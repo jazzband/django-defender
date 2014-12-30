@@ -97,18 +97,23 @@ destination.
 
 Cache backend:
 ==============
-IP_attempts (count, TTL)
-username_attempts (count, TTL)
-ip_blocks (list) # how to expire when in a list?
-username_blocks (list) # how to expire item in the list?
 
+- IP_attempts (count, TTL)
+- username_attempts (count, TTL)
+- ip_blocks (list) # how to expire when in a list?
+- username_blocks (list) # how to expire item in the list?
 
-prefix:failed:ip:[ip] (count, expires)
-prefix:failed:username:[username] (count, expires)
-prefix:blocked:ip:[ip] (true, TTL)
-prefix:blocked:username:[username] (true, TTL)
+cache keys:
+-----------
 
+- prefix:failed:ip:[ip] (count, expires)
+- prefix:failed:username:[username] (count, expires)
+- prefix:blocked:ip:[ip] (true, TTL)
+- prefix:blocked:username:[username] (true, TTL)
 
+Rate limiting Example
+---------------------
+```
 # example of how to do rate limiting by IP
 # assuming it is 10 requests being the limit
 # this assumes there is a DECAY of DECAY_TIME
@@ -125,3 +130,4 @@ ELSE
         EXPIRE(ip, DECAY_TIME)
     EXEC
 END
+```
