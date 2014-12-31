@@ -131,3 +131,13 @@ ELSE
     EXEC
 END
 ```
+
+Running Tests
+=============
+
+Tests can be run, after you clone the repository and having django installed,
+    like:
+
+```
+$ PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
+```

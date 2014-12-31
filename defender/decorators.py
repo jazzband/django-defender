@@ -1,7 +1,7 @@
 import logging
 import socket
 
-import redis
+from redis import StrictRedis
 from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -50,7 +50,7 @@ VERBOSE = getattr(settings, 'DEFENDER_VERBOSE', True)
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
 
-redis_server = redis.StrictRedis(
+redis_server = StrictRedis(
     host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
 
 log = logging.getLogger(__name__)
@@ -198,12 +198,16 @@ def record_failed_attempt(ip, username):
     return True
 
 
-def reset_failed_attempts(ip, username):
-    """ reset the failed attempts for these ip's and usernames """
-    redis_server.delete(get_ip_attempt_cache_key(ip))
-    redis_server.delete(get_username_attempt_cache_key(username))
-    redis_server.delete(get_username_blocked_cache_key(username))
-    redis_server.delete(get_ip_blocked_cache_key(ip))
+def reset_failed_attempts(ip=None, username=None):
+    """ reset the failed attempts for these ip's and usernames
+        TODO: run all commands in one redis transaction
+    """
+    if ip:
+        redis_server.delete(get_ip_attempt_cache_key(ip))
+        redis_server.delete(get_ip_blocked_cache_key(ip))
+    if username:
+        redis_server.delete(get_username_attempt_cache_key(username))
+        redis_server.delete(get_username_blocked_cache_key(username))
 
 
 def lockout_response(request):
