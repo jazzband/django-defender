@@ -13,11 +13,12 @@ from defender.decorators import (
     COOLOFF_TIME, FAILURE_LIMIT, reset_failed_attempts)
 
 
+redis_client = mockredis.mock_strict_redis_client()
+
 # Django >= 1.7 compatibility
 try:
     ADMIN_LOGIN_URL = reverse('admin:login')
-    LOGIN_FORM_KEY = '<form action="/admin/login/" method="post" \
-        id="login-form">'
+    LOGIN_FORM_KEY = '<form action="/admin/" method="post" id="login-form">'
 except NoReverseMatch:
     ADMIN_LOGIN_URL = reverse('admin:index')
     LOGIN_FORM_KEY = 'this_is_the_login_form'
@@ -29,23 +30,13 @@ class AccessAttemptTest(TestCase):
     VALID_USERNAME = 'valid'
     LOCKED_MESSAGE = 'Account locked: too many login attempts.'
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
-    def the_test(self):
-        from redis import StrictRedis
-        print(StrictRedis)
-
-    def the_test2(self):
-        from redis import StrictRedis
-        dir(StrictRedis)
-        print(StrictRedis)
-
     def _get_random_str(self):
         """ Returns a random str """
         chars = string.ascii_uppercase + string.digits
 
         return ''.join(random.choice(chars) for x in range(20))
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def _login(self, is_valid=False, user_agent='test-browser'):
         """Login a user. A valid credential is used when is_valid is True,
            otherwise it will use a random string to make a failed login.
@@ -55,11 +46,12 @@ class AccessAttemptTest(TestCase):
         response = self.client.post(ADMIN_LOGIN_URL, {
             'username': username,
             'password': username,
-            'this_is_the_login_form': 1,
+            LOGIN_FORM_KEY: 1,
         }, HTTP_USER_AGENT=user_agent)
 
         return response
 
+    @patch('defender.decorators.redis_server', redis_client)
     def setUp(self):
         """Create a valid user for login
         """
@@ -69,7 +61,11 @@ class AccessAttemptTest(TestCase):
             password=self.VALID_USERNAME,
         )
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    def tearDown(self):
+        """ clean up the db """
+        redis_client.flushdb()
+
+    @patch('defender.decorators.redis_server', redis_client)
     def test_failure_limit_once(self):
         """Tests the login lock trying to login one more time
         than failure limit
@@ -84,7 +80,7 @@ class AccessAttemptTest(TestCase):
         response = self._login()
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_failure_limit_many(self):
         """Tests the login lock trying to login a lot of times more
         than failure limit
@@ -101,34 +97,33 @@ class AccessAttemptTest(TestCase):
             response = self._login()
             self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_valid_login(self):
         """Tests a valid login for a real username
         """
         response = self._login(is_valid=True)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_cooling_off(self):
         """Tests if the cooling time allows a user to login
         """
         self.test_failure_limit_once()
-
         # Wait for the cooling off period
-        time.sleep(COOLOFF_TIME.total_seconds())
-
+        time.sleep(COOLOFF_TIME)
+        # mock redis require that we expire on our own
+        redis_client.do_expire()
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_cooling_off_for_trusted_user(self):
         """Test the cooling time for a trusted user
         """
-
         # Try the cooling off time
         self.test_cooling_off()
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_long_user_agent_valid(self):
         """Tests if can handle a long user agent
         """
@@ -136,7 +131,7 @@ class AccessAttemptTest(TestCase):
         response = self._login(is_valid=True, user_agent=long_user_agent)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_long_user_agent_not_valid(self):
         """Tests if can handle a long user agent with failure
         """
@@ -146,7 +141,7 @@ class AccessAttemptTest(TestCase):
 
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('redis.StrictRedis', mockredis.mock_strict_redis_client)
+    @patch('defender.decorators.redis_server', redis_client)
     def test_reset_ip(self):
         """Tests if can reset an ip address
         """

@@ -1,7 +1,7 @@
 import logging
 import socket
 
-from redis import StrictRedis
+import redis
 from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -50,7 +50,7 @@ VERBOSE = getattr(settings, 'DEFENDER_VERBOSE', True)
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
 
-redis_server = StrictRedis(
+redis_server = redis.StrictRedis(
     host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
 
 log = logging.getLogger(__name__)
@@ -175,13 +175,13 @@ def get_user_attempts(request):
 def block_ip(ip):
     """ given the ip, block it"""
     key = get_ip_blocked_cache_key(ip)
-    redis_server.set(key, COOLOFF_TIME)
+    redis_server.set(key, 'blocked', COOLOFF_TIME)
 
 
 def block_username(username):
     """ given the username block it. """
     key = get_username_blocked_cache_key(username)
-    redis_server.set(key, COOLOFF_TIME)
+    redis_server.set(key, 'blocked', COOLOFF_TIME)
 
 
 def record_failed_attempt(ip, username):
@@ -239,6 +239,7 @@ def is_already_locked(request):
 
     # ip blocked?
     ip_blocked = redis_server.get(get_ip_blocked_cache_key(ip_address))
+
     if not ip_blocked:
         ip_blocked = False
 
@@ -261,7 +262,7 @@ def check_request(request, login_unsuccessful):
         result = record_failed_attempt(ip_address, username)
     else:
         # user logged in -- forget the failed attempts
-        reset_failed_attempts(ip_address, username)
+        reset_failed_attempts(ip=ip_address, username=username)
 
     return result
 

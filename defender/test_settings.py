@@ -40,6 +40,5 @@ SECRET_KEY = 'too-secret-for-test'
 
 LOGIN_REDIRECT_URL = '/admin'
 
-AXES_LOGIN_FAILURE_LIMIT = 10
-from datetime import timedelta
-AXES_COOLOFF_TIME = timedelta(seconds=2)
+DEFENDER_LOGIN_FAILURE_LIMIT = 10
+DEFENDER_COOLOFF_TIME = 2

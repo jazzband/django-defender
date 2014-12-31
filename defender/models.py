@@ -29,5 +29,4 @@ class AccessAttempt(models.Model):
     )
 
     class Meta:
-        abstract = True
         ordering = ['-attempt_time']
