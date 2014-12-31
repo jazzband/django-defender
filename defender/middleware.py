@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
-from defender.decorators import watch_login
+from .decorators import watch_login
 
 
 class FailedLoginMiddleware(object):

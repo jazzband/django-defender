@@ -202,6 +202,9 @@ users usernames. Default: ``username``
 reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
 * ``DEFENDER_CACHE_PREFIX``: The cache prefix for your defender keys.
 Default: ``defender``
+* ``DEFENDER_LOCKOUT_URL``: The URL you want to redirect to if someone is
+locked out.
+
 * ``REDIS_HOST``: the host name for your redis server
 * ``REDIS_PORT``: the host port for your redis server
 * ``REDIS_PASSWORD``: the password for your redis server
