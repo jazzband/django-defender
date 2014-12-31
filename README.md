@@ -132,6 +132,78 @@ ELSE
 END
 ```
 
+Installing Django-defender
+==========================
+
+Download code, and run setup.
+
+TODO: add to pypi once stable.
+
+```
+    $ python setup.py install
+
+    or
+
+    $ pip install -e git+http://github.com/kencochrane/django-defender.git#egg=django_defender-dev
+
+```
+
+First of all, you must add this project to your list of ``INSTALLED_APPS`` in
+``settings.py``::
+
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    ...
+    'defender',
+    ...
+    )
+
+    Next, install the ``FailedLoginMiddleware`` middleware::
+
+    MIDDLEWARE_CLASSES = (
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'defender.middleware.FailedLoginMiddleware'
+        )
+
+        Run ``python manage.py syncdb``.  This creates the appropriate tables in your database
+        that are necessary for operation.
+
+
+Customizing Defender
+--------------------
+
+You have a couple options available to you to customize ``django-defender`` a bit.
+These should be defined in your ``settings.py`` file.
+
+* ``DEFENDER_LOGIN_FAILURE_LIMIT``: The number of login attempts allowed before a
+record is created for the failed logins.  Default: ``3``
+* ``DEFENDER_USE_USER_AGENT``: If ``True``, lock out / log based on an IP address
+AND a user agent.  This means requests from different user agents but from
+the same IP are treated differently.  Default: ``False``
+* ``DEFENDER_COOLOFF_TIME``: If set, defines a period of inactivity after which
+old failed login attempts will be forgotten. An integer, will be interpreted as a
+number of seconds.  Default: ``300``
+* ``DEFENDER_LOCKOUT_TEMPLATE``: If set, specifies a template to render when a
+user is locked out. Template receives cooloff_time and failure_limit as
+context variables. Default: ``None``
+* ``DEFENDER_USERNAME_FORM_FIELD``: the name of the form field that contains your
+users usernames. Default: ``username``
+* ``DEFENDER_REVERSE_PROXY_HEADER``: the name of the http header with your
+reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
+* ``DEFENDER_CACHE_PREFIX``: The cache prefix for your defender keys.
+Default: ``defender``
+* ``REDIS_HOST``: the host name for your redis server
+* ``REDIS_PORT``: the host port for your redis server
+* ``REDIS_PASSWORD``: the password for your redis server
+* ``REDIS_DB``: the db number for your redis server
+
+
 Running Tests
 =============
 

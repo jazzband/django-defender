@@ -33,7 +33,7 @@ BEHIND_REVERSE_PROXY = getattr(settings,
 # the prefix for these keys in your cache.
 CACHE_PREFIX = getattr(settings,
                        'DEFENDER_CACHE_PREFIX',
-                       False)
+                       'defender')
 
 # if the django app is behind a reverse proxy, look for the
 # ip address using this HTTP header value
@@ -45,7 +45,6 @@ REVERSE_PROXY_HEADER = getattr(settings,
 COOLOFF_TIME = getattr(settings, 'DEFENDER_COOLOFF_TIME', 300)  # seconds
 
 LOCKOUT_TEMPLATE = getattr(settings, 'DEFENDER_LOCKOUT_TEMPLATE', None)
-VERBOSE = getattr(settings, 'DEFENDER_VERBOSE', True)
 
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
