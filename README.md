@@ -151,6 +151,7 @@ TODO: add to pypi once stable.
 First of all, you must add this project to your list of ``INSTALLED_APPS`` in
 ``settings.py``::
 
+```
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -161,18 +162,21 @@ INSTALLED_APPS = (
     'defender',
     ...
     )
+```
 
-    Next, install the ``FailedLoginMiddleware`` middleware::
+Next, install the ``FailedLoginMiddleware`` middleware::
 
+```
     MIDDLEWARE_CLASSES = (
         'django.middleware.common.CommonMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'defender.middleware.FailedLoginMiddleware'
         )
+```
 
-        Run ``python manage.py syncdb``.  This creates the appropriate tables in your database
-        that are necessary for operation.
+Run ``python manage.py syncdb``.  This creates the appropriate tables in your database
+that are necessary for operation.
 
 
 Customizing Defender
