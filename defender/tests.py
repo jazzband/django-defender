@@ -9,22 +9,21 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
-from django.conf import settings
 
 from .connection import parse_redis_url
 from . import utils
 from . import config
 
-if config.MOCK_REDIS:
-    redis_client = mockredis.mock_strict_redis_client()
-else:
-    from .connection import get_redis_connection
-    redis_client = get_redis_connection()
+if config.MOCK_REDIS:  # pragma: no cover
+    redis_client = mockredis.mock_strict_redis_client()  # pragma: no cover
+else:  # pragma: no cover
+    from .connection import get_redis_connection  # pragma: no cover
+    redis_client = get_redis_connection()  # pragma: no cover
 
 # Django >= 1.7 compatibility
 try:
-    ADMIN_LOGIN_URL = reverse('admin:login')
     LOGIN_FORM_KEY = '<form action="/admin/" method="post" id="login-form">'
+    ADMIN_LOGIN_URL = reverse('admin:login')
 except NoReverseMatch:
     ADMIN_LOGIN_URL = reverse('admin:index')
     LOGIN_FORM_KEY = 'this_is_the_login_form'
@@ -128,7 +127,7 @@ class AccessAttemptTest(TestCase):
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
-            redis_client.do_expire()
+            redis_client.do_expire()  # pragma: no cover
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
