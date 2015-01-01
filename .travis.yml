@@ -16,7 +16,8 @@ install:
   - python setup.py develop
 
 script:
-  - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender django-admin.py test defender --settings=defender.test_settings
+  - which django-admin.py
+  - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender ~/virtualenv/python2.7/bin/django-admin.py test defender --settings=defender.test_settings
   - coverage report -m
 
 after_script:
