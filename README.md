@@ -73,7 +73,7 @@ to improve the login.
 requirements
 ============
 
-- django >= 1.6 (may work is previous versions, but not officially supported)
+- django: 1.4.x, 1.6.x, 1.7.x
 - redis
 
 
@@ -113,8 +113,8 @@ Cache backend:
 cache keys:
 -----------
 
-- prefix:failed:ip:[ip] (count, expires)
-- prefix:failed:username:[username] (count, expires)
+- prefix:failed:ip:[ip] (count, TTL)
+- prefix:failed:username:[username] (count, TTL)
 - prefix:blocked:ip:[ip] (true, TTL)
 - prefix:blocked:username:[username] (true, TTL)
 
@@ -211,11 +211,9 @@ reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
 Default: ``defender``
 * ``DEFENDER_LOCKOUT_URL``: The URL you want to redirect to if someone is
 locked out.
-
-* ``REDIS_HOST``: the host name for your redis server
-* ``REDIS_PORT``: the host port for your redis server
-* ``REDIS_PASSWORD``: the password for your redis server
-* ``REDIS_DB``: the db number for your redis server
+* ``DEFENDER_REDIS_URL``: the redis url for defender.
+Default: ``redis://localhost:6379/0``
+(Example with password: ``redis://:mypassword@localhost:6379/0``)
 
 
 Running Tests

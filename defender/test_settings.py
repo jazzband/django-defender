@@ -8,11 +8,6 @@ DATABASES = {
 
 SITE_ID = 1
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = '1234'
-REDIS_PASSWORD = 'mypassword'
-REDIS_DB = 1
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -38,4 +33,6 @@ LOGIN_REDIRECT_URL = '/admin'
 
 DEFENDER_LOGIN_FAILURE_LIMIT = 10
 DEFENDER_COOLOFF_TIME = 2
-MOCK_REDIS = True
+DEFENDER_REDIS_URL = None
+# use mock redis in unit tests locally.
+DEFENDER_MOCK_REDIS = True

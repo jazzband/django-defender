@@ -1,68 +1,16 @@
 import logging
 import socket
 
-import redis
-from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.utils.translation import ugettext_lazy
 
 from .models import AccessAttempt
+from .connection import get_redis_connection
+from . import config
 
-
-def get_setting(variable, default=None):
-    """ get the 'variable' from settings if not there use the
-    provided default """
-    return getattr(settings, variable, default)
-
-# redis server host
-REDIS_HOST = get_setting('REDIS_HOST')
-
-# redis server port
-REDIS_PORT = get_setting('REDIS_PORT')
-
-# redis server password
-REDIS_PASSWORD = get_setting('REDIS_PASSWORD')
-
-# redis db
-REDIS_DB = get_setting('REDIS_DB')
-
-# see if the user has overridden the failure limit
-FAILURE_LIMIT = get_setting('DEFENDER_LOGIN_FAILURE_LIMIT', 3)
-
-USE_USER_AGENT = get_setting('DEFENDER_USE_USER_AGENT', False)
-
-# use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
-
-# see if the django app is sitting behind a reverse proxy
-BEHIND_REVERSE_PROXY = get_setting('DEFENDER_BEHIND_REVERSE_PROXY', False)
-
-# the prefix for these keys in your cache.
-CACHE_PREFIX = get_setting('DEFENDER_CACHE_PREFIX', 'defender')
-
-# if the django app is behind a reverse proxy, look for the
-# ip address using this HTTP header value
-REVERSE_PROXY_HEADER = get_setting('DEFENDER_REVERSE_PROXY_HEADER',
-                                   'HTTP_X_FORWARDED_FOR')
-
-# how long to wait before the bad login attempt gets forgotten. in seconds.
-COOLOFF_TIME = get_setting('DEFENDER_COOLOFF_TIME', 300)  # seconds
-
-LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')
-
-ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
-                              "Note that both fields are case-sensitive.")
-
-# use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
-
-LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
-
-redis_server = redis.StrictRedis(
-    host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
+redis_server = get_redis_connection()
 
 log = logging.getLogger(__name__)
 
@@ -119,10 +67,10 @@ def get_ip_address_from_request(request):
 
 def get_ip(request):
     """ get the ip address from the request """
-    if not BEHIND_REVERSE_PROXY:
+    if not config.BEHIND_REVERSE_PROXY:
         ip = get_ip_address_from_request(request)
     else:
-        ip = request.META.get(REVERSE_PROXY_HEADER, '')
+        ip = request.META.get(config.REVERSE_PROXY_HEADER, '')
         ip = ip.split(",", 1)[0].strip()
         if ip == '':
             ip = request.META.get('REMOTE_ADDR', '')
@@ -131,29 +79,29 @@ def get_ip(request):
 
 def get_ip_attempt_cache_key(ip):
     """ get the cache key by ip """
-    return "{0}:failed:ip:{1}".format(CACHE_PREFIX, ip)
+    return "{0}:failed:ip:{1}".format(config.CACHE_PREFIX, ip)
 
 
 def get_username_attempt_cache_key(username):
     """ get the cache key by username """
-    return "{0}:failed:username:{1}".format(CACHE_PREFIX, username)
+    return "{0}:failed:username:{1}".format(config.CACHE_PREFIX, username)
 
 
 def get_ip_blocked_cache_key(ip):
     """ get the cache key by ip """
-    return "{0}:blocked:ip:{1}".format(CACHE_PREFIX, ip)
+    return "{0}:blocked:ip:{1}".format(config.CACHE_PREFIX, ip)
 
 
 def get_username_blocked_cache_key(username):
     """ get the cache key by username """
-    return "{0}:blocked:username:{1}".format(CACHE_PREFIX, username)
+    return "{0}:blocked:username:{1}".format(config.CACHE_PREFIX, username)
 
 
 def increment_key(key):
     """ given a key increment the value """
     # TODO make this one transaction, not two different ones.
     new_value = redis_server.incr(key, 1)
-    redis_server.expire(key, COOLOFF_TIME)
+    redis_server.expire(key, config.COOLOFF_TIME)
     return new_value
 
 
@@ -162,7 +110,7 @@ def get_user_attempts(request):
     """
     ip = get_ip(request)
 
-    username = request.POST.get(USERNAME_FORM_FIELD, None)
+    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
 
     # get by IP
     ip_count = redis_server.get(get_ip_attempt_cache_key(ip))
@@ -181,13 +129,13 @@ def get_user_attempts(request):
 def block_ip(ip):
     """ given the ip, block it """
     key = get_ip_blocked_cache_key(ip)
-    redis_server.set(key, 'blocked', COOLOFF_TIME)
+    redis_server.set(key, 'blocked', config.COOLOFF_TIME)
 
 
 def block_username(username):
     """ given the username block it. """
     key = get_username_blocked_cache_key(username)
-    redis_server.set(key, 'blocked', COOLOFF_TIME)
+    redis_server.set(key, 'blocked', config.COOLOFF_TIME)
 
 
 def record_failed_attempt(ip, username):
@@ -198,7 +146,7 @@ def record_failed_attempt(ip, username):
     user_count = increment_key(get_username_attempt_cache_key(username))
 
     # if either are over the limit, add to block
-    if ip_count > FAILURE_LIMIT or user_count > FAILURE_LIMIT:
+    if ip_count > config.FAILURE_LIMIT or user_count > config.FAILURE_LIMIT:
         block_ip(ip)
         block_username(username)
         return False
@@ -219,18 +167,18 @@ def reset_failed_attempts(ip=None, username=None):
 
 def lockout_response(request):
     """ if we are locked out, here is the response """
-    if LOCKOUT_TEMPLATE:
+    if config.LOCKOUT_TEMPLATE:
         context = {
-            'cooloff_time': COOLOFF_TIME,
-            'failure_limit': FAILURE_LIMIT,
+            'cooloff_time': config.COOLOFF_TIME,
+            'failure_limit': config.FAILURE_LIMIT,
         }
-        return render_to_response(LOCKOUT_TEMPLATE, context,
+        return render_to_response(config.LOCKOUT_TEMPLATE, context,
                                   context_instance=RequestContext(request))
 
-    if LOCKOUT_URL:
-        return HttpResponseRedirect(LOCKOUT_URL)
+    if config.LOCKOUT_URL:
+        return HttpResponseRedirect(config.LOCKOUT_URL)
 
-    if COOLOFF_TIME:
+    if config.COOLOFF_TIME:
         return HttpResponse("Account locked: too many login attempts.  "
                             "Please try again later.")
     else:
@@ -241,7 +189,7 @@ def lockout_response(request):
 def is_already_locked(request):
     """ Is this IP/username already locked? """
     ip_address = get_ip(request)
-    username = request.POST.get(USERNAME_FORM_FIELD, None)
+    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
 
     # ip blocked?
     ip_blocked = redis_server.get(get_ip_blocked_cache_key(ip_address))
@@ -263,7 +211,7 @@ def is_already_locked(request):
 def check_request(request, login_unsuccessful):
     """ check the request, and process results"""
     ip_address = get_ip(request)
-    username = request.POST.get(USERNAME_FORM_FIELD, None)
+    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
 
     if not login_unsuccessful:
         # user logged in -- forget the failed attempts
@@ -280,7 +228,7 @@ def add_login_attempt(request, login_valid):
         user_agent=request.META.get('HTTP_USER_AGENT',
                                     '<unknown>')[:255],
         ip_address=get_ip(request),
-        username=request.POST.get(USERNAME_FORM_FIELD, None),
+        username=request.POST.get(config.USERNAME_FORM_FIELD, None),
         http_accept=request.META.get('HTTP_ACCEPT', '<unknown>'),
         path_info=request.META.get('PATH_INFO', '<unknown>'),
         login_valid=login_valid,
