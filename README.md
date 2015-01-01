@@ -13,6 +13,12 @@ they want for a backend, so it is configurable.
 Version 0.1 will be very limited in features, it will only do a few things, but
 the goal is to do those things very well, and have full unit tests with docs.
 
+Build status
+------------
+
+[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender)
+
+
 Goals for 0.1
 =============
 
