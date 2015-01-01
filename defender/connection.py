@@ -35,7 +35,6 @@ def parse_redis_url(url):
         return config
 
     url = urlparse.urlparse(url)
-    print url
     # Remove query strings.
     path = url.path[1:]
     path = path.split('?', 2)[0]

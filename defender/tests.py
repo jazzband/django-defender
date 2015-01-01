@@ -226,7 +226,7 @@ class AccessAttemptTest(TestCase):
         self.assertEquals(utils.is_valid_ip(''), False)
 
     def test_parse_redis_url(self):
-        """ """
+        """ test the parse_redis_url method """
         # full regular
         conf = parse_redis_url("redis://user:password@localhost2:1234/2")
         self.assertEquals(conf.get('HOST'), 'localhost2')
@@ -243,7 +243,6 @@ class AccessAttemptTest(TestCase):
 
         # no user name
         conf = parse_redis_url("redis://password@localhost2:1234/2")
-        print conf
         self.assertEquals(conf.get('HOST'), 'localhost2')
         self.assertEquals(conf.get('DB'), 2)
         self.assertEquals(conf.get('PASSWORD'), None)
@@ -251,7 +250,6 @@ class AccessAttemptTest(TestCase):
 
         # no user name 2 with colon
         conf = parse_redis_url("redis://:password@localhost2:1234/2")
-        print conf
         self.assertEquals(conf.get('HOST'), 'localhost2')
         self.assertEquals(conf.get('DB'), 2)
         self.assertEquals(conf.get('PASSWORD'), 'password')
