@@ -9,12 +9,15 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
 from django.conf import settings
 
 from . import utils
 
-redis_client = mockredis.mock_strict_redis_client()
+if settings.MOCK_REDIS:
+    redis_client = mockredis.mock_strict_redis_client()
+else:
+    from .utils import redis_server
+    redis_client = redis_server
 
 # Django >= 1.7 compatibility
 try:
@@ -120,8 +123,10 @@ class AccessAttemptTest(TestCase):
         self.test_failure_limit_once()
         # Wait for the cooling off period
         time.sleep(utils.COOLOFF_TIME)
-        # mock redis require that we expire on our own
-        redis_client.do_expire()
+
+        if settings.MOCK_REDIS:
+            # mock redis require that we expire on our own
+            redis_client.do_expire()
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
