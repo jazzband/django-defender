@@ -11,7 +11,8 @@ from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 
 from .utils import (
-    COOLOFF_TIME, FAILURE_LIMIT, reset_failed_attempts)
+    COOLOFF_TIME, FAILURE_LIMIT, reset_failed_attempts,
+    is_valid_ip)
 
 
 redis_client = mockredis.mock_strict_redis_client()
@@ -154,3 +155,16 @@ class AccessAttemptTest(TestCase):
 
         # Make a login attempt again
         self.test_valid_login()
+
+    def test_is_valid_ip(self):
+        """
+            Test the is_valid_ip() method
+        """
+
+        self.assertEquals(is_valid_ip('192.168.0.1'), True)
+        self.assertEquals(is_valid_ip('130.80.100.24'), True)
+        self.assertEquals(is_valid_ip('8.8.8.8'), True)
+        self.assertEquals(is_valid_ip('127.0.0.1'), True)
+        self.assertEquals(is_valid_ip('fish'), False)
+        self.assertEquals(is_valid_ip(None), False)
+        self.assertEquals(is_valid_ip(''), False)

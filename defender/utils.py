@@ -11,48 +11,55 @@ from django.utils.translation import ugettext_lazy
 
 from .models import AccessAttempt
 
-REDIS_HOST = settings.REDIS_HOST
-REDIS_PORT = settings.REDIS_PORT
-REDIS_PASSWORD = settings.REDIS_PASSWORD
-REDIS_DB = settings.REDIS_DB
+
+def get_setting(variable, default=None):
+    """ get the 'variable' from settings if not there use the
+    provided default """
+    return getattr(settings, variable, default)
+
+# redis server host
+REDIS_HOST = get_setting('REDIS_HOST')
+
+# redis server port
+REDIS_PORT = get_setting('REDIS_PORT')
+
+# redis server password
+REDIS_PASSWORD = get_setting('REDIS_PASSWORD')
+
+# redis db
+REDIS_DB = get_setting('REDIS_DB')
 
 # see if the user has overridden the failure limit
-FAILURE_LIMIT = getattr(settings, 'DEFENDER_LOGIN_FAILURE_LIMIT', 3)
+FAILURE_LIMIT = get_setting('DEFENDER_LOGIN_FAILURE_LIMIT', 3)
 
-USE_USER_AGENT = getattr(settings, 'DEFENDER_USE_USER_AGENT', False)
+USE_USER_AGENT = get_setting('DEFENDER_USE_USER_AGENT', False)
 
 # use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = getattr(settings,
-                              'DEFENDER_USERNAME_FORM_FIELD',
-                              'username')
+USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
 
 # see if the django app is sitting behind a reverse proxy
-BEHIND_REVERSE_PROXY = getattr(settings,
-                               'DEFENDER_BEHIND_REVERSE_PROXY',
-                               False)
+BEHIND_REVERSE_PROXY = get_setting('DEFENDER_BEHIND_REVERSE_PROXY', False)
+
 # the prefix for these keys in your cache.
-CACHE_PREFIX = getattr(settings,
-                       'DEFENDER_CACHE_PREFIX',
-                       'defender')
+CACHE_PREFIX = get_setting('DEFENDER_CACHE_PREFIX', 'defender')
 
 # if the django app is behind a reverse proxy, look for the
 # ip address using this HTTP header value
-REVERSE_PROXY_HEADER = getattr(settings,
-                               'DEFENDER_REVERSE_PROXY_HEADER',
-                               'HTTP_X_FORWARDED_FOR')
+REVERSE_PROXY_HEADER = get_setting('DEFENDER_REVERSE_PROXY_HEADER',
+                                   'HTTP_X_FORWARDED_FOR')
 
 # how long to wait before the bad login attempt gets forgotten. in seconds.
-COOLOFF_TIME = getattr(settings, 'DEFENDER_COOLOFF_TIME', 300)  # seconds
+COOLOFF_TIME = get_setting('DEFENDER_COOLOFF_TIME', 300)  # seconds
 
-LOCKOUT_TEMPLATE = getattr(settings, 'DEFENDER_LOCKOUT_TEMPLATE', None)
+LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')
 
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
 
 # use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = getattr(settings,
-                              'DEFENDER_USERNAME_FORM_FIELD',
-                              'username')
+USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
+
+LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
 
 redis_server = redis.StrictRedis(
     host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
@@ -122,11 +129,6 @@ def get_ip(request):
     return ip
 
 
-def get_lockout_url():
-    """ get the lockout url from the settings """
-    return getattr(settings, 'DEFENDER_LOCKOUT_URL', None)
-
-
 def get_ip_attempt_cache_key(ip):
     """ get the cache key by ip """
     return "{0}:failed:ip:{1}".format(CACHE_PREFIX, ip)
@@ -156,7 +158,7 @@ def increment_key(key):
 
 
 def get_user_attempts(request):
-    """Returns number of access attempts for this ip, username
+    """ Returns number of access attempts for this ip, username
     """
     ip = get_ip(request)
 
@@ -177,7 +179,7 @@ def get_user_attempts(request):
 
 
 def block_ip(ip):
-    """ given the ip, block it"""
+    """ given the ip, block it """
     key = get_ip_blocked_cache_key(ip)
     redis_server.set(key, 'blocked', COOLOFF_TIME)
 
@@ -225,7 +227,6 @@ def lockout_response(request):
         return render_to_response(LOCKOUT_TEMPLATE, context,
                                   context_instance=RequestContext(request))
 
-    LOCKOUT_URL = get_lockout_url()
     if LOCKOUT_URL:
         return HttpResponseRedirect(LOCKOUT_URL)
 
