@@ -13,11 +13,11 @@ env:
 install:
   - pip install -q $DJANGO
   - pip install coveralls
+  - pip install mockredispy
   - python setup.py develop
 
 script:
-  - which django-admin.py
-  - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender ~/virtualenv/python2.7/bin/django-admin.py test defender --settings=defender.test_settings
+  - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
   - coverage report -m
 
 after_script:

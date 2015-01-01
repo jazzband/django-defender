@@ -18,6 +18,7 @@ Build status
 
 [![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender)
 
+[![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)
 
 Goals for 0.1
 =============
