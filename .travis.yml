@@ -12,6 +12,12 @@ env:
 
 install:
   - pip install -q $DJANGO
+  - pip install coveralls
+  - python setup.py develop
 
 script:
-  - PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
+  - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender django-admin.py test defender --settings=defender.test_settings
+  - coverage report -m
+
+after_script:
+  - coveralls --verbose
