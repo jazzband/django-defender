@@ -12,7 +12,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'defender.middleware.FailedLoginMiddleware'
+    'defender.middleware.FailedLoginMiddleware',
+    'defender.middleware.ViewDecoratorMiddleware',
 )
 
 ROOT_URLCONF = 'defender.test_urls'
