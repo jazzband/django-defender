@@ -1,15 +1,4 @@
-import logging
-from django.conf import settings
-
-from .models import AccessAttempt
 from . import utils
-
-# use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = getattr(settings,
-                              'DEFENDER_USERNAME_FORM_FIELD',
-                              'username')
-
-log = logging.getLogger(__name__)
 
 
 def watch_login(func):
@@ -43,15 +32,10 @@ def watch_login(func):
                 response.status_code != 302
             )
 
-            AccessAttempt.objects.create(
-                user_agent=request.META.get('HTTP_USER_AGENT',
-                                            '<unknown>')[:255],
-                ip_address=utils.get_ip(request),
-                username=request.POST.get(USERNAME_FORM_FIELD, None),
-                http_accept=request.META.get('HTTP_ACCEPT', '<unknown>'),
-                path_info=request.META.get('PATH_INFO', '<unknown>'),
-                login_valid=not login_unsuccessful,
-            )
+            # ideally make this background task, but to keep simple, keeping
+            # it inline for now.
+            utils.add_login_attempt(request, not login_unsuccessful)
+
             if utils.check_request(request, login_unsuccessful):
                 return response
 

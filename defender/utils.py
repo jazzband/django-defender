@@ -9,6 +9,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy
 
+from .models import AccessAttempt
+
 REDIS_HOST = settings.REDIS_HOST
 REDIS_PORT = settings.REDIS_PORT
 REDIS_PASSWORD = settings.REDIS_PASSWORD
@@ -46,6 +48,11 @@ LOCKOUT_TEMPLATE = getattr(settings, 'DEFENDER_LOCKOUT_TEMPLATE', None)
 
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
+
+# use a specific username field to retrieve from login POST data
+USERNAME_FORM_FIELD = getattr(settings,
+                              'DEFENDER_USERNAME_FORM_FIELD',
+                              'username')
 
 redis_server = redis.StrictRedis(
     host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
@@ -264,3 +271,16 @@ def check_request(request, login_unsuccessful):
     else:
         # add a failed attempt for this user
         return record_failed_attempt(ip_address, username)
+
+
+def add_login_attempt(request, login_valid):
+    """ Create a record for the login attempt """
+    AccessAttempt.objects.create(
+        user_agent=request.META.get('HTTP_USER_AGENT',
+                                    '<unknown>')[:255],
+        ip_address=get_ip(request),
+        username=request.POST.get(USERNAME_FORM_FIELD, None),
+        http_accept=request.META.get('HTTP_ACCEPT', '<unknown>'),
+        path_info=request.META.get('PATH_INFO', '<unknown>'),
+        login_valid=login_valid,
+    )
