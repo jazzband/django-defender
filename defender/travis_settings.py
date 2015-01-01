@@ -1,3 +1,4 @@
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -9,8 +10,8 @@ DATABASES = {
 SITE_ID = 1
 
 REDIS_HOST = 'localhost'
-REDIS_PORT = '1234'
-REDIS_PASSWORD = 'mypassword'
+REDIS_PORT = '6379'
+REDIS_PASSWORD = None
 REDIS_DB = 1
 
 MIDDLEWARE_CLASSES = (
