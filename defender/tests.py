@@ -460,3 +460,12 @@ class AccessAttemptTest(TestCase):
         # doing a get should also get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
+
+    def test_get_view(self):
+        """ Check that the decorator doesn't tamper with GET requests"""
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self.client.get(ADMIN_LOGIN_URL)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertNotContains(response, self.LOCKED_MESSAGE)
