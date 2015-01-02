@@ -12,6 +12,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
+from django.http import HttpRequest
 
 from .connection import parse_redis_url
 from . import utils
@@ -347,3 +348,94 @@ class AccessAttemptTest(TestCase):
         self.assertEquals(conf.get('DB'), 0)
         self.assertEquals(conf.get('PASSWORD'), None)
         self.assertEquals(conf.get('PORT'), 1234)
+
+    def test_get_ip_address_from_request(self):
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = ','.join(
+            ['192.168.100.23', '1.2.3.4']
+        )
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = '192.168.100.34'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '127.0.0.1')
+
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = '127.0.0.1'
+        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4'
+        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '5.6.7.8')
+
+        req = HttpRequest()
+        req.META['REMOTE_ADDR'] = '1.2.3.4'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['HTTP_X_FORWARDED_FOR'] = ','.join(
+            ['127.0.0.1', '192.168.132.98']
+        )
+        req.META['HTTP_X_REAL_IP'] = '10.0.0.34'
+        req.META['REMOTE_ADDR'] = '1.2.3.4'
+        ip = utils.get_ip_address_from_request(req)
+        self.assertEqual(ip, '1.2.3.4')
+
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_PROXIED')
+    def test_get_ip_reverse_proxy_custom_header(self):
+        req = HttpRequest()
+        req.META['HTTP_X_PROXIED'] = '1.2.3.4'
+        self.assertEqual(utils.get_ip(req), '1.2.3.4')
+        req = HttpRequest()
+        req.META['HTTP_X_PROXIED'] = '1.2.3.4, 5.6.7.8, 127.0.0.1'
+        self.assertEqual(utils.get_ip(req), '1.2.3.4')
+
+        req = HttpRequest()
+        req.META['REMOTE_ADDR'] = '1.2.3.4'
+        self.assertEqual(utils.get_ip(req), '1.2.3.4')
+
+    def test_get_user_attempts(self):
+        ip_attempts = random.randint(3, 12)
+        username_attempts = random.randint(3, 12)
+        for i in range(0, ip_attempts):
+            utils.increment_key(utils.get_ip_attempt_cache_key('1.2.3.4'))
+        for i in range(0, username_attempts):
+            utils.increment_key(utils.get_username_attempt_cache_key('foobar'))
+        req = HttpRequest()
+        req.POST['username'] = 'foobar'
+        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        self.assertEqual(
+            utils.get_user_attempts(req), max(ip_attempts, username_attempts)
+        )
+
+        req = HttpRequest()
+        req.POST['username'] = 'foobar'
+        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
+        self.assertEqual(
+            utils.get_user_attempts(req), username_attempts
+        )
+
+        req = HttpRequest()
+        req.POST['username'] = 'barfoo'
+        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        self.assertEqual(
+            utils.get_user_attempts(req), ip_attempts
+        )

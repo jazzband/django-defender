@@ -117,11 +117,13 @@ def get_user_attempts(request):
     ip_count = redis_server.get(get_ip_attempt_cache_key(ip))
     if not ip_count:
         ip_count = 0
+    ip_count = int(ip_count)
 
     # get by username
     username_count = redis_server.get(get_username_attempt_cache_key(username))
     if not username_count:
         username_count = 0
+    username_count = int(username_count)
 
     # return the larger of the two.
     return max(ip_count, username_count)
