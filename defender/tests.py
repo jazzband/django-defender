@@ -447,7 +447,7 @@ class AccessAttemptTest(TestCase):
         # before getting locked out.
         # FIXME: I tried making sure every request in only processed once but
         # there seems to be an issue with django reusing request objects.
-        for i in range(0, config.FAILURE_LIMIT / 2):
+        for i in range(0, int(config.FAILURE_LIMIT / 2)):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
