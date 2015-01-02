@@ -38,5 +38,5 @@ setup(name='django-defender',
       license='Apache 2',
       packages=['defender'],
       install_requires=['django==1.6.8', 'redis==2.10.3', 'hiredis==0.1.4', ],
-      tests_require=['mock', 'mockredispy'],
+      tests_require=['mock', 'mockredispy', 'coverage'],
       )
