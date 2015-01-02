@@ -211,6 +211,27 @@ class AccessAttemptTest(TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/o/login/')
 
+    @patch('defender.config.LOCKOUT_TEMPLATE', 'defender/lockout.html')
+    def test_failed_login_redirect_to_template(self):
+        """ Test to make sure that after lockout we send to the correct
+        template """
+
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self._login()
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now, check template make sure it is valid.
+        response = self._login()
+        self.assertEquals(response.status_code, 200)
+        self.assertTemplateUsed(response, 'defender/lockout.html')
+
+        # doing a get should also get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertEquals(response.status_code, 200)
+        self.assertTemplateUsed(response, 'defender/lockout.html')
+
     @patch('defender.config.COOLOFF_TIME', 0)
     def test_failed_login_no_cooloff(self):
         for i in range(0, config.FAILURE_LIMIT):

@@ -199,7 +199,7 @@ AND a user agent.  This means requests from different user agents but from
 the same IP are treated differently.  Default: ``False``
 * ``DEFENDER_COOLOFF_TIME``: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
-number of seconds.  Default: ``300``
+number of seconds. If ``0``, the locks will not expire. Default: ``300``
 * ``DEFENDER_LOCKOUT_TEMPLATE``: If set, specifies a template to render when a
 user is locked out. Template receives cooloff_time and failure_limit as
 context variables. Default: ``None``
@@ -219,9 +219,15 @@ Default: ``redis://localhost:6379/0``
 Running Tests
 =============
 
-Tests can be run, after you clone the repository and having django installed,
-    like:
+Tests can be run, after you clone the repository and having Django installed,
+like:
 
 ```
 $ PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
+```
+
+With Code coverage:
+
+```
+PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
 ```
