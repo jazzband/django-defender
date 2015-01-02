@@ -101,7 +101,8 @@ def increment_key(key):
     """ given a key increment the value """
     # TODO make this one transaction, not two different ones.
     new_value = redis_server.incr(key, 1)
-    redis_server.expire(key, config.COOLOFF_TIME)
+    if config.COOLOFF_TIME:
+        redis_server.expire(key, config.COOLOFF_TIME)
     return new_value
 
 
@@ -129,13 +130,19 @@ def get_user_attempts(request):
 def block_ip(ip):
     """ given the ip, block it """
     key = get_ip_blocked_cache_key(ip)
-    redis_server.set(key, 'blocked', config.COOLOFF_TIME)
+    if config.COOLOFF_TIME:
+        redis_server.set(key, 'blocked', config.COOLOFF_TIME)
+    else:
+        redis_server.set(key, 'blocked')
 
 
 def block_username(username):
     """ given the username block it. """
     key = get_username_blocked_cache_key(username)
-    redis_server.set(key, 'blocked', config.COOLOFF_TIME)
+    if config.COOLOFF_TIME:
+        redis_server.set(key, 'blocked', config.COOLOFF_TIME)
+    else:
+        redis_server.set(key, 'blocked')
 
 
 def record_failed_attempt(ip, username):
