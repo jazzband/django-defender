@@ -31,8 +31,11 @@ CACHE_PREFIX = get_setting('DEFENDER_CACHE_PREFIX', 'defender')
 REVERSE_PROXY_HEADER = get_setting('DEFENDER_REVERSE_PROXY_HEADER',
                                    'HTTP_X_FORWARDED_FOR')
 
-# how long to wait before the bad login attempt gets forgotten. in seconds.
-COOLOFF_TIME = get_setting('DEFENDER_COOLOFF_TIME', 300)  # seconds
+try:
+    # how long to wait before the bad login attempt gets forgotten. in seconds.
+    COOLOFF_TIME = int(get_setting('DEFENDER_COOLOFF_TIME', 300))  # seconds
+except ValueError:
+    raise Exception('COOLOFF_TIME needs to be an integer')  # pragma: no cover
 
 LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')
 

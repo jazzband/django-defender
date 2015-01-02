@@ -6,7 +6,10 @@ from mock import patch
 import mockredis
 
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends.db import SessionStore
 from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 
@@ -147,6 +150,36 @@ class AccessAttemptTest(TestCase):
         long_user_agent = 'ie6' * 1024
         response = self._login(is_valid=True, user_agent=long_user_agent)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
+
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    def test_get_ip_reverse_proxy(self):
+        """ Tests if can handle a long user agent
+        """
+        request_factory = RequestFactory()
+        request = request_factory.get(ADMIN_LOGIN_URL)
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META['HTTP_X_FORWARDED_FOR'] = '192.168.24.24'
+        self.assertEquals(utils.get_ip(request), '192.168.24.24')
+
+        request_factory = RequestFactory()
+        request = request_factory.get(ADMIN_LOGIN_URL)
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META['REMOTE_ADDR'] = '24.24.24.24'
+        self.assertEquals(utils.get_ip(request), '24.24.24.24')
+
+    def test_get_ip(self):
+        """ Tests if can handle a long user agent
+        """
+        request_factory = RequestFactory()
+        request = request_factory.get(ADMIN_LOGIN_URL)
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        self.assertEquals(utils.get_ip(request), '127.0.0.1')
 
     def test_long_user_agent_not_valid(self):
         """ Tests if can handle a long user agent with failure
