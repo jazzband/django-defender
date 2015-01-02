@@ -34,7 +34,7 @@ REVERSE_PROXY_HEADER = get_setting('DEFENDER_REVERSE_PROXY_HEADER',
 try:
     # how long to wait before the bad login attempt gets forgotten. in seconds.
     COOLOFF_TIME = int(get_setting('DEFENDER_COOLOFF_TIME', 300))  # seconds
-except ValueError:
+except ValueError:  # pragma: no cover
     raise Exception('COOLOFF_TIME needs to be an integer')  # pragma: no cover
 
 LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')

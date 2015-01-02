@@ -81,6 +81,11 @@ class AccessAttemptTest(TestCase):
         """ clean up the db """
         mock_get_connection().flushdb()
 
+    def test_login_get(self):
+        """ visit the login page """
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertEquals(response.status_code, 200)
+
     def test_failure_limit_once(self):
         """ Tests the login lock trying to login one more time
         than failure limit
