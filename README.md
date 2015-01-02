@@ -75,7 +75,7 @@ requirements
 
 - django: 1.4.x, 1.6.x, 1.7.x
 - redis
-- python: 2.6.x, 2.7.x, 3.2.x, 3.3.x, 3.4.x, PyPy, PyPy3
+- python: 2.6.x, 2.7.x, 3.2.x, 3.3.x, 3.4.x, PyPy
 
 How it works
 ============
