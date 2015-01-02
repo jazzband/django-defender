@@ -1,7 +1,7 @@
 import redis
 try:
     import urlparse
-except ImportError:
+except ImportError:  # pragma: no cover
     import urllib.parse as urlparse  # pragma: no cover
 
 from . import config

@@ -41,6 +41,9 @@ class AccessAttemptTest(TestCase):
     """
     VALID_USERNAME = 'valid'
     LOCKED_MESSAGE = 'Account locked: too many login attempts.'
+    PERMANENT_LOCKED_MESSAGE = (
+        LOCKED_MESSAGE + '  Contact an admin to unlock your account.'
+    )
 
     def _get_random_str(self):
         """ Returns a random str """
@@ -207,6 +210,22 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/o/login/')
+
+    @patch('defender.config.COOLOFF_TIME', 0)
+    def test_failed_login_no_cooloff(self):
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self._login()
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now, check redirect make sure it is valid.
+        response = self._login()
+        self.assertContains(response, self.PERMANENT_LOCKED_MESSAGE)
+
+        # doing a get should also get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, self.PERMANENT_LOCKED_MESSAGE)
 
     def test_is_valid_ip(self):
         """ Test the is_valid_ip() method
