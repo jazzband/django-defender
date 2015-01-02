@@ -14,11 +14,16 @@ from .connection import parse_redis_url
 from . import utils
 from . import config
 
-if config.MOCK_REDIS:  # pragma: no cover
-    redis_client = mockredis.mock_strict_redis_client()  # pragma: no cover
-else:  # pragma: no cover
-    from .connection import get_redis_connection  # pragma: no cover
-    redis_client = get_redis_connection()  # pragma: no cover
+mocked_redis = mockredis.mock_strict_redis_client()
+
+
+def mock_get_connection():
+    if config.MOCK_REDIS:  # pragma: no cover
+        return mocked_redis  # pragma: no cover
+    else:  # pragma: no cover
+        from .connection import get_redis_connection  # pragma: no cover
+        return get_redis_connection()  # pragma: no cover
+
 
 # Django >= 1.7 compatibility
 try:
@@ -29,6 +34,8 @@ except NoReverseMatch:
     LOGIN_FORM_KEY = 'this_is_the_login_form'
 
 
+@patch('defender.connection.get_redis_connection', mock_get_connection)
+@patch('defender.utils.redis_server', mock_get_connection())
 class AccessAttemptTest(TestCase):
     """ Test case using custom settings for testing
     """
@@ -41,7 +48,6 @@ class AccessAttemptTest(TestCase):
 
         return ''.join(random.choice(chars) for x in range(20))
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def _login(self, is_valid=False, user_agent='test-browser'):
         """ Login a user. A valid credential is used when is_valid is True,
            otherwise it will use a random string to make a failed login.
@@ -56,7 +62,6 @@ class AccessAttemptTest(TestCase):
 
         return response
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def setUp(self):
         """ Create a valid user for login
         """
@@ -68,9 +73,8 @@ class AccessAttemptTest(TestCase):
 
     def tearDown(self):
         """ clean up the db """
-        redis_client.flushdb()
+        mock_get_connection().flushdb()
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_failure_limit_once(self):
         """ Tests the login lock trying to login one more time
         than failure limit
@@ -89,7 +93,6 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_failure_limit_many(self):
         """ Tests the login lock trying to login a lot of times more
         than failure limit
@@ -110,14 +113,12 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_valid_login(self):
         """ Tests a valid login for a real username
         """
         response = self._login(is_valid=True)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
         """
@@ -127,18 +128,16 @@ class AccessAttemptTest(TestCase):
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
-            redis_client.do_expire()  # pragma: no cover
+            mock_get_connection().do_expire()  # pragma: no cover
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_cooling_off_for_trusted_user(self):
         """ Test the cooling time for a trusted user
         """
         # Try the cooling off time
         self.test_cooling_off()
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_long_user_agent_valid(self):
         """ Tests if can handle a long user agent
         """
@@ -146,7 +145,6 @@ class AccessAttemptTest(TestCase):
         response = self._login(is_valid=True, user_agent=long_user_agent)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_long_user_agent_not_valid(self):
         """ Tests if can handle a long user agent with failure
         """
@@ -156,7 +154,6 @@ class AccessAttemptTest(TestCase):
 
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_reset_ip(self):
         """ Tests if can reset an ip address
         """
@@ -170,7 +167,6 @@ class AccessAttemptTest(TestCase):
         self.test_valid_login()
 
     @patch('defender.config.LOCKOUT_URL', 'http://localhost/othe/login/')
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_failed_login_redirect_to_URL(self):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
@@ -192,7 +188,6 @@ class AccessAttemptTest(TestCase):
         self.assertEquals(response['Location'], 'http://localhost/othe/login/')
 
     @patch('defender.config.LOCKOUT_URL', '/o/login/')
-    @patch('defender.connection.get_redis_connection', redis_client)
     def test_failed_login_redirect_to_URL_local(self):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
