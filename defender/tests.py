@@ -395,7 +395,7 @@ class AccessAttemptTest(TestCase):
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
     @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_PROXIED')
-    def test_get_ip_reverse_proxy(self):
+    def test_get_ip_reverse_proxy_custom_header(self):
         req = HttpRequest()
         req.META['HTTP_X_PROXIED'] = '1.2.3.4'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
@@ -406,3 +406,31 @@ class AccessAttemptTest(TestCase):
         req = HttpRequest()
         req.META['REMOTE_ADDR'] = '1.2.3.4'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
+
+    def test_get_user_attempts(self):
+        ip_attempts = random.randint(3, 12)
+        username_attempts = random.randint(3, 12)
+        for i in range(0, ip_attempts):
+            utils.increment_key(utils.get_ip_attempt_cache_key('1.2.3.4'))
+        for i in range(0, username_attempts):
+            utils.increment_key(utils.get_username_attempt_cache_key('foobar'))
+        req = HttpRequest()
+        req.POST['username'] = 'foobar'
+        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        self.assertEqual(
+            utils.get_user_attempts(req), max(ip_attempts, username_attempts)
+        )
+
+        req = HttpRequest()
+        req.POST['username'] = 'foobar'
+        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
+        self.assertEqual(
+            utils.get_user_attempts(req), username_attempts
+        )
+
+        req = HttpRequest()
+        req.POST['username'] = 'barfoo'
+        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        self.assertEqual(
+            utils.get_user_attempts(req), ip_attempts
+        )
