@@ -439,3 +439,38 @@ class AccessAttemptTest(TestCase):
         self.assertEqual(
             utils.get_user_attempts(req), ip_attempts
         )
+
+    def test_admin(self):
+        from .admin import AccessAttemptAdmin
+        AccessAttemptAdmin
+
+    @patch('defender.middleware.ViewDecoratorMiddleware.watched_logins',
+           (ADMIN_LOGIN_URL, ))
+    def test_decorator_middleware(self):
+        # because watch_login is called twice in this test (once by the
+        # middleware and once by the decorator) we have half as many attempts
+        # before getting locked out.
+        # FIXME: I tried making sure every request in only processed once but
+        # there seems to be an issue with django reusing request objects.
+        for i in range(0, int(config.FAILURE_LIMIT / 2)):
+            response = self._login()
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login()
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # doing a get should also get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+    def test_get_view(self):
+        """ Check that the decorator doesn't tamper with GET requests"""
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self.client.get(ADMIN_LOGIN_URL)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertNotContains(response, self.LOCKED_MESSAGE)
