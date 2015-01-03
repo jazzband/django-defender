@@ -16,9 +16,7 @@ the goal is to do those things very well, and have full unit tests with docs.
 Build status
 ------------
 
-[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender)
-
-[![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)
+[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)
 
 Goals for 0.1
 =============
@@ -105,10 +103,10 @@ destination.
 Cache backend:
 ==============
 
-- IP_attempts (count, TTL)
+- ip_attempts (count, TTL)
 - username_attempts (count, TTL)
-- ip_blocks (list) # how to expire when in a list?
-- username_blocks (list) # how to expire item in the list?
+- ip_blocks (list)
+- username_blocks (list)
 
 cache keys:
 -----------
@@ -192,29 +190,30 @@ Customizing Defender
 You have a couple options available to you to customize ``django-defender`` a bit.
 These should be defined in your ``settings.py`` file.
 
-* ``DEFENDER_LOGIN_FAILURE_LIMIT``: The number of login attempts allowed before a
+* ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
 record is created for the failed logins.  Default: ``3``
-* ``DEFENDER_USE_USER_AGENT``: If ``True``, lock out / log based on an IP address
+* ``DEFENDER_USE_USER_AGENT``: Boolean: If ``True``, lock out / log based on an IP address
 AND a user agent.  This means requests from different user agents but from
 the same IP are treated differently.  Default: ``False``
-* ``DEFENDER_COOLOFF_TIME``: If set, defines a period of inactivity after which
+* ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
 number of seconds. If ``0``, the locks will not expire. Default: ``300``
-* ``DEFENDER_LOCKOUT_TEMPLATE``: If set, specifies a template to render when a
+* ``DEFENDER_LOCKOUT_TEMPLATE``: String: If set, specifies a template to render when a
 user is locked out. Template receives cooloff_time and failure_limit as
 context variables. Default: ``None``
-* ``DEFENDER_USERNAME_FORM_FIELD``: the name of the form field that contains your
+* ``DEFENDER_USERNAME_FORM_FIELD``: String: the name of the form field that contains your
 users usernames. Default: ``username``
-* ``DEFENDER_REVERSE_PROXY_HEADER``: the name of the http header with your
+* ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
 reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
-* ``DEFENDER_CACHE_PREFIX``: The cache prefix for your defender keys.
+* ``DEFENDER_CACHE_PREFIX``: String: The cache prefix for your defender keys.
 Default: ``defender``
-* ``DEFENDER_LOCKOUT_URL``: The URL you want to redirect to if someone is
+* ``DEFENDER_LOCKOUT_URL``: String: The URL you want to redirect to if someone is
 locked out.
-* ``DEFENDER_REDIS_URL``: the redis url for defender.
+* ``DEFENDER_REDIS_URL``: String: the redis url for defender.
 Default: ``redis://localhost:6379/0``
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
-
+* ``DEFENDER_PROTECTED_LOGINS``: Tuple: Used by ``ViewDecoratorMiddleware`` to decide
+which login urls need protecting. Default: ``('/accounts/login/',)``
 
 Running Tests
 =============

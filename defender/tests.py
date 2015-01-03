@@ -444,15 +444,16 @@ class AccessAttemptTest(TestCase):
         from .admin import AccessAttemptAdmin
         AccessAttemptAdmin
 
-    @patch('defender.middleware.ViewDecoratorMiddleware.watched_logins',
-           (ADMIN_LOGIN_URL, ))
+    @patch('defender.config.PROTECTED_LOGINS', (ADMIN_LOGIN_URL, ))
     def test_decorator_middleware(self):
         # because watch_login is called twice in this test (once by the
         # middleware and once by the decorator) we have half as many attempts
         # before getting locked out.
-        # FIXME: I tried making sure every request in only processed once but
-        # there seems to be an issue with django reusing request objects.
-        for i in range(0, int(config.FAILURE_LIMIT / 2)):
+        # this is getting called twice, once for each decorator, not sure how
+        # to dynamically remove one of the middlewares during a test so we
+        # divide the failure limit by 2.
+
+        for i in range(0, int(config.FAILURE_LIMIT)):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)

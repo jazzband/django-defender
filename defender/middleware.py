@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 from .decorators import watch_login
+from .config import PROTECTED_LOGINS
 
 
 class FailedLoginMiddleware(object):
@@ -22,14 +22,8 @@ class ViewDecoratorMiddleware(object):
     `defender.middleware.FailedLoginMiddleware` and before the django
     flatpages middleware.
     """
-    watched_logins = getattr(
-        settings, 'DEFENDER_PROTECTED_LOGINS', (
-            '/accounts/login/',
-        )
-    )
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if request.path in self.watched_logins:
+        if request.path in PROTECTED_LOGINS:
             return watch_login(view_func)(request, *view_args, **view_kwargs)
-
         return None

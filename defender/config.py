@@ -46,3 +46,7 @@ ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
 USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
 
 LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
+
+
+PROTECTED_LOGINS = get_setting('DEFENDER_PROTECTED_LOGINS',
+                               ('/accounts/login/',))
