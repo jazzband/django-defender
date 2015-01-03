@@ -99,10 +99,11 @@ def get_username_blocked_cache_key(username):
 
 def increment_key(key):
     """ given a key increment the value """
-    # TODO make this one transaction, not two different ones.
-    new_value = redis_server.incr(key, 1)
+    pipe = redis_server.pipeline()
+    pipe.incr(key, 1)
     if config.COOLOFF_TIME:
-        redis_server.expire(key, config.COOLOFF_TIME)
+        pipe.expire(key, config.COOLOFF_TIME)
+    new_value = pipe.execute()[0]
     return new_value
 
 
@@ -164,14 +165,15 @@ def record_failed_attempt(ip, username):
 
 def reset_failed_attempts(ip=None, username=None):
     """ reset the failed attempts for these ip's and usernames
-        TODO: run all commands in one redis transaction
     """
+    pipe = redis_server.pipeline()
     if ip:
-        redis_server.delete(get_ip_attempt_cache_key(ip))
-        redis_server.delete(get_ip_blocked_cache_key(ip))
+        pipe.delete(get_ip_attempt_cache_key(ip))
+        pipe.delete(get_ip_blocked_cache_key(ip))
     if username:
-        redis_server.delete(get_username_attempt_cache_key(username))
-        redis_server.delete(get_username_blocked_cache_key(username))
+        pipe.delete(get_username_attempt_cache_key(username))
+        pipe.delete(get_username_blocked_cache_key(username))
+    pipe.execute()
 
 
 def lockout_response(request):
