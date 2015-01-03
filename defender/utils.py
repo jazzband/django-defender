@@ -20,7 +20,7 @@ def is_valid_ip(ip_address):
     valid = True
     try:
         socket.inet_aton(ip_address.strip())
-    except:
+    except (socket.error, AttributeError):
         valid = False
     return valid
 
@@ -61,7 +61,7 @@ def get_ip_address_from_request(request):
                     remote_addr):
                 ip_address = remote_addr.strip()
     if not ip_address:
-            ip_address = '127.0.0.1'
+        ip_address = '127.0.0.1'
     return ip_address
 
 

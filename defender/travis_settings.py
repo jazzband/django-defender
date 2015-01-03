@@ -1,3 +1,4 @@
+import os
 
 DATABASES = {
     'default': {
@@ -29,7 +30,7 @@ INSTALLED_APPS = [
     'defender',
 ]
 
-SECRET_KEY = 'too-secret-for-test'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'too-secret-for-test')
 
 LOGIN_REDIRECT_URL = '/admin'
 

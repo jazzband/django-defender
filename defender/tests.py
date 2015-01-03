@@ -17,6 +17,7 @@ from django.http import HttpRequest
 from .connection import parse_redis_url
 from . import utils
 from . import config
+from models import AccessAttempt
 
 mocked_redis = mockredis.mock_strict_redis_client()
 
@@ -286,6 +287,14 @@ class AccessAttemptTest(TestCase):
         # doing a get should also get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.PERMANENT_LOCKED_MESSAGE)
+
+    def test_login_attempt_model(self):
+        """ test the login model"""
+
+        response = self._login()
+        self.assertContains(response, LOGIN_FORM_KEY)
+        self.assertEquals(AccessAttempt.objects.count(), 1)
+        self.assertIsNotNone(AccessAttempt.objects.all()[0])
 
     def test_is_valid_ip(self):
         """ Test the is_valid_ip() method

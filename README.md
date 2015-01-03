@@ -16,7 +16,7 @@ the goal is to do those things very well, and have full unit tests with docs.
 Build status
 ------------
 
-[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)
+[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
 
 Goals for 0.1
 =============

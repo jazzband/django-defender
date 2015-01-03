@@ -1,0 +1,7 @@
+doc-warnings: yes
+test-warnings: no
+strictness: veryhigh
+max-line-length: 80
+uses:
+    - django
+autodetect: yes

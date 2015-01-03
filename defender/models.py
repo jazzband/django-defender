@@ -30,3 +30,9 @@ class AccessAttempt(models.Model):
 
     class Meta:
         ordering = ['-attempt_time']
+
+    def __unicode__(self):
+        """ unicode value for this model """
+        return u"{0} @ {1} | {2}".format(self.username,
+                                         self.attempt_time,
+                                         self.login_valid)
