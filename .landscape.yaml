@@ -1,6 +1,6 @@
-doc-warnings: yes
+doc-warnings: no
 test-warnings: no
-strictness: veryhigh
+strictness: high
 max-line-length: 80
 uses:
     - django
