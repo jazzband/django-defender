@@ -34,7 +34,7 @@ def watch_login(func):
 
             # ideally make this background task, but to keep simple, keeping
             # it inline for now.
-            utils.add_login_attempt(request, not login_unsuccessful)
+            utils.add_login_attempt_to_db(request, not login_unsuccessful)
 
             if utils.check_request(request, login_unsuccessful):
                 return response

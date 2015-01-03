@@ -214,6 +214,9 @@ Default: ``redis://localhost:6379/0``
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
 * ``DEFENDER_PROTECTED_LOGINS``: Tuple: Used by ``ViewDecoratorMiddleware`` to decide
 which login urls need protecting. Default: ``('/accounts/login/',)``
+* ``DEFENDER_USE_CELERY``: Boolean: If you want to use Celery to store the login
+attempt to the database, set to True. If False, it is saved inline.
+Default: ``False``
 
 Running Tests
 =============

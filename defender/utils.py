@@ -6,9 +6,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from .models import AccessAttempt
 from .connection import get_redis_connection
 from . import config
+from .data import store_login_attempt
 
 redis_server = get_redis_connection()
 
@@ -233,14 +233,19 @@ def check_request(request, login_unsuccessful):
         return record_failed_attempt(ip_address, username)
 
 
-def add_login_attempt(request, login_valid):
-    """ Create a record for the login attempt """
-    AccessAttempt.objects.create(
-        user_agent=request.META.get('HTTP_USER_AGENT',
-                                    '<unknown>')[:255],
-        ip_address=get_ip(request),
-        username=request.POST.get(config.USERNAME_FORM_FIELD, None),
-        http_accept=request.META.get('HTTP_ACCEPT', '<unknown>'),
-        path_info=request.META.get('PATH_INFO', '<unknown>'),
-        login_valid=login_valid,
-    )
+def add_login_attempt_to_db(request, login_valid):
+    """ Create a record for the login attempt If using celery call celery
+    task, if not, call the method normally """
+    user_agent = request.META.get('HTTP_USER_AGENT', '<unknown>')[:255]
+    ip_address = get_ip(request)
+    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
+    http_accept = request.META.get('HTTP_ACCEPT', '<unknown>')
+    path_info = request.META.get('PATH_INFO', '<unknown>')
+
+    if config.USE_CELERY:
+        from .tasks import add_login_attempt_task
+        add_login_attempt_task.delay(user_agent, ip_address, username,
+                                     http_accept, path_info, login_valid)
+    else:
+        store_login_attempt(user_agent, ip_address, username,
+                            http_accept, path_info, login_valid)

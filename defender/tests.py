@@ -294,7 +294,7 @@ class AccessAttemptTest(TestCase):
         response = self._login()
         self.assertContains(response, LOGIN_FORM_KEY)
         self.assertEquals(AccessAttempt.objects.count(), 1)
-        self.assertIsNotNone(AccessAttempt.objects.all()[0])
+        self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
     def test_is_valid_ip(self):
         """ Test the is_valid_ip() method
@@ -413,6 +413,7 @@ class AccessAttemptTest(TestCase):
         req = HttpRequest()
         req.META['HTTP_X_PROXIED'] = '1.2.3.4'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
+
         req = HttpRequest()
         req.META['HTTP_X_PROXIED'] = '1.2.3.4, 5.6.7.8, 127.0.0.1'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
@@ -450,6 +451,7 @@ class AccessAttemptTest(TestCase):
         )
 
     def test_admin(self):
+        """ test the admin pages for this app """
         from .admin import AccessAttemptAdmin
         AccessAttemptAdmin
 
@@ -484,3 +486,23 @@ class AccessAttemptTest(TestCase):
             self.assertContains(response, LOGIN_FORM_KEY)
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertNotContains(response, self.LOCKED_MESSAGE)
+
+    @patch('defender.config.USE_CELERY', True)
+    def test_use_celery(self):
+        """ Check that use celery works"""
+
+        self.assertEquals(AccessAttempt.objects.count(), 0)
+
+        for i in range(0, int(config.FAILURE_LIMIT)):
+            response = self._login()
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login()
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        self.assertEquals(AccessAttempt.objects.count(),
+                          config.FAILURE_LIMIT+1)
+        self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))

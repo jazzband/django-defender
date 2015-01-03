@@ -39,3 +39,22 @@ DEFENDER_COOLOFF_TIME = 2
 DEFENDER_REDIS_URL = "redis://localhost:6379/1"
 # don't use mock redis in unit tests, we will use real redis on travis.
 DEFENDER_MOCK_REDIS = False
+
+# Celery settings:
+CELERY_ALWAYS_EAGER = True
+BROKER_BACKEND = 'memory'
+BROKER_URL = 'memory://'
+
+import os
+
+from celery import Celery
+
+# set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'defender.travis_settings')
+
+app = Celery('defender')
+
+# Using a string here means the worker will not have to
+# pickle the object when using Windows.
+app.config_from_object('django.conf:settings')
+app.autodiscover_tasks(lambda: INSTALLED_APPS)

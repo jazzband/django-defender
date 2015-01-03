@@ -4,4 +4,7 @@ strictness: veryhigh
 max-line-length: 80
 uses:
     - django
+    - celery
 autodetect: yes
+ignore-patterns:
+    - .*_settings.py$
