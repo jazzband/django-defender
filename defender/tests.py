@@ -17,7 +17,7 @@ from django.http import HttpRequest
 from .connection import parse_redis_url
 from . import utils
 from . import config
-from models import AccessAttempt
+from .models import AccessAttempt
 
 mocked_redis = mockredis.mock_strict_redis_client()
 

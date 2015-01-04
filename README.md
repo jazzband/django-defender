@@ -56,6 +56,55 @@ Long term goals
 (improve the chances that a good IP is blocked)
 - add management command to prune old (configurable) login attempts.
 
+Performance:
+============
+The goal of defender is to make it as fast as possible so that it doesn't slow
+down the login process. In order to make sure our goals are met we need a way
+to test the application to make sure we are on the right track. The best
+way to do this is to compare how fast a normal Django login takes with defender
+and django-axes.
+
+The normal django login, would be our baseline, and we expect it to be the
+fastest of the 3 methods, because there are no additional checks happening.
+
+The defender login would most likely be slower then the django login, and
+hopefully faster then the django-axes login. The goal is to make it as little
+of a difference between the regular raw login, and defender.
+
+The django-axes login speed, will probably be the slowest of the three since it
+does more checks and does a lot of database queries.
+
+The best way to determine the speed of a login is to do a load test against an
+application with each setup, and compare the login times for each type.
+
+Types of Load tests
+-------------------
+In order to make sure we cover all the different types of logins, in our load
+test we need to have more then one test.
+
+1. All success:
+  - We will do a load test with nothing but successful logins
+2. Mixed: some success some failure:
+  - We will load test with some successful logins and some failures to see how
+  the failure effect the performance.
+3. All Failures:
+  - We will load test with all failure logins and see the difference in
+  performance.
+
+We will need a sample application that we can use for the load test, with the
+only difference is the configuration where we either load defender, axes, or
+none of them.
+
+We can use a hosted load testing service, or something like jmeter. Either way
+we need to be consistent for all of the tests. If we use jmeter, we should have
+our jmeter configuration for others to run the tests on their own.
+
+Results
+-------
+We will post the results here. We will explain each test, and show the results
+along with some charts.
+
+
 Why not django-axes
 ===================
 
@@ -73,7 +122,7 @@ requirements
 
 - django: 1.4.x, 1.6.x, 1.7.x
 - redis
-- python: 2.6.x, 2.7.x, 3.2.x, 3.3.x, 3.4.x, PyPy
+- python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, PyPy
 
 How it works
 ============
