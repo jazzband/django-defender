@@ -229,9 +229,26 @@ Next, install the ``FailedLoginMiddleware`` middleware::
         )
 ```
 
-Run ``python manage.py syncdb``.  This creates the appropriate tables in your database
-that are necessary for operation.
+Database tables:
+----------------
 
+You will need to create tables in your database that are necessary
+for operation.
+
+If you're using Django 1.7.x:
+```bash
+python manage.py migrate defender
+```
+
+On versions of Django prior to 1.7, you might use South (version >= 1.0).
+```bash
+python manage.py migrate defender
+```
+
+If you're not using South, a normal syncdb will work:
+```bash
+python manage.py syncdb
+```
 
 Customizing Defender
 --------------------
