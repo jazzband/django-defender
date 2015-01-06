@@ -25,5 +25,10 @@ script:
   - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.travis_settings
   - coverage report -m
 
+matrix:
+  exclude:
+    - python: "2.6"
+      env: DJANGO=Django==1.7.2
+
 after_success:
   - coveralls --verbose
