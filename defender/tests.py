@@ -32,7 +32,7 @@ def mock_get_connection():
 
 # Django >= 1.7 compatibility
 try:
-    LOGIN_FORM_KEY = '<form action="/admin/" method="post" id="login-form">'
+    LOGIN_FORM_KEY = '<form action="/admin/login/" method="post" id="login-form">'
     ADMIN_LOGIN_URL = reverse('admin:login')
 except NoReverseMatch:
     ADMIN_LOGIN_URL = reverse('admin:index')
