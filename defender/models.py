@@ -1,6 +1,10 @@
+from __future__ import unicode_literals
+
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 
+@python_2_unicode_compatible
 class AccessAttempt(models.Model):
     user_agent = models.CharField(
         max_length=255,
@@ -31,8 +35,8 @@ class AccessAttempt(models.Model):
     class Meta:
         ordering = ['-attempt_time']
 
-    def __unicode__(self):
+    def __str__(self):
         """ unicode value for this model """
-        return u"{0} @ {1} | {2}".format(self.username,
-                                         self.attempt_time,
-                                         self.login_valid)
+        return "{0} @ {1} | {2}".format(self.username,
+                                        self.attempt_time,
+                                        self.login_valid)

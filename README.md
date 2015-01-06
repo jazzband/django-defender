@@ -120,7 +120,7 @@ to improve the login.
 requirements
 ============
 
-- django: 1.4.x, 1.5.x, 1.6.x, 1.7.x
+- django: 1.6.x, 1.7.x
 - redis
 - python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, PyPy
 
