@@ -1,3 +1,4 @@
+import mockredis
 import redis
 try:
     import urlparse
@@ -10,14 +11,20 @@ from . import config
 urlparse.uses_netloc.append("redis")
 
 
+mocked_redis = mockredis.mock_strict_redis_client()
+
+
 def get_redis_connection():
-    """ Get the redis connection """
-    redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
-    return redis.StrictRedis(
-        host=redis_config.get('HOST'),
-        port=redis_config.get('PORT'),
-        db=redis_config.get('DB'),
-        password=redis_config.get('PASSWORD'))
+    """ Get the redis connection if not using mock """
+    if config.MOCK_REDIS:  # pragma: no cover
+        return mocked_redis  # pragma: no cover
+    else:  # pragma: no cover
+        redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
+        return redis.StrictRedis(
+            host=redis_config.get('HOST'),
+            port=redis_config.get('PORT'),
+            db=redis_config.get('DB'),
+            password=redis_config.get('PASSWORD'))
 
 
 def parse_redis_url(url):

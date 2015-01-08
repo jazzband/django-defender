@@ -3,7 +3,6 @@ import string
 import time
 
 from mock import patch
-import mockredis
 
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -14,20 +13,10 @@ from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 
-from .connection import parse_redis_url
+from .connection import parse_redis_url, get_redis_connection
 from . import utils
 from . import config
 from .models import AccessAttempt
-
-mocked_redis = mockredis.mock_strict_redis_client()
-
-
-def mock_get_connection():
-    if config.MOCK_REDIS:  # pragma: no cover
-        return mocked_redis  # pragma: no cover
-    else:  # pragma: no cover
-        from .connection import get_redis_connection  # pragma: no cover
-        return get_redis_connection()  # pragma: no cover
 
 
 # Django >= 1.7 compatibility
@@ -39,8 +28,6 @@ except NoReverseMatch:
     LOGIN_FORM_KEY = 'this_is_the_login_form'
 
 
-@patch('defender.connection.get_redis_connection', mock_get_connection)
-@patch('defender.utils.redis_server', mock_get_connection())
 class AccessAttemptTest(TestCase):
     """ Test case using custom settings for testing
     """
@@ -81,7 +68,7 @@ class AccessAttemptTest(TestCase):
 
     def tearDown(self):
         """ clean up the db """
-        mock_get_connection().flushdb()
+        get_redis_connection().flushdb()
 
     def test_login_get(self):
         """ visit the login page """
@@ -141,7 +128,7 @@ class AccessAttemptTest(TestCase):
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
-            mock_get_connection().do_expire()  # pragma: no cover
+            get_redis_connection().do_expire()  # pragma: no cover
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
