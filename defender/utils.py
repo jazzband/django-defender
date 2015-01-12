@@ -216,7 +216,7 @@ def is_already_locked(request):
     if not user_blocked:
         user_blocked = False
 
-    return ip_blocked or user_blocked
+    return ip_blocked and user_blocked
 
 
 def check_request(request, login_unsuccessful):
