@@ -4,19 +4,19 @@ import time
 
 from mock import patch
 
-from django.test import TestCase
-from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
+from django.test.client import RequestFactory
 
-from .connection import parse_redis_url, get_redis_connection
 from . import utils
 from . import config
+from .connection import parse_redis_url, get_redis_connection
 from .models import AccessAttempt
+from .test import DefenderTestCase, DefenderTransactionTestCase
 
 
 # Django >= 1.7 compatibility
@@ -31,7 +31,7 @@ except NoReverseMatch:
 VALID_USERNAME = VALID_PASSWORD = 'valid'
 
 
-class AccessAttemptTest(TestCase):
+class AccessAttemptTest(DefenderTestCase):
     """ Test case using custom settings for testing
     """
     LOCKED_MESSAGE = 'Account locked: too many login attempts.'
@@ -73,10 +73,6 @@ class AccessAttemptTest(TestCase):
             email='test@example.com',
             password=VALID_PASSWORD,
         )
-
-    def tearDown(self):
-        """ clean up the db """
-        get_redis_connection().flushdb()
 
     def test_login_get(self):
         """ visit the login page """
@@ -556,3 +552,33 @@ class AccessAttemptTest(TestCase):
         self.assertEquals(AccessAttempt.objects.count(),
                           config.FAILURE_LIMIT+1)
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
+
+
+class DefenderTestCaseTest(DefenderTestCase):
+    """Make sure that we're cleaning the cache between tests"""
+    key = 'test_key'
+
+    def test_first_incr(self):
+        utils.redis_server.incr(self.key)
+        result = int(utils.redis_server.get(self.key))
+        self.assertEqual(result, 1)
+
+    def test_second_incr(self):
+        utils.redis_server.incr(self.key)
+        result = int(utils.redis_server.get(self.key))
+        self.assertEqual(result, 1)
+
+
+class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
+    """Make sure that we're cleaning the cache between tests"""
+    key = 'test_key'
+
+    def test_first_incr(self):
+        utils.redis_server.incr(self.key)
+        result = int(utils.redis_server.get(self.key))
+        self.assertEqual(result, 1)
+
+    def test_second_incr(self):
+        utils.redis_server.incr(self.key)
+        result = int(utils.redis_server.get(self.key))
+        self.assertEqual(result, 1)
