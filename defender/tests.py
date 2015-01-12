@@ -126,7 +126,7 @@ class AccessAttemptTest(TestCase):
         one more time than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
-            ip = '74.125.239.{}.'.format(i)
+            ip = '74.125.239.{0}.'.format(i)
             response = self._login(username=VALID_USERNAME, remote_addr=ip)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -174,7 +174,7 @@ class AccessAttemptTest(TestCase):
         another ip
         """
         for i in range(0, config.FAILURE_LIMIT + 1):
-            ip = '74.125.239.{}.'.format(i)
+            ip = '74.125.239.{0}.'.format(i)
             response = self._login(username=VALID_USERNAME, remote_addr=ip)
 
         # try to login with a different ip
