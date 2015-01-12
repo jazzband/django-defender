@@ -213,10 +213,11 @@ def is_already_locked(request):
 
     # username blocked?
     user_blocked = redis_server.get(get_username_blocked_cache_key(username))
-    if not user_blocked:
-        user_blocked = False
+    if user_blocked:
+        return True
 
-    return ip_blocked or user_blocked
+    # if the username nor ip is blocked, the request is not blocked
+    return False
 
 
 def check_request(request, login_unsuccessful):

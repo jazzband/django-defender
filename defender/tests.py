@@ -28,10 +28,12 @@ except NoReverseMatch:
     LOGIN_FORM_KEY = 'this_is_the_login_form'
 
 
+VALID_USERNAME = VALID_PASSWORD = 'valid'
+
+
 class AccessAttemptTest(TestCase):
     """ Test case using custom settings for testing
     """
-    VALID_USERNAME = 'valid'
     LOCKED_MESSAGE = 'Account locked: too many login attempts.'
     PERMANENT_LOCKED_MESSAGE = (
         LOCKED_MESSAGE + '  Contact an admin to unlock your account.'
@@ -43,17 +45,23 @@ class AccessAttemptTest(TestCase):
 
         return ''.join(random.choice(chars) for x in range(20))
 
-    def _login(self, is_valid=False, user_agent='test-browser'):
-        """ Login a user. A valid credential is used when is_valid is True,
-           otherwise it will use a random string to make a failed login.
+    def _login(self, username=None, password=None, user_agent='test-browser',
+               remote_addr='127.0.0.1'):
+        """ Login a user. If the username or password is not provided
+        it will use a random string instead. Use the VALID_USERNAME and
+        VALID_PASSWORD to make a valid login.
         """
-        username = self.VALID_USERNAME if is_valid else self._get_random_str()
+        if username is None:
+            username = self._get_random_str()
+
+        if password is None:
+            password = self._get_random_str()
 
         response = self.client.post(ADMIN_LOGIN_URL, {
             'username': username,
-            'password': username,
+            'password': password,
             LOGIN_FORM_KEY: 1,
-        }, HTTP_USER_AGENT=user_agent)
+        }, HTTP_USER_AGENT=user_agent, REMOTE_ADDR=remote_addr)
 
         return response
 
@@ -61,9 +69,9 @@ class AccessAttemptTest(TestCase):
         """ Create a valid user for login
         """
         self.user = User.objects.create_superuser(
-            username=self.VALID_USERNAME,
+            username=VALID_USERNAME,
             email='test@example.com',
-            password=self.VALID_USERNAME,
+            password=VALID_PASSWORD,
         )
 
     def tearDown(self):
@@ -75,9 +83,9 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertEquals(response.status_code, 200)
 
-    def test_failure_limit_once(self):
-        """ Tests the login lock trying to login one more time
-        than failure limit
+    def test_failure_limit_by_ip_once(self):
+        """ Tests the login lock by ip when trying to login
+        one more time than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
@@ -93,9 +101,9 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-    def test_failure_limit_many(self):
-        """ Tests the login lock trying to login a lot of times more
-        than failure limit
+    def test_failure_limit_by_ip_many(self):
+        """ Tests the login lock by ip when trying to
+        login a lot of times more than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
@@ -113,16 +121,70 @@ class AccessAttemptTest(TestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
+    def test_failure_limit_by_username_once(self):
+        """ Tests the login lock by username when trying to login
+        one more time than failure limit
+        """
+        for i in range(0, config.FAILURE_LIMIT):
+            ip = '74.125.239.{0}.'.format(i)
+            response = self._login(username=VALID_USERNAME, remote_addr=ip)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login()
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # doing a get should also get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
     def test_valid_login(self):
         """ Tests a valid login for a real username
         """
-        response = self._login(is_valid=True)
+        response = self._login(username=VALID_USERNAME, password=VALID_PASSWORD)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
+
+    def test_reset_after_valid_login(self):
+        """ Tests the counter gets reset after a valid login
+        """
+        for i in range(0, config.FAILURE_LIMIT):
+            self._login(username=VALID_USERNAME)
+
+        # now login with a valid username and password
+        self._login(username=VALID_USERNAME, password=VALID_PASSWORD)
+
+        # and we should be able to try again without hitting the failure limit
+        response = self._login(username=VALID_USERNAME)
+        self.assertNotContains(response, self.LOCKED_MESSAGE)
+
+    def test_blocked_ip_cannot_login(self):
+        """ Test an user with blocked ip cannot login with another username
+        """
+        for i in range(0, config.FAILURE_LIMIT + 1):
+            response = self._login(username=VALID_USERNAME)
+
+        # try to login with a different user
+        response = self._login(username='myuser')
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+    def test_blocked_username_cannot_login(self):
+        """ Test an user with blocked username cannot login using
+        another ip
+        """
+        for i in range(0, config.FAILURE_LIMIT + 1):
+            ip = '74.125.239.{0}.'.format(i)
+            response = self._login(username=VALID_USERNAME, remote_addr=ip)
+
+        # try to login with a different ip
+        response = self._login(username=VALID_USERNAME, remote_addr='8.8.8.8')
+        self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
         """
-        self.test_failure_limit_once()
+        self.test_failure_limit_by_ip_once()
         # Wait for the cooling off period
         time.sleep(config.COOLOFF_TIME)
 
@@ -142,7 +204,8 @@ class AccessAttemptTest(TestCase):
         """ Tests if can handle a long user agent
         """
         long_user_agent = 'ie6' * 1024
-        response = self._login(is_valid=True, user_agent=long_user_agent)
+        response = self._login(username=VALID_USERNAME, password=VALID_PASSWORD,
+                               user_agent=long_user_agent)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
@@ -188,7 +251,7 @@ class AccessAttemptTest(TestCase):
         """ Tests if can reset an ip address
         """
         # Make a lockout
-        self.test_failure_limit_once()
+        self.test_failure_limit_by_ip_once()
 
         # Reset the ip so we can try again
         utils.reset_failed_attempts(ip='127.0.0.1')
