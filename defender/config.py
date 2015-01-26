@@ -48,7 +48,4 @@ USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
 LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
 
 
-PROTECTED_LOGINS = get_setting('DEFENDER_PROTECTED_LOGINS',
-                               ('/accounts/login/',))
-
 USE_CELERY = get_setting('DEFENDER_USE_CELERY', False)

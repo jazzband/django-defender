@@ -501,7 +501,6 @@ class AccessAttemptTest(DefenderTestCase):
         from .admin import AccessAttemptAdmin
         AccessAttemptAdmin
 
-    @patch('defender.config.PROTECTED_LOGINS', (ADMIN_LOGIN_URL, ))
     def test_decorator_middleware(self):
         # because watch_login is called twice in this test (once by the
         # middleware and once by the decorator) we have half as many attempts
