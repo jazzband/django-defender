@@ -1,0 +1,43 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block result_list %}
+    <h1>Blocked Logins</h1>
+    <p>Here is a list of IP's and usernames that are blocked</p>
+
+    <h2>Blocked IP's</h2>
+    <table>
+        <tr><th>IP</th><th>Action</th></tr>
+        {% for block in blocked_ip_list %}
+            <tr>
+                <td>{{block}}</td>
+                <td>
+                    <form method='POST' action="{% url 'defender_unblock_ip_view' block %}">
+                      {% csrf_token %}
+                      <input type='submit' value='unblock' />
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+        <tr><td colspan='2'>No IP's</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>Blocked Usernames</h2>
+    <table>
+        <tr><th>Username</th><th>Action</th></tr>
+    {% for block in blocked_username_list %}
+        <tr>
+            <td>{{block}}</td>
+            <td>
+                <form method='POST' action="{% url 'defender_unblock_username_view' block %}">
+                    {% csrf_token %}
+                    <input type='submit' value='unblock' />
+                </form>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan='2'>No Username's</td></tr>
+    {% endfor %}
+    </table>
+{% endblock result_list %}
