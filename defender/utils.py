@@ -234,7 +234,8 @@ def lockout_response(request):
     """ if we are locked out, here is the response """
     if config.LOCKOUT_TEMPLATE:
         context = {
-            'cooloff_time': config.COOLOFF_TIME,
+            'cooloff_time_seconds': config.COOLOFF_TIME,
+            'cooloff_time_minutes': config.COOLOFF_TIME / 60,
             'failure_limit': config.FAILURE_LIMIT,
         }
         return render_to_response(config.LOCKOUT_TEMPLATE, context,

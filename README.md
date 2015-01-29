@@ -18,6 +18,10 @@ Build status
 
 [![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
 
+Sites using Defender:
+=====================
+- https://hub.docker.com
+
 Goals for 0.1
 =============
 
@@ -253,30 +257,31 @@ You have a couple options available to you to customize ``django-defender`` a bi
 These should be defined in your ``settings.py`` file.
 
 * ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
-record is created for the failed logins.  Default: ``3``
+record is created for the failed logins.  [Default: ``3``]
 * ``DEFENDER_USE_USER_AGENT``: Boolean: If ``True``, lock out / log based on an IP address
 AND a user agent.  This means requests from different user agents but from
-the same IP are treated differently.  Default: ``False``
+the same IP are treated differently.  [Default: ``False``]
 * ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
-number of seconds. If ``0``, the locks will not expire. Default: ``300``
-* ``DEFENDER_LOCKOUT_TEMPLATE``: String: If set, specifies a template to render when a
-user is locked out. Template receives cooloff_time and failure_limit as
-context variables. Default: ``None``
+number of seconds. If ``0``, the locks will not expire. [Default: ``300``]
+* ``DEFENDER_LOCKOUT_TEMPLATE``: String:   [Default: ``None``] If set, specifies a template to render when a user is locked out. Template receives the following context variables:
+   - ``cooloff_time_seconds``: The cool off time in seconds
+   - ``cooloff_time_minutes``: The cool off time in minutes
+   - ``failure_limit``: The number of failures before you get blocked.
 * ``DEFENDER_USERNAME_FORM_FIELD``: String: the name of the form field that contains your
-users usernames. Default: ``username``
+users usernames. [Default: ``username``]
 * ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
-reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
+reverse proxy IP address  [Default: ``HTTP_X_FORWARDED_FOR``]
 * ``DEFENDER_CACHE_PREFIX``: String: The cache prefix for your defender keys.
-Default: ``defender``
+[Default: ``defender``]
 * ``DEFENDER_LOCKOUT_URL``: String: The URL you want to redirect to if someone is
 locked out.
 * ``DEFENDER_REDIS_URL``: String: the redis url for defender.
-Default: ``redis://localhost:6379/0``
+[Default: ``redis://localhost:6379/0``]
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
 * ``DEFENDER_USE_CELERY``: Boolean: If you want to use Celery to store the login
 attempt to the database, set to True. If False, it is saved inline.
-Default: ``False``
+[Default: ``False``]
 
 Running Tests
 =============
