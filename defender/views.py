@@ -2,11 +2,13 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.contrib.admin.views.decorators import staff_member_required
 
 from .utils import (
     get_blocked_ips, get_blocked_usernames, unblock_ip, unblock_username)
 
 
+@staff_member_required
 def block_view(request):
     """ List the blocked IP and Usernames """
     blocked_ip_list = get_blocked_ips()
@@ -19,6 +21,7 @@ def block_view(request):
         context, context_instance=RequestContext(request))
 
 
+@staff_member_required
 def unblock_ip_view(request, ip):
     """ upblock the given ip """
     if request.method == 'POST':
@@ -26,6 +29,7 @@ def unblock_ip_view(request, ip):
     return HttpResponseRedirect(reverse("defender_blocks_view"))
 
 
+@staff_member_required
 def unblock_username_view(request, username):
     """ unblockt he given username """
     if request.method == 'POST':
