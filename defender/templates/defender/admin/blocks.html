@@ -1,0 +1,74 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>table {width: 100%;}</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url "admin:index" %}">Home</a> &rsaquo;
+    <a href="{% url "admin:app_list" "defender" %}">Defender</a> &rsaquo;
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div id="content-main">
+
+<h1>Blocked Logins</h1>
+<p>Here is a list of IP's and usernames that are blocked</p>
+
+<div class="module">
+
+<table>
+    <caption>Blocked IP's</caption>
+    <thead>
+    <tr><th>IP</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+    {% for block in blocked_ip_list %}
+    <tr class="{% cycle "row2" "row1" %}">
+        <td>{{block}}</td>
+        <td>
+            <form method='POST' action="{% url 'defender_unblock_ip_view' block %}">
+                {% csrf_token %}
+                <input type='submit' value='unblock' />
+            </form>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan='2'>No IP's</td></tr>
+    {% endfor %}
+</tbody>
+</table>
+</div>
+
+<div class="module">
+<table>
+    <caption>Blocked Usernames</caption>
+    <thead>
+        <tr><th>Usernames</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+    {% for block in blocked_username_list %}
+    <tr class="{% cycle "row2" "row1" %}">
+        <td>{{block}}</td>
+        <td>
+            <form method='POST' action="{% url 'defender_unblock_username_view' block %}">
+                {% csrf_token %}
+                <input type='submit' value='unblock' />
+            </form>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan='2'>No Username's</td></tr>
+    {% endfor %}
+</tbody>
+</table>
+
+</div>
+</div>
+{% endblock content %}

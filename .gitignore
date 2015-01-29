@@ -52,3 +52,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# exampleapp
+defender/exampleapp/static/
+defender/exampleapp/media/

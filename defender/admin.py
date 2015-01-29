@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from .models import AccessAttempt
 
 
@@ -33,12 +32,10 @@ class AccessAttemptAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('path_info', 'login_valid')
         }),
-        ('Form Data', {
-            'fields': ('get_data', 'post_data')
-        }),
         ('Meta Data', {
-            'fields': ('user_agent', 'ip_address', 'http_accept')
+            'fields': ('user_agent', 'ip_address')
         })
     )
+
 
 admin.site.register(AccessAttempt, AccessAttemptAdmin)

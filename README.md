@@ -1,7 +1,7 @@
 django-defender
 ===============
 
-A simple django reusable app that blocks people from brute forcing login
+A simple Django reusable app that blocks people from brute forcing login
 attempts. The goal is to make this as fast as possible, so that we do not
 slow down the login attempts.
 
@@ -17,6 +17,10 @@ Build status
 ------------
 
 [![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
+
+Sites using Defender:
+=====================
+- https://hub.docker.com
 
 Goals for 0.1
 =============
@@ -129,62 +133,39 @@ How it works
 
 1. When someone tries to login, we first check to see if they are currently
 blocked. We check the username they are trying to use, as well as the IP
-address. If they are blocked, goto step 10. If not blocked go to step 2.
+address. If they are blocked, goto step 5. If not blocked go to step 2.
 
 2. They are not blocked, so we check to see if the login was valid. If valid
-go to step 20. If not valid go to step 3.
+go to step 6. If not valid go to step 3.
 
 3. Login attempt wasn't valid. Add their username and IP address for this
 attempt to the cache. If this brings them over the limit, add them to the
-blocked list, and then goto step 10. If not over the limit goto step 4.
+blocked list, and then goto step 5. If not over the limit goto step 4.
 
 4. login was invalid, but not over the limit. Send them back to the login screen
 to try again.
 
 
-10. User is blocked: Send them to the blocked page, telling them they are
+5. User is blocked: Send them to the blocked page, telling them they are
 blocked, and give an estimate on when they will be unblocked.
 
-20. Login is valid. Reset any failed login attempts, and forward to their
+6. Login is valid. Reset any failed login attempts, and forward to their
 destination.
 
 
 Cache backend:
 ==============
 
-- ip_attempts (count, TTL)
-- username_attempts (count, TTL)
-- ip_blocks (list)
-- username_blocks (list)
-
 cache keys:
 -----------
 
+Counters:
 - prefix:failed:ip:[ip] (count, TTL)
 - prefix:failed:username:[username] (count, TTL)
+
+Booleans (if present it is blocked):
 - prefix:blocked:ip:[ip] (true, TTL)
 - prefix:blocked:username:[username] (true, TTL)
-
-Rate limiting Example
----------------------
-```
-# example of how to do rate limiting by IP
-# assuming it is 10 requests being the limit
-# this assumes there is a DECAY of DECAY_TIME
-# to remove invalid logins after a set number of time
-# For every incorrect login, we reset the block time.
-
-FUNCTION LIMIT_API_CALL(ip)
-current = LLEN(ip)
-IF current > 10 THEN
-    ERROR "too many requests per second"
-ELSE
-    MULTI
-        RPUSH(ip, ip)
-        EXPIRE(ip, DECAY_TIME)
-    EXEC
-END
-```
 
 Installing Django-defender
 ==========================
@@ -229,6 +210,25 @@ Next, install the ``FailedLoginMiddleware`` middleware::
         )
 ```
 
+If you want to manage the blocked users via the Django admin, then add the
+following to your ``urls.py``
+
+```
+urlpatterns = patterns(
+    '',
+    (r'^admin/', include(admin.site.urls)), # normal admin
+    (r'^admin/defender/', include('defender.urls')), # defender admin
+    # your own patterns follow…
+)
+```
+
+
+Admin Pages:
+------------
+![alt tag](https://cloud.githubusercontent.com/assets/261601/5950540/8895b570-a729-11e4-9dc3-6b00e46c8043.png)
+
+![alt tag](https://cloud.githubusercontent.com/assets/261601/5950541/88a35194-a729-11e4-981b-3a55b44ef9d5.png)
+
 Database tables:
 ----------------
 
@@ -257,30 +257,31 @@ You have a couple options available to you to customize ``django-defender`` a bi
 These should be defined in your ``settings.py`` file.
 
 * ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
-record is created for the failed logins.  Default: ``3``
+record is created for the failed logins.  [Default: ``3``]
 * ``DEFENDER_USE_USER_AGENT``: Boolean: If ``True``, lock out / log based on an IP address
 AND a user agent.  This means requests from different user agents but from
-the same IP are treated differently.  Default: ``False``
+the same IP are treated differently.  [Default: ``False``]
 * ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
-number of seconds. If ``0``, the locks will not expire. Default: ``300``
-* ``DEFENDER_LOCKOUT_TEMPLATE``: String: If set, specifies a template to render when a
-user is locked out. Template receives cooloff_time and failure_limit as
-context variables. Default: ``None``
+number of seconds. If ``0``, the locks will not expire. [Default: ``300``]
+* ``DEFENDER_LOCKOUT_TEMPLATE``: String:   [Default: ``None``] If set, specifies a template to render when a user is locked out. Template receives the following context variables:
+   - ``cooloff_time_seconds``: The cool off time in seconds
+   - ``cooloff_time_minutes``: The cool off time in minutes
+   - ``failure_limit``: The number of failures before you get blocked.
 * ``DEFENDER_USERNAME_FORM_FIELD``: String: the name of the form field that contains your
-users usernames. Default: ``username``
+users usernames. [Default: ``username``]
 * ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
-reverse proxy IP address  Default: ``HTTP_X_FORWARDED_FOR``
+reverse proxy IP address  [Default: ``HTTP_X_FORWARDED_FOR``]
 * ``DEFENDER_CACHE_PREFIX``: String: The cache prefix for your defender keys.
-Default: ``defender``
+[Default: ``defender``]
 * ``DEFENDER_LOCKOUT_URL``: String: The URL you want to redirect to if someone is
 locked out.
 * ``DEFENDER_REDIS_URL``: String: the redis url for defender.
-Default: ``redis://localhost:6379/0``
+[Default: ``redis://localhost:6379/0``]
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
 * ``DEFENDER_USE_CELERY``: Boolean: If you want to use Celery to store the login
 attempt to the database, set to True. If False, it is saved inline.
-Default: ``False``
+[Default: ``False``]
 
 Running Tests
 =============

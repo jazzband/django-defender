@@ -97,6 +97,36 @@ def get_username_blocked_cache_key(username):
     return "{0}:blocked:username:{1}".format(config.CACHE_PREFIX, username)
 
 
+def strip_keys(key_list):
+    """ Given a list of keys, remove the prefix and remove just
+    the data we care about.
+
+    for example:
+
+        ['defender:blocked:ip:ken', 'defender:blocked:ip:joffrey']
+
+    would result in:
+
+        ['ken', 'joffrey']
+
+    """
+    return [key.split(":")[-1] for key in key_list]
+
+
+def get_blocked_ips():
+    """ get a list of blocked ips from redis """
+    key = get_ip_blocked_cache_key("*")
+    key_list = redis_server.keys(key)
+    return strip_keys(key_list)
+
+
+def get_blocked_usernames():
+    """ get a list of blocked usernames from redis """
+    key = get_username_blocked_cache_key("*")
+    key_list = redis_server.keys(key)
+    return strip_keys(key_list)
+
+
 def increment_key(key):
     """ given a key increment the value """
     pipe = redis_server.pipeline()
@@ -163,16 +193,40 @@ def record_failed_attempt(ip, username):
     return True
 
 
+def unblock_ip(ip, pipe=None):
+    """ unblock the given IP """
+    do_commit = False
+    if not pipe:
+        pipe = redis_server.pipeline()
+        do_commit = True
+    if ip:
+        pipe.delete(get_ip_attempt_cache_key(ip))
+        pipe.delete(get_ip_blocked_cache_key(ip))
+        if do_commit:
+            pipe.execute()
+
+
+def unblock_username(username, pipe=None):
+    """ unblock the given Username """
+    do_commit = False
+    if not pipe:
+        pipe = redis_server.pipeline()
+        do_commit = True
+    if username:
+        pipe.delete(get_username_attempt_cache_key(username))
+        pipe.delete(get_username_blocked_cache_key(username))
+        if do_commit:
+            pipe.execute()
+
+
 def reset_failed_attempts(ip=None, username=None):
     """ reset the failed attempts for these ip's and usernames
     """
     pipe = redis_server.pipeline()
-    if ip:
-        pipe.delete(get_ip_attempt_cache_key(ip))
-        pipe.delete(get_ip_blocked_cache_key(ip))
-    if username:
-        pipe.delete(get_username_attempt_cache_key(username))
-        pipe.delete(get_username_blocked_cache_key(username))
+
+    unblock_ip(ip, pipe=pipe)
+    unblock_username(username, pipe=pipe)
+
     pipe.execute()
 
 
@@ -180,7 +234,8 @@ def lockout_response(request):
     """ if we are locked out, here is the response """
     if config.LOCKOUT_TEMPLATE:
         context = {
-            'cooloff_time': config.COOLOFF_TIME,
+            'cooloff_time_seconds': config.COOLOFF_TIME,
+            'cooloff_time_minutes': config.COOLOFF_TIME / 60,
             'failure_limit': config.FAILURE_LIMIT,
         }
         return render_to_response(config.LOCKOUT_TEMPLATE, context,
