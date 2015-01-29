@@ -8,3 +8,4 @@ uses:
 autodetect: yes
 ignore-patterns:
     - .*_settings.py$
+    - defender/exampleapp/*

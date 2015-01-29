@@ -1,2 +1,2 @@
 [run]
-omit = *_settings.py, defender/*migrations/*
+omit = *_settings.py, defender/*migrations/*, defender/exampleapp/*
