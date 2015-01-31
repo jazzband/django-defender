@@ -185,12 +185,17 @@ def record_failed_attempt(ip, username):
     ip_count = increment_key(get_ip_attempt_cache_key(ip))
     user_count = increment_key(get_username_attempt_cache_key(username))
 
+    ip_block = False
+    user_block = False
     # if either are over the limit, add to block
-    if ip_count > config.FAILURE_LIMIT or user_count > config.FAILURE_LIMIT:
+    if ip_count > config.FAILURE_LIMIT:
         block_ip(ip)
+        ip_block = True
+    if user_count > config.FAILURE_LIMIT:
         block_username(username)
-        return False
-    return True
+        user_block = True
+    # if any blocks return False, no blocks return True
+    return not (ip_block or user_block)
 
 
 def unblock_ip(ip, pipe=None):
