@@ -162,6 +162,9 @@ def get_user_attempts(request):
 
 def block_ip(ip):
     """ given the ip, block it """
+    if not ip:
+        # no reason to continue when there is no ip
+        return
     key = get_ip_blocked_cache_key(ip)
     if config.COOLOFF_TIME:
         redis_server.set(key, 'blocked', config.COOLOFF_TIME)
@@ -171,6 +174,9 @@ def block_ip(ip):
 
 def block_username(username):
     """ given the username block it. """
+    if not username:
+        # no reason to continue when there is no username
+        return
     key = get_username_blocked_cache_key(username)
     if config.COOLOFF_TIME:
         redis_server.set(key, 'blocked', config.COOLOFF_TIME)
