@@ -10,9 +10,6 @@ check the database on each login attempt. The first version will be based on
 Redis, but the goal is to make this configurable so that people can use what
 they want for a backend, so it is configurable.
 
-Version 0.1 will be very limited in features, it will only do a few things, but
-the goal is to do those things very well, and have full unit tests with docs.
-
 Build status
 ------------
 
@@ -22,8 +19,8 @@ Sites using Defender:
 =====================
 - https://hub.docker.com
 
-Goals for 0.1
-=============
+0.1 Features
+============
 
 - Log all login attempts to the database
 - support for reverse proxies with different headers for IP addresses
@@ -40,13 +37,12 @@ Goals for 0.1
         - key_prefix
     - block length
     - number of incorrect attempts before block
-- 100% code coverage
+- 95% code coverage
 - full documentation
 - admin pages
     - list of blocked usernames and ip's
     - ability to unblock people
     - list of recent login attempts
-    - search by username for recent login attempts
 
 Long term goals
 ===============
@@ -145,7 +141,6 @@ blocked list, and then goto step 5. If not over the limit goto step 4.
 4. login was invalid, but not over the limit. Send them back to the login screen
 to try again.
 
-
 5. User is blocked: Send them to the blocked page, telling them they are
 blocked, and give an estimate on when they will be unblocked.
 
@@ -172,9 +167,11 @@ Installing Django-defender
 
 Download code, and run setup.
 
-TODO: add to pypi once stable.
-
 ```
+    $ pip install django-defender
+
+    or
+
     $ python setup.py install
 
     or
