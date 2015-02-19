@@ -7,8 +7,8 @@ slow down the login attempts.
 
 We will use a cache so that it doesn't have to hit the database in order to
 check the database on each login attempt. The first version will be based on
-Redis, but the goal is to make this configurable so that people can use what
-they want for a backend, so it is configurable.
+Redis, but the goal is to make this configurable so that people can use whatever
+backend best fits their needs.
 
 Build status
 ------------
