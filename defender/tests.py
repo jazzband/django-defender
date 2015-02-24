@@ -140,7 +140,8 @@ class AccessAttemptTest(DefenderTestCase):
     def test_valid_login(self):
         """ Tests a valid login for a real username
         """
-        response = self._login(username=VALID_USERNAME, password=VALID_PASSWORD)
+        response = self._login(username=VALID_USERNAME,
+                               password=VALID_PASSWORD)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
     def test_reset_after_valid_login(self):
@@ -206,6 +207,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_FORWARDED_FOR')
     def test_get_ip_reverse_proxy(self):
         """ Tests if can handle a long user agent
         """
@@ -344,8 +346,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
     def test_is_valid_ip(self):
-        """ Test the is_valid_ip() method
-        """
+        """ Test the is_valid_ip() method """
         self.assertEquals(utils.is_valid_ip('192.168.0.1'), True)
         self.assertEquals(utils.is_valid_ip('130.80.100.24'), True)
         self.assertEquals(utils.is_valid_ip('8.8.8.8'), True)
@@ -353,6 +354,8 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEquals(utils.is_valid_ip('fish'), False)
         self.assertEquals(utils.is_valid_ip(None), False)
         self.assertEquals(utils.is_valid_ip(''), False)
+        self.assertEquals(utils.is_valid_ip('0x41.0x41.0x41.0x41'), False)
+        self.assertEquals(utils.is_valid_ip('192.168.100.34.y'), False)
 
     def test_parse_redis_url(self):
         """ test the parse_redis_url method """
@@ -407,52 +410,28 @@ class AccessAttemptTest(DefenderTestCase):
 
     def test_get_ip_address_from_request(self):
         req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4'
+        req.META['REMOTE_ADDR'] = '1.2.3.4'
         ip = utils.get_ip_address_from_request(req)
         self.assertEqual(ip, '1.2.3.4')
 
         req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = ','.join(
-            ['192.168.100.23', '1.2.3.4']
-        )
+        req.META['REMOTE_ADDR'] = '1.2.3.4 '
         ip = utils.get_ip_address_from_request(req)
         self.assertEqual(ip, '1.2.3.4')
 
         req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = '192.168.100.34'
+        req.META['REMOTE_ADDR'] = '192.168.100.34.y'
         ip = utils.get_ip_address_from_request(req)
         self.assertEqual(ip, '127.0.0.1')
 
         req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = '127.0.0.1'
-        req.META['HTTP_X_REAL_IP'] = '1.2.3.4'
+        req.META['REMOTE_ADDR'] = 'cat'
         ip = utils.get_ip_address_from_request(req)
-        self.assertEqual(ip, '1.2.3.4')
+        self.assertEqual(ip, '127.0.0.1')
 
         req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4'
-        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
         ip = utils.get_ip_address_from_request(req)
-        self.assertEqual(ip, '1.2.3.4')
-
-        req = HttpRequest()
-        req.META['HTTP_X_REAL_IP'] = '5.6.7.8'
-        ip = utils.get_ip_address_from_request(req)
-        self.assertEqual(ip, '5.6.7.8')
-
-        req = HttpRequest()
-        req.META['REMOTE_ADDR'] = '1.2.3.4'
-        ip = utils.get_ip_address_from_request(req)
-        self.assertEqual(ip, '1.2.3.4')
-
-        req = HttpRequest()
-        req.META['HTTP_X_FORWARDED_FOR'] = ','.join(
-            ['127.0.0.1', '192.168.132.98']
-        )
-        req.META['HTTP_X_REAL_IP'] = '10.0.0.34'
-        req.META['REMOTE_ADDR'] = '1.2.3.4'
-        ip = utils.get_ip_address_from_request(req)
-        self.assertEqual(ip, '1.2.3.4')
+        self.assertEqual(ip, '127.0.0.1')
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
     @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_PROXIED')
@@ -469,6 +448,8 @@ class AccessAttemptTest(DefenderTestCase):
         req.META['REMOTE_ADDR'] = '1.2.3.4'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
 
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_REAL_IP')
     def test_get_user_attempts(self):
         ip_attempts = random.randint(3, 12)
         username_attempts = random.randint(3, 12)

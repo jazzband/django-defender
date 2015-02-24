@@ -1,5 +1,6 @@
 import logging
 import socket
+import re
 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -17,63 +18,37 @@ log = logging.getLogger(__name__)
 
 def is_valid_ip(ip_address):
     """ Check Validity of an IP address """
-    valid = True
-    try:
-        socket.inet_aton(ip_address.strip())
-    except (socket.error, AttributeError):
-        valid = False
-    return valid
+    if not ip_address:
+        return False
+    ip_address = ip_address.strip()
+    ipv4_re = r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+    ipv6_re = r'\[[0-9a-f:\.]+\]'
+    ipv4_regex = re.compile(ipv4_re)
+    ipv6_regex = re.compile(ipv6_re)
+
+    if ipv4_regex.match(ip_address) or ipv6_regex.match(ip_address):
+        return True
+    return False
 
 
 def get_ip_address_from_request(request):
     """ Makes the best attempt to get the client's real IP or return
         the loopback """
-    PRIVATE_IPS_PREFIX = ('10.', '172.', '192.', '127.')
-    ip_address = ''
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
-    if x_forwarded_for and ',' not in x_forwarded_for:
-        if not x_forwarded_for.startswith(PRIVATE_IPS_PREFIX) and is_valid_ip(
-                x_forwarded_for):
-            ip_address = x_forwarded_for.strip()
-    else:
-        ips = [ip.strip() for ip in x_forwarded_for.split(',')]
-        for ip in ips:
-            if ip.startswith(PRIVATE_IPS_PREFIX):
-                continue
-            elif not is_valid_ip(ip):
-                continue
-            else:
-                ip_address = ip
-                break
-    if not ip_address:
-        x_real_ip = request.META.get('HTTP_X_REAL_IP', '')
-        if x_real_ip:
-            if not x_real_ip.startswith(PRIVATE_IPS_PREFIX) and is_valid_ip(
-                    x_real_ip):
-                ip_address = x_real_ip.strip()
-    if not ip_address:
-        remote_addr = request.META.get('REMOTE_ADDR', '')
-        if remote_addr:
-            if not remote_addr.startswith(PRIVATE_IPS_PREFIX) and is_valid_ip(
-                    remote_addr):
-                ip_address = remote_addr.strip()
-            if remote_addr.startswith(PRIVATE_IPS_PREFIX) and is_valid_ip(
-                    remote_addr):
-                ip_address = remote_addr.strip()
-    if not ip_address:
-        ip_address = '127.0.0.1'
-    return ip_address
+    remote_addr = request.META.get('REMOTE_ADDR', '')
+    if remote_addr and is_valid_ip(remote_addr):
+            return remote_addr.strip()
+    return '127.0.0.1'
 
 
 def get_ip(request):
     """ get the ip address from the request """
-    if not config.BEHIND_REVERSE_PROXY:
-        ip = get_ip_address_from_request(request)
-    else:
+    if config.BEHIND_REVERSE_PROXY:
         ip = request.META.get(config.REVERSE_PROXY_HEADER, '')
         ip = ip.split(",", 1)[0].strip()
         if ip == '':
             ip = request.META.get('REMOTE_ADDR', '')
+    else:
+        ip = get_ip_address_from_request(request)
     return ip
 
 
