@@ -6,13 +6,14 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.1'
+version = '0.1.1'
 
 setup(name='django-defender',
       version=version,
       description="redis based Django app that locks out users after too "
       "many failed login attempts.",
-      long_description=open('README.md').read(),
+      long_description="redis based Django app based on speed, that locks out"
+      "users after too many failed login attempts.",
       classifiers=[
           'Development Status :: 4 - Beta',
           'Framework :: Django',
