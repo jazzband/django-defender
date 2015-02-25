@@ -43,7 +43,7 @@ def get_ip(request):
         ip = request.META.get(config.REVERSE_PROXY_HEADER, '')
         ip = ip.split(",", 1)[0].strip()
         if ip == '':
-            ip = request.META.get('REMOTE_ADDR', '')
+            ip = get_ip_address_from_request(request)
     else:
         ip = get_ip_address_from_request(request)
     return ip
