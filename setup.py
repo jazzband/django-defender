@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.1.1'
+version = '0.2'
 
 setup(name='django-defender',
       version=version,
@@ -37,6 +37,12 @@ setup(name='django-defender',
       author_email='kencochrane@gmail.com',
       license='Apache 2',
       packages=['defender'],
+      package_data={
+          "defender": ["templates/*.html",
+                       "migrations/*.py",
+                       "south_migrations/*.py",
+                       "exampleapp/*.*"],
+      },
       install_requires=['Django>=1.6,<1.8', 'redis==2.10.3', 'hiredis==0.1.4'],
       tests_require=['mock', 'mockredispy', 'coverage', 'celery'],
       )

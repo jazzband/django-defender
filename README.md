@@ -19,8 +19,16 @@ Sites using Defender:
 =====================
 - https://hub.docker.com
 
-0.1 Features
-============
+
+Versions
+========
+- 0.2 - security fix for XFF headers
+- 0.1.1 - setup.py fix
+- 0.1 - initial release
+
+
+Features
+========
 
 - Log all login attempts to the database
 - support for reverse proxies with different headers for IP addresses
@@ -255,9 +263,8 @@ These should be defined in your ``settings.py`` file.
 
 * ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
 record is created for the failed logins.  [Default: ``3``]
-* ``DEFENDER_USE_USER_AGENT``: Boolean: If ``True``, lock out / log based on an IP address
-AND a user agent.  This means requests from different user agents but from
-the same IP are treated differently.  [Default: ``False``]
+* ``DEFENDER_BEHIND_REVERSE_PROXY``: Boolean: Is defender behind a reverse proxy?
+[Default: False]
 * ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
 number of seconds. If ``0``, the locks will not expire. [Default: ``300``]

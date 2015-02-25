@@ -8,8 +8,8 @@ python:
   - "pypy"
 
 env:
-  - DJANGO=Django==1.6.9
-  - DJANGO=Django==1.7.2
+  - DJANGO=Django==1.6.10
+  - DJANGO=Django==1.7.5
 
 services:
   - redis-server
@@ -28,7 +28,7 @@ script:
 matrix:
   exclude:
     - python: "2.6"
-      env: DJANGO=Django==1.7.2
+      env: DJANGO=Django==1.7.5
 
 after_success:
   - coveralls --verbose
