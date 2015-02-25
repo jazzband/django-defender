@@ -362,6 +362,10 @@ class AccessAttemptTest(DefenderTestCase):
             utils.is_valid_ip('2001:db8:85a3:0:0:8a2e:370:7334'), True)
         self.assertEquals(
             utils.is_valid_ip('2001:db8:85a3::8a2e:370:7334'), True)
+        self.assertEquals(
+            utils.is_valid_ip('::ffff:192.0.2.128'), True)
+        self.assertEquals(
+            utils.is_valid_ip('::ffff:8.8.8.8'), True)
 
     def test_parse_redis_url(self):
         """ test the parse_redis_url method """
