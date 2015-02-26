@@ -43,6 +43,6 @@ setup(name='django-defender',
                        "south_migrations/*.py",
                        "exampleapp/*.*"],
       },
-      install_requires=['Django>=1.6,<1.8', 'redis==2.10.3', 'hiredis==0.1.4'],
+      install_requires=['Django>=1.6,<1.8', 'redis==2.10.3', 'hiredis==0.1.4', 'mockredis==0.1.3'],
       tests_require=['mock', 'mockredispy', 'coverage', 'celery'],
       )
