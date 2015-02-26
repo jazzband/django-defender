@@ -22,6 +22,7 @@ Sites using Defender:
 
 Versions
 ========
+- 0.2.1 - bug fix
 - 0.2 - security fix for XFF headers
 - 0.1.1 - setup.py fix
 - 0.1 - initial release
