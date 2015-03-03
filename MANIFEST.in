@@ -1,0 +1,5 @@
+include CHANGES
+include README.md
+include LICENSE
+recursive-include defender/templates *.html
+recursive-exclude * *.py[co]

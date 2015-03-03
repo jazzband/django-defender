@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
 
 try:
     from setuptools import setup
@@ -6,7 +9,33 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.2.1'
+version = '0.2.2'
+
+
+def get_packages(package):
+    """
+    Return root package and all sub-packages.
+    """
+    return [dirpath
+            for dirpath, dirnames, filenames in os.walk(package)
+            if os.path.exists(os.path.join(dirpath, '__init__.py'))]
+
+
+def get_package_data(package):
+    """
+    Return all files under the root package, that are not in a
+    package themselves.
+    """
+    walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
+            for dirpath, dirnames, filenames in os.walk(package)
+            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
+
+    filepaths = []
+    for base, filenames in walk:
+        filepaths.extend([os.path.join(base, filename)
+                          for filename in filenames])
+    return {package: filepaths}
+
 
 setup(name='django-defender',
       version=version,
@@ -36,13 +65,10 @@ setup(name='django-defender',
       url='https://github.com/kencochrane/django-defender',
       author_email='kencochrane@gmail.com',
       license='Apache 2',
-      packages=['defender'],
-      package_data={
-          "defender": ["templates/*.html",
-                       "migrations/*.py",
-                       "south_migrations/*.py",
-                       "exampleapp/*.*"],
-      },
-      install_requires=['Django>=1.6,<1.8', 'redis==2.10.3', 'hiredis==0.1.4', 'mockredispy==2.9.0.10'],
+      include_package_data=True,
+      packages=get_packages('defender'),
+      package_data=get_package_data('defender'),
+      install_requires=['Django>=1.6,<1.8', 'redis==2.10.3',
+                        'hiredis==0.1.4', 'mockredispy==2.9.0.10'],
       tests_require=['mock', 'mockredispy', 'coverage', 'celery'],
       )
