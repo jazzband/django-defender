@@ -22,6 +22,16 @@ Sites using Defender:
 
 Versions
 ========
+- 0.3
+    - Added management command ``cleanup_django_axes`` to clean up access
+    attempt table.
+    - Added ``DEFENDER_STORE_ACCESS_ATTEMPTS`` config to say if you want to
+    store attempts to DB or not.
+    - Added ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION`` config to specify how long
+    to store the access attempt records in the db, before the management command
+    cleans them up.
+    - changed the Django admin page to remove some filters which were making the
+    page load slow with lots of login attempts in the database.
 - 0.2.2 - bug fix add missing files to pypi package
 - 0.2.1 - bug fix
 - 0.2 - security fix for XFF headers
@@ -49,6 +59,8 @@ Features
     - number of incorrect attempts before block
 - 95% code coverage
 - full documentation
+- Ability to store login attempts to the database
+- Management command to clean up login attempts database table
 - admin pages
     - list of blocked usernames and ip's
     - ability to unblock people
@@ -229,6 +241,29 @@ urlpatterns = patterns(
 )
 ```
 
+Management Commands:
+--------------------
+
+``cleanup_django_defender``:
+
+If you have a website with a lot of traffic, the AccessAttempts table will get
+full pretty quickly. If you don't need to keep the data for auditing purposes
+there is a management command to help you keep it clean.
+
+It will look at your ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION`` setting to determine
+which records will be deleted. Default if not specified, is 24 hours.
+
+```bash
+$ python manage.py cleanup_django_defender
+```
+
+You can set this up as a daily or weekly cron job to keep the table size down.
+
+```bash
+# run at 12:24 AM every morning.
+24 0 * * * /usr/bin/python manage.py cleanup_django_defender >> /var/log/django_defender_cleanup.log
+```
+
 
 Admin Pages:
 ------------
@@ -285,9 +320,17 @@ locked out.
 * ``DEFENDER_REDIS_URL``: String: the redis url for defender.
 [Default: ``redis://localhost:6379/0``]
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
+* ``DEFENDER_STORE_ACCESS_ATTEMPTS``: Boolean: If you want to store the login
+attempt to the database, set to True. If False, it is not saved
+[Default: ``True``]
 * ``DEFENDER_USE_CELERY``: Boolean: If you want to use Celery to store the login
 attempt to the database, set to True. If False, it is saved inline.
 [Default: ``False``]
+* ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION``: Int: Length of time in hours for how
+long to keep the access attempt records in the database before the management
+command cleans them up.
+[Default: 24]
+
 
 Running Tests
 =============

@@ -275,6 +275,11 @@ def check_request(request, login_unsuccessful):
 def add_login_attempt_to_db(request, login_valid):
     """ Create a record for the login attempt If using celery call celery
     task, if not, call the method normally """
+
+    if not config.STORE_ACCESS_ATTEMPTS:
+        # If we don't want to store in the database, then don't proceed.
+        return
+
     user_agent = request.META.get('HTTP_USER_AGENT', '<unknown>')[:255]
     ip_address = get_ip(request)
     username = request.POST.get(config.USERNAME_FORM_FIELD, None)
