@@ -1,6 +1,13 @@
 from django.conf import settings
 from django.utils.translation import ugettext_lazy
 
+class LoginAttemptStatus(object):
+
+    values = ['LOGIN_SUCCEED','LOGIN_FAILED_SHOW_WARNING','LOGIN_FAILED_LOCK_USER', 'LOGIN_FAILED_PASS_USER']
+
+    class __metaclass__(type):
+        def __getattr__(self, name):
+            return self.values.index(name)
 
 def get_setting(variable, default=None):
     """ get the 'variable' from settings if not there use the

@@ -160,20 +160,22 @@ def record_failed_attempt(ip, username):
     """ record the failed login attempt, if over limit return False,
     if not over limit return True """
     # increment the failed count, and get current number
-    ip_count = increment_key(get_ip_attempt_cache_key(ip))
     user_count = increment_key(get_username_attempt_cache_key(username))
 
-    ip_block = False
+    status = config.LoginAttemptStatus.LOGIN_FAILED_PASS_USER
     user_block = False
-    # if either are over the limit, add to block
-    if ip_count > config.FAILURE_LIMIT:
-        block_ip(ip)
-        ip_block = True
-    if user_count > config.FAILURE_LIMIT:
+
+    if config.WARNING_LIMIT:
+        if user_count == config.WARNING_LIMIT:
+            return config.LoginAttemptStatus.LOGIN_FAILED_SHOW_WARNING
+
+    if user_count >= config.FAILURE_LIMIT:
         block_username(username)
         user_block = True
-    # if any blocks return False, no blocks return True
-    return not (ip_block or user_block)
+
+    if user_block:
+        return config.LoginAttemptStatus.LOGIN_FAILED_LOCK_USER
+    return status
 
 
 def unblock_ip(ip, pipe=None):
@@ -266,7 +268,7 @@ def check_request(request, login_unsuccessful):
     if not login_unsuccessful:
         # user logged in -- forget the failed attempts
         reset_failed_attempts(ip=ip_address, username=username)
-        return True
+        return config.LoginAttemptStatus.LOGIN_SUCCEED
     else:
         # add a failed attempt for this user
         return record_failed_attempt(ip_address, username)
