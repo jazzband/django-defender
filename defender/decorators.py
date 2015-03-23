@@ -1,5 +1,7 @@
 from . import utils
-
+from . import config
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 def watch_login(func):
     """
@@ -36,10 +38,18 @@ def watch_login(func):
             # it inline for now.
             utils.add_login_attempt_to_db(request, not login_unsuccessful)
 
-            if utils.check_request(request, login_unsuccessful):
+            login_attempt_status = utils.check_request(request, login_unsuccessful)
+
+            if login_attempt_status in [config.LoginAttemptStatus.LOGIN_SUCCEED, config.LoginAttemptStatus.LOGIN_FAILED_PASS_USER]:
                 return response
 
-            return utils.lockout_response(request)
+            elif login_attempt_status == config.LoginAttemptStatus.LOGIN_FAILED_LOCK_USER:
+                return utils.lockout_response(request)
+
+            elif login_attempt_status == config.LoginAttemptStatus.LOGIN_FAILED_SHOW_WARNING:
+                return render_to_response('auth/login.html', {"error_list": ["Invalid email and/or password. "
+                                                                             "WARNING: Your account will lock after 2 more unsuccessful login attempts."]},
+                                                                             context_instance=RequestContext(request))
 
         return response
 
