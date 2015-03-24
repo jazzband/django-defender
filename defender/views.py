@@ -22,10 +22,10 @@ def block_view(request):
 
 
 @staff_member_required
-def unblock_ip_view(request, ip):
+def unblock_ip_view(request, ip_address):
     """ upblock the given ip """
     if request.method == 'POST':
-        unblock_ip(ip)
+        unblock_ip(ip_address)
     return HttpResponseRedirect(reverse("defender_blocks_view"))
 
 

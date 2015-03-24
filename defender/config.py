@@ -33,7 +33,8 @@ try:
     # how long to wait before the bad login attempt gets forgotten. in seconds.
     COOLOFF_TIME = int(get_setting('DEFENDER_COOLOFF_TIME', 300))  # seconds
 except ValueError:  # pragma: no cover
-    raise Exception('COOLOFF_TIME needs to be an integer')  # pragma: no cover
+    raise Exception(
+        'DEFENDER_COOLOFF_TIME needs to be an integer')  # pragma: no cover
 
 LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')
 
@@ -45,5 +46,16 @@ USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
 
 LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
 
-
 USE_CELERY = get_setting('DEFENDER_USE_CELERY', False)
+
+STORE_ACCESS_ATTEMPTS = get_setting('DEFENDER_STORE_ACCESS_ATTEMPTS', True)
+
+# Used by the management command to decide how long to keep access attempt
+# recods. Number is # of hours.
+try:
+    ACCESS_ATTEMPT_EXPIRATION = int(get_setting(
+        'DEFENDER_ACCESS_ATTEMPT_EXPIRATION', 24))
+except ValueError:  # pragma: no cover
+    raise Exception(
+        'DEFENDER_ACCESS_ATTEMPT_EXPIRATION'
+        ' needs to be an integer')  # pragma: no cover

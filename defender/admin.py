@@ -13,17 +13,12 @@ class AccessAttemptAdmin(admin.ModelAdmin):
     )
 
     list_filter = [
-        'attempt_time',
-        'ip_address',
         'username',
-        'path_info',
     ]
 
     search_fields = [
         'ip_address',
         'username',
-        'user_agent',
-        'path_info',
     ]
 
     date_hierarchy = 'attempt_time'

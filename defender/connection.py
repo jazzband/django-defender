@@ -11,13 +11,13 @@ from . import config
 urlparse.uses_netloc.append("redis")
 
 
-mocked_redis = mockredis.mock_strict_redis_client()
+MOCKED_REDIS = mockredis.mock_strict_redis_client()
 
 
 def get_redis_connection():
     """ Get the redis connection if not using mock """
     if config.MOCK_REDIS:  # pragma: no cover
-        return mocked_redis  # pragma: no cover
+        return MOCKED_REDIS  # pragma: no cover
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
         return redis.StrictRedis(
@@ -31,7 +31,7 @@ def parse_redis_url(url):
     """Parses a redis URL."""
 
     # create config with some sane defaults
-    config = {
+    redis_config = {
         "DB": 0,
         "PASSWORD": None,
         "HOST": "localhost",
@@ -39,7 +39,7 @@ def parse_redis_url(url):
     }
 
     if not url:
-        return config
+        return redis_config
 
     url = urlparse.urlparse(url)
     # Remove query strings.
@@ -47,12 +47,12 @@ def parse_redis_url(url):
     path = path.split('?', 2)[0]
 
     if path:
-        config.update({"DB": int(path)})
+        redis_config.update({"DB": int(path)})
     if url.password:
-        config.update({"PASSWORD": url.password})
+        redis_config.update({"PASSWORD": url.password})
     if url.hostname:
-        config.update({"HOST": url.hostname})
+        redis_config.update({"HOST": url.hostname})
     if url.port:
-        config.update({"PORT": int(url.port)})
+        redis_config.update({"PORT": int(url.port)})
 
-    return config
+    return redis_config

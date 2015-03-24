@@ -253,7 +253,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_failure_limit_by_ip_once()
 
         # Reset the ip so we can try again
-        utils.reset_failed_attempts(ip='127.0.0.1')
+        utils.reset_failed_attempts(ip_address='127.0.0.1')
 
         # Make a login attempt again
         self.test_valid_login()
@@ -550,13 +550,13 @@ class DefenderTestCaseTest(DefenderTestCase):
     key = 'test_key'
 
     def test_first_incr(self):
-        utils.redis_server.incr(self.key)
-        result = int(utils.redis_server.get(self.key))
+        utils.REDIS_SERVER.incr(self.key)
+        result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
-        utils.redis_server.incr(self.key)
-        result = int(utils.redis_server.get(self.key))
+        utils.REDIS_SERVER.incr(self.key)
+        result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
 
@@ -565,11 +565,11 @@ class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
     key = 'test_key'
 
     def test_first_incr(self):
-        utils.redis_server.incr(self.key)
-        result = int(utils.redis_server.get(self.key))
+        utils.REDIS_SERVER.incr(self.key)
+        result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
-        utils.redis_server.incr(self.key)
-        result = int(utils.redis_server.get(self.key))
+        utils.REDIS_SERVER.incr(self.key)
+        result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
