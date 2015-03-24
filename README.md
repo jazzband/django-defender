@@ -22,8 +22,9 @@ Sites using Defender:
 
 Versions
 ========
+- 0.3.1 - fixed the management command name
 - 0.3
-    - Added management command ``cleanup_django_axes`` to clean up access
+    - Added management command ``cleanup_django_defender`` to clean up access
     attempt table.
     - Added ``DEFENDER_STORE_ACCESS_ATTEMPTS`` config to say if you want to
     store attempts to DB or not.
