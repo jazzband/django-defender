@@ -544,6 +544,36 @@ class AccessAttemptTest(DefenderTestCase):
                           config.FAILURE_LIMIT+1)
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
+    @patch('defender.config.LOCKOUT_BY_IP_USERNAME', True)
+    def test_lockout_by_ip_and_username(self):
+        """Check that lockout still works when locking out by IP and Username combined"""
+
+        username = 'testy'
+
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self._login(username=username)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login(username=username)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # We shouldn't get a lockout message when attempting to use no username
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # We shouldn't get a lockout message when attempting to use a different username
+        response = self._login()
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # We shouldn't get a lockout message when attempting to use a different ip address
+        ip = '74.125.239.60'
+        response = self._login(username=VALID_USERNAME, remote_addr=ip)
+        # Check if we are in the same login page
+        self.assertContains(response, LOGIN_FORM_KEY)
+
 
 class DefenderTestCaseTest(DefenderTestCase):
     """Make sure that we're cleaning the cache between tests"""
