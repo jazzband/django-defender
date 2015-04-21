@@ -172,6 +172,10 @@ def record_failed_attempt(ip_address, username):
     if user_count > config.FAILURE_LIMIT:
         block_username(username)
         user_block = True
+
+    if config.LOCKOUT_BY_IP_USERNAME:
+        return not (ip_block and user_block)
+
     # if any blocks return False, no blocks return True
     return not (ip_block or user_block)
 
@@ -243,16 +247,22 @@ def is_already_locked(request):
     # ip blocked?
     ip_blocked = REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
 
-    if not ip_blocked:
-        ip_blocked = False
-    else:
-        # short circuit no need to check username if ip is already blocked.
-        return True
-
     # username blocked?
     user_blocked = REDIS_SERVER.get(get_username_blocked_cache_key(username))
-    if user_blocked:
-        return True
+
+    if config.LOCKOUT_BY_IP_USERNAME:
+        LOG.info("Block by ip & username")
+        if ip_blocked and user_blocked:
+            # if both this IP and this username are present the reqeust is blocked
+            return True
+
+    else:
+        if ip_blocked:
+            # short circuit no need to check username if ip is already blocked.
+            return True
+
+        if user_blocked:
+            return True
 
     # if the username nor ip is blocked, the request is not blocked
     return False
