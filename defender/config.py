@@ -15,7 +15,8 @@ MOCK_REDIS = get_setting('DEFENDER_MOCK_REDIS', False)
 # see if the user has overridden the failure limit
 FAILURE_LIMIT = get_setting('DEFENDER_LOGIN_FAILURE_LIMIT', 3)
 
-LOCKOUT_BY_IP_USERNAME = get_setting('DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME', False)
+LOCKOUT_BY_IP_USERNAME = get_setting(
+    'DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME', False)
 
 # use a specific username field to retrieve from login POST data
 USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')

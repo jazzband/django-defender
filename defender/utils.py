@@ -253,7 +253,8 @@ def is_already_locked(request):
     if config.LOCKOUT_BY_IP_USERNAME:
         LOG.info("Block by ip & username")
         if ip_blocked and user_blocked:
-            # if both this IP and this username are present the reqeust is blocked
+            # if both this IP and this username are present the request is
+            # blocked
             return True
 
     else:
