@@ -13,7 +13,7 @@ backend best fits their needs.
 Build status
 ------------
 
-[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender) [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
+[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender)  [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
 
 Sites using Defender:
 =====================
@@ -302,7 +302,8 @@ These should be defined in your ``settings.py`` file.
 * ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
 record is created for the failed logins.  [Default: ``3``]
 * ``DEFENDER_BEHIND_REVERSE_PROXY``: Boolean: Is defender behind a reverse proxy?
-[Default: False]
+[Default: ``False``]
+* ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``: Boolean: Locks a user out based on a combination of IP and Username.  This stops a user denying access to the application for all other users accessing the app from behind the same IP address. [Default: ``False``]
 * ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
 number of seconds. If ``0``, the locks will not expire. [Default: ``300``]
@@ -330,7 +331,7 @@ attempt to the database, set to True. If False, it is saved inline.
 * ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION``: Int: Length of time in hours for how
 long to keep the access attempt records in the database before the management
 command cleans them up.
-[Default: 24]
+[Default: ``24``]
 
 
 Running Tests
