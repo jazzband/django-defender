@@ -9,7 +9,7 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.3.1'
+version = '0.3.2'
 
 
 def get_packages(package):
@@ -68,7 +68,7 @@ setup(name='django-defender',
       include_package_data=True,
       packages=get_packages('defender'),
       package_data=get_package_data('defender'),
-      install_requires=['Django>=1.6,<1.8', 'redis==2.10.3',
-                        'hiredis==0.1.6', 'mockredispy==2.9.0.10'],
+      install_requires=['Django>=1.6,<1.9', 'redis==2.10.3',
+                        'hiredis==0.2.0', 'mockredispy==2.9.0.11'],
       tests_require=['mock', 'mockredispy', 'coverage', 'celery'],
       )

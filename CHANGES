@@ -1,3 +1,24 @@
+0.3.2
+=====
+added ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``, and changed settings to support
+django 1.8.
+
+0.3.1
+=====
+fixed the management command name
+
+0.3
+===
+
+- Added management command ``cleanup_django_defender`` to clean up access
+    attempt table.
+- Added ``DEFENDER_STORE_ACCESS_ATTEMPTS`` config to say if you want to
+    store attempts to DB or not.
+- Added ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION`` config to specify how long
+    to store the access attempt records in the db, before the management command
+    cleans them up.
+- changed the Django admin page to remove some filters which were making the
+    page load slow with lots of login attempts in the database.
 
 0.2.2
 =====
