@@ -22,6 +22,8 @@ Sites using Defender:
 
 Versions
 ========
+- 0.3.2 - added ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``, and changed settings
+    to support django 1.8.
 - 0.3.1 - fixed the management command name
 - 0.3
     - Added management command ``cleanup_django_defender`` to clean up access
