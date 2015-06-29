@@ -75,6 +75,28 @@ class AccessAttemptTest(DefenderTestCase):
             password=VALID_PASSWORD,
         )
 
+    def test_data_integrity_of_get_blocked_ips(self):
+        """ Test whether data retrieved from redis via
+        get_blocked_ips() is the same as the data saved
+        """
+        data_in = ['127.0.0.1', '4.2.2.1']
+        for ip in data_in:
+            utils.block_ip(ip)
+        data_out = utils.get_blocked_ips()
+        # values stored are unique, so we can use set()
+        self.assertEqual(sorted(data_in), sorted(data_out))
+
+    def test_data_integrity_of_get_blocked_usernames(self):
+        """ Test whether data retrieved from redis via
+        get_blocked_usernames() is the same as the data saved
+        """
+        data_in = ['foo', 'bar']
+        for username in data_in:
+            utils.block_username(username)
+        data_out = utils.get_blocked_usernames()
+        # values stored are unique, so we can use set()
+        self.assertEqual(sorted(data_in), sorted(data_out))
+
     def test_login_get(self):
         """ visit the login page """
         response = self.client.get(ADMIN_LOGIN_URL)
