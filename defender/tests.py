@@ -83,7 +83,6 @@ class AccessAttemptTest(DefenderTestCase):
         for ip in data_in:
             utils.block_ip(ip)
         data_out = utils.get_blocked_ips()
-        # values stored are unique, so we can use set()
         self.assertEqual(sorted(data_in), sorted(data_out))
 
     def test_data_integrity_of_get_blocked_usernames(self):
@@ -94,7 +93,6 @@ class AccessAttemptTest(DefenderTestCase):
         for username in data_in:
             utils.block_username(username)
         data_out = utils.get_blocked_usernames()
-        # values stored are unique, so we can use set()
         self.assertEqual(sorted(data_in), sorted(data_out))
 
     def test_login_get(self):
