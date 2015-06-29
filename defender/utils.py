@@ -88,14 +88,16 @@ def strip_keys(key_list):
 def get_blocked_ips():
     """ get a list of blocked ips from redis """
     key = get_ip_blocked_cache_key("*")
-    key_list = REDIS_SERVER.keys(key)
+    key_list = [redis_key.decode('utf-8')
+                for redis_key in REDIS_SERVER.keys(key)]
     return strip_keys(key_list)
 
 
 def get_blocked_usernames():
     """ get a list of blocked usernames from redis """
     key = get_username_blocked_cache_key("*")
-    key_list = REDIS_SERVER.keys(key)
+    key_list = [redis_key.decode('utf-8')
+                for redis_key in REDIS_SERVER.keys(key)]
     return strip_keys(key_list)
 
 
