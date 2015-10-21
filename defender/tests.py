@@ -85,6 +85,11 @@ class AccessAttemptTest(DefenderTestCase):
         data_out = utils.get_blocked_ips()
         self.assertEqual(sorted(data_in), sorted(data_out))
 
+        # send in None, should have same values.
+        utils.block_ip(None)
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(sorted(data_in), sorted(data_out))
+
     def test_data_integrity_of_get_blocked_usernames(self):
         """ Test whether data retrieved from redis via
         get_blocked_usernames() is the same as the data saved
@@ -92,6 +97,11 @@ class AccessAttemptTest(DefenderTestCase):
         data_in = ['foo', 'bar']
         for username in data_in:
             utils.block_username(username)
+        data_out = utils.get_blocked_usernames()
+        self.assertEqual(sorted(data_in), sorted(data_out))
+
+        # send in None, should have same values.
+        utils.block_username(None)
         data_out = utils.get_blocked_usernames()
         self.assertEqual(sorted(data_in), sorted(data_out))
 
@@ -593,6 +603,59 @@ class AccessAttemptTest(DefenderTestCase):
         response = self._login(username=VALID_USERNAME, remote_addr=ip)
         # Check if we are in the same login page
         self.assertContains(response, LOGIN_FORM_KEY)
+
+    @patch('defender.config.DISABLE_IP_LOCKOUT', True)
+    def test_disable_ip_lockout(self):
+        """Check that lockout still works when we disable IP Lock out"""
+
+        username = 'testy'
+
+        # try logging in with the same IP, but different username
+        # we shouldn't be blocked.
+        # same IP different, usernames
+        ip = '74.125.239.60'
+        for i in range(0, config.FAILURE_LIMIT+10):
+            login_username = u"{}{}".format(username, i)
+            response = self._login(username=login_username, remote_addr=ip)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # same username with same IP
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self._login(username=username)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # But we should get one now
+        # same username and Ip, over the limit for username.
+        response = self._login(username=username)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # We shouldn't get a lockout message when attempting to use no username
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # We shouldn't get a lockout message when attempting to use a different username
+        response = self._login()
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # We shouldn't get a lockout message when attempting to use a different ip address
+        second_ip = '74.125.239.99'
+        response = self._login(username=VALID_USERNAME, remote_addr=second_ip)
+        # Check if we are in the same login page
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # we should have no ip's blocked
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, [])
+
+        # even if we try to manually block one it still won't be in there.
+        utils.block_ip(second_ip)
+
+        # we should still have no ip's blocked
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, [])
 
 
 class DefenderTestCaseTest(DefenderTestCase):

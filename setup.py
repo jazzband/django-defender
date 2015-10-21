@@ -9,7 +9,7 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.3.2'
+version = '0.4.0'
 
 
 def get_packages(package):
@@ -54,6 +54,7 @@ setup(name='django-defender',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Programming Language :: Python :: Implementation :: CPython',
           'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
