@@ -193,9 +193,10 @@ def record_failed_attempt(ip_address, username):
         # we need to return False
         return not user_block
 
-    # we want to make sure both the IP and user is blocked before we return False
-    # this is mostly used when a lot of your users are using proxies, and you
-    # don't want one user to block everyone on that one IP.
+    # we want to make sure both the IP and user is blocked before we
+    # return False
+    # this is mostly used when a lot of your users are using proxies,
+    # and you don't want one user to block everyone on that one IP.
     if config.LOCKOUT_BY_IP_USERNAME:
         # both ip_block and user_block need to be True in order
         # to return a False.

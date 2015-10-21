@@ -20,7 +20,8 @@ FAILURE_LIMIT = get_setting('DEFENDER_LOGIN_FAILURE_LIMIT', 3)
 LOCKOUT_BY_IP_USERNAME = get_setting(
     'DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME', False)
 
-# if this is True, The users IP address will not get locked when there are too many login attempts.
+# if this is True, The users IP address will not get locked when
+# there are too many login attempts.
 DISABLE_IP_LOCKOUT = get_setting('DEFENDER_DISABLE_IP_LOCKOUT', False)
 
 # use a specific username field to retrieve from login POST data
