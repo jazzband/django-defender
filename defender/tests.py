@@ -615,7 +615,7 @@ class AccessAttemptTest(DefenderTestCase):
         # same IP different, usernames
         ip = '74.125.239.60'
         for i in range(0, config.FAILURE_LIMIT+10):
-            login_username = u"{}{}".format(username, i)
+            login_username = u"{0}{1}".format(username, i)
             response = self._login(username=login_username, remote_addr=ip)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
