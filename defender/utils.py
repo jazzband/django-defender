@@ -280,28 +280,13 @@ def is_already_locked(request):
     username = request.POST.get(config.USERNAME_FORM_FIELD, None)
     user_blocked = REDIS_SERVER.get(get_username_blocked_cache_key(username))
 
-    if config.DISABLE_IP_LOCKOUT:
-        # if DISABLE_IP_LOCKOUT is turned on, then return user_blocked
-        # result, since we don't care about ip at this point.
-        return user_blocked
-
     if config.LOCKOUT_BY_IP_USERNAME:
         LOG.info("Block by ip & username")
-        if ip_blocked and user_blocked:
-            # if both this IP and this username are present the request is
-            # blocked
-            return True
+        # if both this IP and this username are present the request is
+        # blocked
+        return ip_blocked and user_blocked
 
-    else:
-        if ip_blocked:
-            # short circuit no need to check username if ip is already blocked.
-            return True
-
-        if user_blocked:
-            return True
-
-    # if the username nor ip is blocked, the request is not blocked
-    return False
+    return ip_blocked or user_blocked
 
 
 def check_request(request, login_unsuccessful):
