@@ -87,6 +87,9 @@ def strip_keys(key_list):
 
 def get_blocked_ips():
     """ get a list of blocked ips from redis """
+    if config.DISABLE_IP_LOCKOUT:
+        # There are no blocked IP's since we disabled them.
+        return []
     key = get_ip_blocked_cache_key("*")
     key_list = [redis_key.decode('utf-8')
                 for redis_key in REDIS_SERVER.keys(key)]
@@ -139,6 +142,9 @@ def block_ip(ip_address):
     if not ip_address:
         # no reason to continue when there is no ip
         return
+    if config.DISABLE_IP_LOCKOUT:
+        # no need to block, we disabled it.
+        return
     key = get_ip_blocked_cache_key(ip_address)
     if config.COOLOFF_TIME:
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
@@ -162,23 +168,41 @@ def record_failed_attempt(ip_address, username):
     """ record the failed login attempt, if over limit return False,
     if not over limit return True """
     # increment the failed count, and get current number
-    ip_count = increment_key(get_ip_attempt_cache_key(ip_address))
+    ip_block = False
+    if not config.DISABLE_IP_LOCKOUT:
+        # we only want to increment the IP if this is disabled.
+        ip_count = increment_key(get_ip_attempt_cache_key(ip_address))
+        # if over the limit, add to block
+        if ip_count > config.FAILURE_LIMIT:
+            block_ip(ip_address)
+            ip_block = True
+
+    user_block = False
     user_count = increment_key(get_username_attempt_cache_key(username))
 
-    ip_block = False
-    user_block = False
-    # if either are over the limit, add to block
-    if ip_count > config.FAILURE_LIMIT:
-        block_ip(ip_address)
-        ip_block = True
+    # if over the limit, add to block
     if user_count > config.FAILURE_LIMIT:
         block_username(username)
         user_block = True
 
+    # if we have this turned on, then there is no reason to look at ip_block
+    # we will just look at user_block, and short circut the result since
+    # we don't need to continue.
+    if config.DISABLE_IP_LOCKOUT:
+        # if user_block is True, it means it was blocked
+        # we need to return False
+        return not user_block
+
+    # we want to make sure both the IP and user is blocked before we
+    # return False
+    # this is mostly used when a lot of your users are using proxies,
+    # and you don't want one user to block everyone on that one IP.
     if config.LOCKOUT_BY_IP_USERNAME:
+        # both ip_block and user_block need to be True in order
+        # to return a False.
         return not (ip_block and user_block)
 
-    # if any blocks return False, no blocks return True
+    # if any blocks return False, no blocks. return True
     return not (ip_block or user_block)
 
 
@@ -243,32 +267,26 @@ def lockout_response(request):
 
 def is_already_locked(request):
     """ Is this IP/username already locked? """
-    ip_address = get_ip(request)
-    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
 
-    # ip blocked?
-    ip_blocked = REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
+    if not config.DISABLE_IP_LOCKOUT:
+        # ip blocked?
+        ip_address = get_ip(request)
+        ip_blocked = REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
+    else:
+        # we disabled ip lockout, so it will never be blocked.
+        ip_blocked = False
 
     # username blocked?
+    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
     user_blocked = REDIS_SERVER.get(get_username_blocked_cache_key(username))
 
     if config.LOCKOUT_BY_IP_USERNAME:
         LOG.info("Block by ip & username")
-        if ip_blocked and user_blocked:
-            # if both this IP and this username are present the request is
-            # blocked
-            return True
+        # if both this IP and this username are present the request is
+        # blocked
+        return ip_blocked and user_blocked
 
-    else:
-        if ip_blocked:
-            # short circuit no need to check username if ip is already blocked.
-            return True
-
-        if user_blocked:
-            return True
-
-    # if the username nor ip is blocked, the request is not blocked
-    return False
+    return ip_blocked or user_blocked
 
 
 def check_request(request, login_unsuccessful):

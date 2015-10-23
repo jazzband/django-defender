@@ -22,6 +22,7 @@ Sites using Defender:
 
 Versions
 ========
+- 0.4.0 - added ``DEFENDER_DISABLE_IP_LOCKOUT`` and added support for Python 3.5
 - 0.3.2 - added ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``, and changed settings
     to support django 1.8.
 - 0.3.1 - fixed the management command name
@@ -306,6 +307,7 @@ record is created for the failed logins.  [Default: ``3``]
 * ``DEFENDER_BEHIND_REVERSE_PROXY``: Boolean: Is defender behind a reverse proxy?
 [Default: ``False``]
 * ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``: Boolean: Locks a user out based on a combination of IP and Username.  This stops a user denying access to the application for all other users accessing the app from behind the same IP address. [Default: ``False``]
+* ``DEFENDER_DISABLE_IP_LOCKOUT``: Boolean: If this is True, it will not lockout the users IP address, it will only lockout the username. [Default: False]
 * ``DEFENDER_COOLOFF_TIME``: Int: If set, defines a period of inactivity after which
 old failed login attempts will be forgotten. An integer, will be interpreted as a
 number of seconds. If ``0``, the locks will not expire. [Default: ``300``]
