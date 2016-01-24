@@ -686,3 +686,21 @@ class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
         utils.REDIS_SERVER.incr(self.key)
         result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
+
+
+class TestUtils(DefenderTestCase):
+    def test_username_blocking(self):
+        username = 'foo'
+        self.assertFalse(utils.is_user_already_locked(username))
+        utils.block_username(username)
+        self.assertTrue(utils.is_user_already_locked(username))
+        utils.unblock_username(username)
+        self.assertFalse(utils.is_user_already_locked(username))
+
+    def test_ip_address_blocking(self):
+        ip = '1.2.3.4'
+        self.assertFalse(utils.is_source_ip_already_locked(ip))
+        utils.block_ip(ip)
+        self.assertTrue(utils.is_source_ip_already_locked(ip))
+        utils.unblock_ip(ip)
+        self.assertFalse(utils.is_source_ip_already_locked(ip))

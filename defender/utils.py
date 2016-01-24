@@ -265,25 +265,30 @@ def lockout_response(request):
                             "Contact an admin to unlock your account.")
 
 
+def is_user_already_locked(username):
+    """Is this username already locked?"""
+    if username is None:
+        return False
+    return REDIS_SERVER.get(get_username_blocked_cache_key(username))
+
+
+def is_source_ip_already_locked(ip_address):
+    """Is this IP already locked?"""
+    if ip_address is None:
+        return False
+    if config.DISABLE_IP_LOCKOUT:
+        return False
+    return REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
+
+
 def is_already_locked(request):
-    """ Is this IP/username already locked? """
-
-    if not config.DISABLE_IP_LOCKOUT:
-        # ip blocked?
-        ip_address = get_ip(request)
-        ip_blocked = REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
-    else:
-        # we disabled ip lockout, so it will never be blocked.
-        ip_blocked = False
-
-    # username blocked?
-    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
-    user_blocked = REDIS_SERVER.get(get_username_blocked_cache_key(username))
+    """Parse the username & IP from the request, and see if it's already locked."""
+    user_blocked = is_user_already_locked(
+        request.POST.get(config.USERNAME_FORM_FIELD, None))
+    ip_blocked = is_source_ip_already_locked(get_ip(request))
 
     if config.LOCKOUT_BY_IP_USERNAME:
-        LOG.info("Block by ip & username")
-        # if both this IP and this username are present the request is
-        # blocked
+        # if both this IP and this username are present the request is blocked
         return ip_blocked and user_blocked
 
     return ip_blocked or user_blocked
