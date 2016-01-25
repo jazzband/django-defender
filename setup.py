@@ -9,7 +9,7 @@ except ImportError:
     from distutils.core import setup
 
 
-version = '0.4.0'
+version = '0.4.1'
 
 
 def get_packages(package):
