@@ -2,8 +2,7 @@ import logging
 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.core.validators import validate_ipv46_address
 from django.core.exceptions import ValidationError
 
@@ -251,8 +250,7 @@ def lockout_response(request):
             'cooloff_time_minutes': config.COOLOFF_TIME / 60,
             'failure_limit': config.FAILURE_LIMIT,
         }
-        return render_to_response(config.LOCKOUT_TEMPLATE, context,
-                                  context_instance=RequestContext(request))
+        return render(request, config.LOCKOUT_TEMPLATE, context)
 
     if config.LOCKOUT_URL:
         return HttpResponseRedirect(config.LOCKOUT_URL)
