@@ -1,5 +1,4 @@
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.admin.views.decorators import staff_member_required
@@ -16,9 +15,7 @@ def block_view(request):
 
     context = {'blocked_ip_list': blocked_ip_list,
                'blocked_username_list': blocked_username_list}
-    return render_to_response(
-        'defender/admin/blocks.html',
-        context, context_instance=RequestContext(request))
+    return render(request, 'defender/admin/blocks.html', context)
 
 
 @staff_member_required
