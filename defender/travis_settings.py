@@ -29,6 +29,13 @@ INSTALLED_APPS = [
     'defender',
 ]
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+    },
+]
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'too-secret-for-test')
 
 LOGIN_REDIRECT_URL = '/admin'
