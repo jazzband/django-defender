@@ -1,3 +1,7 @@
+0.4.2
+=====
+Better support for Django 1.9
+
 0.4.1
 =====
 minor refactor to make it easier to retrieve username.

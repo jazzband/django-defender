@@ -22,6 +22,7 @@ Sites using Defender:
 
 Versions
 ========
+- 0.4.2 - Better support for Django 1.9
 - 0.4.1 - minor refactor to make it easier to retrieve username.
 - 0.4.0 - added ``DEFENDER_DISABLE_IP_LOCKOUT`` and added support for Python 3.5
 - 0.3.2 - added ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``, and changed settings

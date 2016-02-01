@@ -10,8 +10,8 @@ python:
 env:
   - DJANGO=Django==1.6.11
   - DJANGO=Django==1.7.11
-  - DJANGO=Django==1.8.8
-  - DJANGO=Django==1.9.1
+  - DJANGO=Django==1.8.9
+  - DJANGO=Django==1.9.2
 
 services:
   - redis-server
@@ -32,11 +32,11 @@ matrix:
     - python: "2.6"
       env: DJANGO=Django==1.7.11
     - python: "2.6"
-      env: DJANGO=Django==1.8.8
+      env: DJANGO=Django==1.8.9
     - python: "2.6"
-      env: DJANGO=Django==1.9.1
+      env: DJANGO=Django==1.9.2
     - python: "3.3"
-      env: DJANGO=Django==1.9.1
+      env: DJANGO=Django==1.9.2
     - python: "3.5"
       env: DJANGO=Django==1.6.11
     - python: "3.5"
