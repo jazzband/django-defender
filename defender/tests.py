@@ -1,9 +1,11 @@
 import random
 import string
 import time
+from distutils.version import StrictVersion
 
 from mock import patch
 
+from django import get_version
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
@@ -27,6 +29,7 @@ except NoReverseMatch:
     ADMIN_LOGIN_URL = reverse('admin:index')
     LOGIN_FORM_KEY = 'this_is_the_login_form'
 
+DJANGO_VERSION = StrictVersion(get_version())
 
 VALID_USERNAME = VALID_PASSWORD = 'valid'
 
@@ -317,6 +320,13 @@ class AccessAttemptTest(DefenderTestCase):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
+
+        # RFC 7231 allows relative URIs in Location header.
+        # Django from version 1.9 is support this:
+        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
+        lockout_url = 'http://testserver/o/login/'
+        if DJANGO_VERSION >= StrictVersion('1.9'):
+            lockout_url = '/o/login/'
 
         # So, we shouldn't have gotten a lock-out yet.
         # But we should get one now, check redirect make sure it is valid.
