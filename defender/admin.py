@@ -12,10 +12,6 @@ class AccessAttemptAdmin(admin.ModelAdmin):
         'login_valid',
     )
 
-    list_filter = [
-        'username',
-    ]
-
     search_fields = [
         'ip_address',
         'username',
