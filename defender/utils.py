@@ -314,9 +314,13 @@ def add_login_attempt_to_db(request, login_valid):
         # If we don't want to store in the database, then don't proceed.
         return
 
+    if config.USERNAME_FORM_FIELD in request.POST:
+        username = request.POST[config.USERNAME_FORM_FIELD][:255]
+    else:
+        username = None
+
     user_agent = request.META.get('HTTP_USER_AGENT', '<unknown>')[:255]
     ip_address = get_ip(request)
-    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
     http_accept = request.META.get('HTTP_ACCEPT', '<unknown>')
     path_info = request.META.get('PATH_INFO', '<unknown>')
 
