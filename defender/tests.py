@@ -666,6 +666,54 @@ class AccessAttemptTest(DefenderTestCase):
         data_out = utils.get_blocked_ips()
         self.assertEqual(data_out, [])
 
+    @patch('defender.config.DISABLE_USERNAME_LOCKOUT', True)
+    def test_disable_username_lockout(self):
+        """Check lockouting still works when we disable username lockout"""
+
+        username = 'testy'
+
+        # try logging in with the same username, but different IPs.
+        # we shouldn't be locked.
+        for i in range(0, config.FAILURE_LIMIT+10):
+            ip = '74.125.126.{0}'.format(i)
+            response = self._login(username=username, remote_addr=ip)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # same ip and same username
+        ip = '74.125.127.1'
+        for i in range(0, config.FAILURE_LIMIT):
+            response = self._login(username=username, remote_addr=ip)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # But we should get one now
+        # same username and Ip, over the limit.
+        response = self._login(username=username, remote_addr=ip)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # We shouldn't get a lockout message when attempting to use no username
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # We shouldn't get a lockout message when attempting to use a different ip address
+        # to be sure that username is not blocked.
+        second_ip = '74.125.127.2'
+        response = self._login(username=username, remote_addr=second_ip)
+        # Check if we are in the same login page
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+        # we should have no usernames are blocked
+        data_out = utils.get_blocked_usernames()
+        self.assertEqual(data_out, [])
+
+        # even if we try to manually block one it still won't be in there.
+        utils.block_username(username)
+
+        # we should still have no ip's blocked
+        data_out = utils.get_blocked_usernames()
+        self.assertEqual(data_out, [])
+
 
 class DefenderTestCaseTest(DefenderTestCase):
     """Make sure that we're cleaning the cache between tests"""

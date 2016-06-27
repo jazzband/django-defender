@@ -97,6 +97,9 @@ def get_blocked_ips():
 
 def get_blocked_usernames():
     """ get a list of blocked usernames from redis """
+    if config.DISABLE_USERNAME_LOCKOUT:
+        # There are no blocked usernames since we disabled them.
+        return []
     key = get_username_blocked_cache_key("*")
     key_list = [redis_key.decode('utf-8')
                 for redis_key in REDIS_SERVER.keys(key)]
@@ -156,6 +159,9 @@ def block_username(username):
     if not username:
         # no reason to continue when there is no username
         return
+    if config.DISABLE_USERNAME_LOCKOUT:
+        # no need to block, we disabled it.
+        return
     key = get_username_blocked_cache_key(username)
     if config.COOLOFF_TIME:
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
@@ -177,12 +183,12 @@ def record_failed_attempt(ip_address, username):
             ip_block = True
 
     user_block = False
-    user_count = increment_key(get_username_attempt_cache_key(username))
-
-    # if over the limit, add to block
-    if user_count > config.FAILURE_LIMIT:
-        block_username(username)
-        user_block = True
+    if not config.DISABLE_USERNAME_LOCKOUT:
+        user_count = increment_key(get_username_attempt_cache_key(username))
+        # if over the limit, add to block
+        if user_count > config.FAILURE_LIMIT:
+            block_username(username)
+            user_block = True
 
     # if we have this turned on, then there is no reason to look at ip_block
     # we will just look at user_block, and short circut the result since
@@ -191,6 +197,10 @@ def record_failed_attempt(ip_address, username):
         # if user_block is True, it means it was blocked
         # we need to return False
         return not user_block
+
+    if config.DISABLE_USERNAME_LOCKOUT:
+        # The same as DISABLE_IP_LOCKOUT
+        return not ip_block
 
     # we want to make sure both the IP and user is blocked before we
     # return False
@@ -266,6 +276,8 @@ def lockout_response(request):
 def is_user_already_locked(username):
     """Is this username already locked?"""
     if username is None:
+        return False
+    if config.DISABLE_USERNAME_LOCKOUT:
         return False
     return REDIS_SERVER.get(get_username_blocked_cache_key(username))
 
