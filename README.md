@@ -148,7 +148,7 @@ to improve the login.
 requirements
 ============
 
-- django: 1.6.x, 1.7.x
+- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x
 - redis
 - python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, PyPy
 
