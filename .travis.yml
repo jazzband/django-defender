@@ -28,11 +28,7 @@ script:
 matrix:
   exclude:
     - python: "3.3"
-      env: DJANGO=Django==1.9.2
-    - python: "3.5"
-      env: DJANGO=Django==1.6.11
-    - python: "3.5"
-      env: DJANGO=Django==1.7.11
+      env: DJANGO=Django==1.9.12
 
 after_success:
   - coveralls --verbose
