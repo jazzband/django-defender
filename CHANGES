@@ -1,3 +1,7 @@
+0.4.x
+=====
+- Flex version requirements for dependencies
+
 0.4.2
 =====
 Better support for Django 1.9
