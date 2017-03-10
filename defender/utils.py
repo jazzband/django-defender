@@ -116,12 +116,19 @@ def increment_key(key):
     return new_value
 
 
-def get_user_attempts(request):
+def get_username_from_request(request):
+    """ unloads username from default POST request """
+    if config.USERNAME_FORM_FIELD in request.POST:
+        return request.POST[config.USERNAME_FORM_FIELD][:255]
+    return None
+
+
+def get_user_attempts(request, get_username=get_username_from_request):
     """ Returns number of access attempts for this ip, username
     """
     ip_address = get_ip(request)
 
-    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
+    username = get_username(request)
 
     # get by IP
     ip_count = REDIS_SERVER.get(get_ip_attempt_cache_key(ip_address))
@@ -291,10 +298,9 @@ def is_source_ip_already_locked(ip_address):
     return REDIS_SERVER.get(get_ip_blocked_cache_key(ip_address))
 
 
-def is_already_locked(request):
+def is_already_locked(request, get_username=get_username_from_request):
     """Parse the username & IP from the request, and see if it's already locked."""
-    user_blocked = is_user_already_locked(
-        request.POST.get(config.USERNAME_FORM_FIELD, None))
+    user_blocked = is_user_already_locked(get_username(request))
     ip_blocked = is_source_ip_already_locked(get_ip(request))
 
     if config.LOCKOUT_BY_IP_USERNAME:
@@ -304,10 +310,10 @@ def is_already_locked(request):
     return ip_blocked or user_blocked
 
 
-def check_request(request, login_unsuccessful):
+def check_request(request, login_unsuccessful, get_username=get_username_from_request):
     """ check the request, and process results"""
     ip_address = get_ip(request)
-    username = request.POST.get(config.USERNAME_FORM_FIELD, None)
+    username = get_username(request)
 
     if not login_unsuccessful:
         # user logged in -- forget the failed attempts
@@ -318,7 +324,7 @@ def check_request(request, login_unsuccessful):
         return record_failed_attempt(ip_address, username)
 
 
-def add_login_attempt_to_db(request, login_valid):
+def add_login_attempt_to_db(request, login_valid, get_username=get_username_from_request):
     """ Create a record for the login attempt If using celery call celery
     task, if not, call the method normally """
 
@@ -326,10 +332,7 @@ def add_login_attempt_to_db(request, login_valid):
         # If we don't want to store in the database, then don't proceed.
         return
 
-    if config.USERNAME_FORM_FIELD in request.POST:
-        username = request.POST[config.USERNAME_FORM_FIELD][:255]
-    else:
-        username = None
+    username = get_username(request)
 
     user_agent = request.META.get('HTTP_USER_AGENT', '<unknown>')[:255]
     ip_address = get_ip(request)
