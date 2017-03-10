@@ -54,9 +54,6 @@ LOCKOUT_TEMPLATE = get_setting('DEFENDER_LOCKOUT_TEMPLATE')
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. "
                               "Note that both fields are case-sensitive.")
 
-# use a specific username field to retrieve from login POST data
-USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')
-
 LOCKOUT_URL = get_setting('DEFENDER_LOCKOUT_URL')
 
 USE_CELERY = get_setting('DEFENDER_USE_CELERY', False)
