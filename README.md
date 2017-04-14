@@ -22,6 +22,7 @@ Sites using Defender:
 
 Versions
 ========
+- 0.4.3 - Better Support for Django 1.10 and 1.11
 - 0.4.2 - Better support for Django 1.9
 - 0.4.1 - minor refactor to make it easier to retrieve username.
 - 0.4.0 - added ``DEFENDER_DISABLE_IP_LOCKOUT`` and added support for Python 3.5
@@ -149,9 +150,9 @@ to improve the login.
 requirements
 ============
 
-- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x
+- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x, 1.10.x, 1.11.x
 - redis
-- python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, PyPy
+- python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
 
 How it works
 ============

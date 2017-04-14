@@ -1,6 +1,7 @@
-0.4.x
+0.4.3
 =====
 - Flex version requirements for dependencies
+- Better support for Django 1.10 and 1.11
 
 0.4.2
 =====

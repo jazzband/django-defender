@@ -13,6 +13,8 @@ env:
   - DJANGO=1.7
   - DJANGO=1.8
   - DJANGO=1.9
+  - DJANGO=1.10
+  - DJANGO=1.11
 
 services:
   - redis-server
@@ -36,6 +38,10 @@ matrix:
       env: DJANGO=1.8
     - python: "2.6"
       env: DJANGO=1.9
+    - python: "2.6"
+      env: DJANGO=1.10
+    - python: "2.6"
+      env: DJANGO=1.11
     - python: "3.3"
       env: DJANGO=1.9
     - python: "3.5"
