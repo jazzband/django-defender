@@ -6,7 +6,6 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  - "3.6"
 
 env:
   - DJANGO=1.6
@@ -14,7 +13,6 @@ env:
   - DJANGO=1.8
   - DJANGO=1.9
   - DJANGO=1.10
-  - DJANGO=1.11
 
 services:
   - redis-server
@@ -40,28 +38,14 @@ matrix:
       env: DJANGO=1.9
     - python: "2.6"
       env: DJANGO=1.10
-    - python: "2.6"
-      env: DJANGO=1.11
     - python: "3.3"
       env: DJANGO=1.9
     - python: "3.3"
       env: DJANGO=1.10
-    - python: "3.3"
-      env: DJANGO=1.11
     - python: "3.5"
       env: DJANGO=1.6
     - python: "3.5"
       env: DJANGO=1.7
-    - python: "3.6"
-      env: DJANGO=1.6
-    - python: "3.6"
-      env: DJANGO=1.7
-    - python: "3.6"
-      env: DJANGO=1.8
-    - python: "3.6"
-      env: DJANGO=1.9
-    - python: "3.6"
-      env: DJANGO=1.10
 
 after_success:
   - coveralls --verbose

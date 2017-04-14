@@ -22,7 +22,7 @@ Sites using Defender:
 
 Versions
 ========
-- 0.4.3 - Better Support for Django 1.10 and 1.11
+- 0.4.3 - Better Support for Django 1.10
 - 0.4.2 - Better support for Django 1.9
 - 0.4.1 - minor refactor to make it easier to retrieve username.
 - 0.4.0 - added ``DEFENDER_DISABLE_IP_LOCKOUT`` and added support for Python 3.5
@@ -147,10 +147,18 @@ This started out as a fork of django-axes, and is using as much of their code
 as possible, and removing the parts not needed, and speeding up the lookups
 to improve the login.
 
+Django 1.11
+============
+Due to a change with Django 1.11 where they deprecated the `django.contrib.auth.views.login` in favor
+of `django.contrib.auth.views.LoginView` https://docs.djangoproject.com/en/1.11/topics/auth/default/#django.contrib.auth.views.LoginView
+
+This is currently breaking the defender middleware (FailedLoginMiddleware) we have setup, and needs to be changed to support
+the LoginView Class Based View before it will work with Django 1.11. If you know up to fix it, please submit a PR.
+
 requirements
 ============
 
-- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x, 1.10.x, 1.11.x
+- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x, 1.10.x
 - redis
 - python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
 
