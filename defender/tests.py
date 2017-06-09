@@ -532,6 +532,16 @@ class AccessAttemptTest(DefenderTestCase):
         from .admin import AccessAttemptAdmin
         AccessAttemptAdmin
 
+    def test_unblock_view_user_with_plus(self):
+        """
+        There is an available admin view for unblocking a user
+        with a plus sign in the username.
+
+        Regression test for #GH76.
+        """
+        reverse('defender_unblock_username_view',
+                kwargs={'username': 'user+test@test.tld'})
+
     def test_decorator_middleware(self):
         # because watch_login is called twice in this test (once by the
         # middleware and once by the decorator) we have half as many attempts
