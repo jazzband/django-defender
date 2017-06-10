@@ -16,14 +16,6 @@ def watch_login(func):
         # call the login function
         response = func(request, *args, **kwargs)
 
-        if func.__name__ == 'decorated_login':
-            # if we're dealing with this function itself, don't bother checking
-            # for invalid login attempts.  I suppose there's a bunch of
-            # recursion going on here that used to cause one failed login
-            # attempt to generate 10+ failed access attempt records (with 3
-            # failed attempts each supposedly)
-            return response
-
         if request.method == 'POST':
             # see if the login was successful
             login_unsuccessful = (
