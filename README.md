@@ -354,7 +354,7 @@ Adapting to other authentication method
 --------------------
 
 `defender` can be used for authentication other than `Django authentication system`.
-E.g. if `django-rest-framework` authentication has to be protected from brute force attack,custom authentication method can be implemented.
+E.g. if `django-rest-framework` authentication has to be protected from brute force attack, a custom authentication method can be implemented.
 
 There's sample `BasicAuthenticationDefender` class based on `djangorestframework.BasicAuthentication`:
 
@@ -431,7 +431,7 @@ class BasicAuthenticationDefender(BasicAuthentication):
 
 ```
 
-To make it works add `BasicAuthenticationDefender` to `DEFAULT_AUTHENTICATION_CLASSES` in your `settings.py`.
+To make it works add `BasicAuthenticationDefender` to `DEFAULT_AUTHENTICATION_CLASSES` above all other authentication methods in your `settings.py`.
 
 Running Tests
 =============
