@@ -20,6 +20,9 @@ def get_redis_connection():
     if config.MOCK_REDIS:  # pragma: no cover
         return MOCKED_REDIS  # pragma: no cover
     elif config.DEFENDER_REDIS_NAME:  # pragma: no cover
+        if config.DEFENDER_REDIS_NAME not in caches:
+            raise KeyError('The cache {} was not found on the django cache settings.'.format(
+                config.DEFENDER_REDIS_NAME))
         return caches[config.DEFENDER_REDIS_NAME].get_master_client()
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
