@@ -1,3 +1,4 @@
+from django.core.cache import caches
 import mockredis
 import redis
 try:
@@ -18,6 +19,8 @@ def get_redis_connection():
     """ Get the redis connection if not using mock """
     if config.MOCK_REDIS:  # pragma: no cover
         return MOCKED_REDIS  # pragma: no cover
+    elif config.DEFENDER_REDIS_NAME:  # pragma: no cover
+        return caches[config.DEFENDER_REDIS_NAME].get_master_client()
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
         return redis.StrictRedis(
