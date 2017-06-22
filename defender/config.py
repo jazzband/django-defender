@@ -10,6 +10,9 @@ def get_setting(variable, default=None):
 # redis server host
 DEFENDER_REDIS_URL = get_setting('DEFENDER_REDIS_URL')
 
+# reuse declared cache from django settings
+DEFENDER_REDIS_NAME = get_setting('DEFENDER_REDIS_NAME')
+
 MOCK_REDIS = get_setting('DEFENDER_MOCK_REDIS', False)
 
 # see if the user has overridden the failure limit
