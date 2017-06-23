@@ -23,9 +23,16 @@ def get_redis_connection():
         return MOCKED_REDIS  # pragma: no cover
     elif config.DEFENDER_REDIS_NAME:  # pragma: no cover
         try:
-            return caches[config.DEFENDER_REDIS_NAME].get_master_client()
+            cache = caches[config.DEFENDER_REDIS_NAME]
         except InvalidCacheBackendError:
             raise KeyError(INVALID_CACHE_ERROR_MSG.format(config.DEFENDER_REDIS_NAME))
+        # every redis backend implement it own way to get the low level client
+        try:
+            # redis_cache.RedisCache case (django-redis-cache package)
+            return cache.get_master_client()
+        except AttributeError:
+            # django_redis.cache.RedisCache case (django-redis package)
+            return cache._client
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
         return redis.StrictRedis(
