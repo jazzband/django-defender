@@ -23,7 +23,7 @@ def get_redis_connection():
         return MOCKED_REDIS  # pragma: no cover
     elif config.DEFENDER_REDIS_NAME:  # pragma: no cover
         try:
-            return caches[config.DEFENDER_REDIS_NAME]._client
+            return caches[config.DEFENDER_REDIS_NAME].get_master_client()
         except InvalidCacheBackendError:
             raise KeyError(INVALID_CACHE_ERROR_MSG.format(config.DEFENDER_REDIS_NAME))
     else:  # pragma: no cover

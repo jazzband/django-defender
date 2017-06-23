@@ -12,7 +12,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 from django.test.client import RequestFactory
-from django_redis.client.default import DefaultClient
+from redis.client import Redis
 
 from . import utils
 from . import config
@@ -454,7 +454,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.DEFENDER_REDIS_NAME', 'default')
     def test_get_redis_connection_django_conf(self):
         redis_client = get_redis_connection()
-        self.assertIsInstance(redis_client, DefaultClient)
+        self.assertIsInstance(redis_client, Redis)
 
     @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
     def test_get_redis_connection_django_conf_wrong_key(self):
