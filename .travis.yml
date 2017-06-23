@@ -20,6 +20,7 @@ install:
   - pip install -q django~=$DJANGO.0
   - pip install coveralls
   - pip install mockredispy
+  - pip install django-redis
   - pip install 'celery<4'
   - python setup.py develop
 

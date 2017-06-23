@@ -71,5 +71,5 @@ setup(name='django-defender',
       package_data=get_package_data('defender'),
       install_requires=['Django>=1.8,<=1.10', 'redis>=2.10.3,<3.0',
                         'hiredis>=0.2.0,<1.0', 'mockredispy>=2.9.0.11,<3.0'],
-      tests_require=['mock', 'mockredispy', 'coverage', 'celery'],
+      tests_require=['mock', 'mockredispy', 'coverage', 'celery', 'django-redis'],
       )

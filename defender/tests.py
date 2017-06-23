@@ -13,6 +13,7 @@ from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 from django.test.client import RequestFactory
+from django_redis.client.default import DefaultClient
 
 from . import utils
 from . import config
@@ -456,6 +457,16 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get('DB'), 0)
         self.assertEqual(conf.get('PASSWORD'), None)
         self.assertEqual(conf.get('PORT'), 1234)
+
+    @patch('defender.config.DEFENDER_REDIS_NAME', 'default')
+    def test_get_redis_connection_django_conf(self):
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, DefaultClient)
+
+    @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
+    def test_get_redis_connection_django_conf_wrong_key(self):
+        error_msg = 'The cache bad-key was not found on the django cache settings.'
+        self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
 
     def test_get_ip_address_from_request(self):
         req = HttpRequest()
