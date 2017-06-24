@@ -3,20 +3,25 @@ import string
 import time
 from distutils.version import StrictVersion
 
-from mock import patch
+# Python 3 has mock in the stdlib
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 from django import get_version
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.urlresolvers import reverse
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
 from redis.client import Redis
 
 from . import utils
 from . import config
 from .connection import parse_redis_url, get_redis_connection
+from .decorators import watch_login
 from .models import AccessAttempt
 from .test import DefenderTestCase, DefenderTransactionTestCase
 
@@ -687,7 +692,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         # try logging in with the same username, but different IPs.
         # we shouldn't be locked.
-        for i in range(0, config.FAILURE_LIMIT+10):
+        for i in range(0, config.FAILURE_LIMIT + 10):
             ip = '74.125.126.{0}'.format(i)
             response = self._login(username=username, remote_addr=ip)
             # Check if we are in the same login page
@@ -727,6 +732,92 @@ class AccessAttemptTest(DefenderTestCase):
         data_out = utils.get_blocked_usernames()
         self.assertEqual(data_out, [])
 
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.FAILURE_LIMIT', 3)
+    def test_login_blocked_for_non_standard_login_views_without_msg(self):
+        """
+        Check that a view wich returns the expected status code is causing 
+        the user to be locked out when we do not expect a specific message
+        to be returned.
+        """
+
+        @watch_login(status_code=401)
+        def fake_api_401_login_view_without_msg(request):
+            return HttpResponse(status=401)
+
+        request_factory = RequestFactory()
+        request = request_factory.post('api/login')
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META['HTTP_X_FORWARDED_FOR'] = '192.168.24.24'
+
+        for _ in range(3):
+            fake_api_401_login_view_without_msg(request)
+
+            data_out = utils.get_blocked_ips()
+            self.assertEqual(data_out, [])
+
+        fake_api_401_login_view_without_msg(request)
+
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, ['192.168.24.24'])
+
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.FAILURE_LIMIT', 3)
+    def test_login_blocked_for_non_standard_login_views_with_msg(self):
+        """
+        Check that a view wich returns the expected status code and the
+        expected message is causing the IP to be locked out.
+        """
+        @watch_login(status_code=401, msg='Invalid credentials')
+        def fake_api_401_login_view_without_msg(request):
+            return HttpResponse('Sorry, Invalid credentials',
+                                status=401)
+
+        request_factory = RequestFactory()
+        request = request_factory.post('api/login')
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META['HTTP_X_FORWARDED_FOR'] = '192.168.24.24'
+
+        for _ in range(3):
+            fake_api_401_login_view_without_msg(request)
+
+            data_out = utils.get_blocked_ips()
+            self.assertEqual(data_out, [])
+
+        fake_api_401_login_view_without_msg(request)
+
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, ['192.168.24.24'])
+
+    @patch('defender.config.BEHIND_REVERSE_PROXY', True)
+    @patch('defender.config.FAILURE_LIMIT', 3)
+    def test_login_non_blocked_for_non_standard_login_views_different_msg(self):
+        """
+        Check that a view wich returns the expected status code but not the
+        expected message is not causing the IP to be locked out.
+        """
+        @watch_login(status_code=401, msg='Invalid credentials')
+        def fake_api_401_login_view_without_msg(request):
+            return HttpResponse('Ups, wrong credentials',
+                                status=401)
+
+        request_factory = RequestFactory()
+        request = request_factory.post('api/login')
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META['HTTP_X_FORWARDED_FOR'] = '192.168.24.24'
+
+        for _ in range(4):
+            fake_api_401_login_view_without_msg(request)
+
+            data_out = utils.get_blocked_ips()
+            self.assertEqual(data_out, [])
+
 
 class DefenderTestCaseTest(DefenderTestCase):
     """Make sure that we're cleaning the cache between tests"""
@@ -759,6 +850,7 @@ class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
 
 
 class TestUtils(DefenderTestCase):
+
     def test_username_blocking(self):
         username = 'foo'
         self.assertFalse(utils.is_user_already_locked(username))
