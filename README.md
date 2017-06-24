@@ -332,6 +332,8 @@ locked out.
 * ``DEFENDER_REDIS_URL``: String: the redis url for defender.
 [Default: ``redis://localhost:6379/0``]
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
+* ``DEFENDER_REDIS_NAME``: String: the name of your cache client on the CACHES django setting. If set, ``DEFENDER_REDIS_URL`` will be ignored.
+[Default: ``None``]
 * ``DEFENDER_STORE_ACCESS_ATTEMPTS``: Boolean: If you want to store the login
 attempt to the database, set to True. If False, it is not saved
 [Default: ``True``]
