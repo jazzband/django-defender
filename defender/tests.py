@@ -9,10 +9,10 @@ from django import get_version
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
-from django.core.urlresolvers import NoReverseMatch
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 from django.test.client import RequestFactory
+from redis.client import Redis
 
 from . import utils
 from . import config
@@ -20,14 +20,8 @@ from .connection import parse_redis_url, get_redis_connection
 from .models import AccessAttempt
 from .test import DefenderTestCase, DefenderTransactionTestCase
 
-# Django >= 1.7 compatibility
-try:
-    LOGIN_FORM_KEY = '<form action="/admin/login/" method="post"'
-    ' id="login-form">'
-    ADMIN_LOGIN_URL = reverse('admin:login')
-except NoReverseMatch:
-    ADMIN_LOGIN_URL = reverse('admin:index')
-    LOGIN_FORM_KEY = 'this_is_the_login_form'
+LOGIN_FORM_KEY = '<form action="/admin/login/" method="post" id="login-form">'
+ADMIN_LOGIN_URL = reverse('admin:login')
 
 DJANGO_VERSION = StrictVersion(get_version())
 
@@ -46,7 +40,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Returns a random str """
         chars = string.ascii_uppercase + string.digits
 
-        return ''.join(random.choice(chars) for x in range(20))
+        return ''.join(random.choice(chars) for _ in range(20))
 
     def _login(self, username=None, password=None, user_agent='test-browser',
                remote_addr='127.0.0.1'):
@@ -193,7 +187,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Test an user with blocked ip cannot login with another username
         """
         for i in range(0, config.FAILURE_LIMIT + 1):
-            response = self._login(username=VALID_USERNAME)
+            self._login(username=VALID_USERNAME)
 
         # try to login with a different user
         response = self._login(username='myuser')
@@ -205,7 +199,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         for i in range(0, config.FAILURE_LIMIT + 1):
             ip = '74.125.239.{0}.'.format(i)
-            response = self._login(username=VALID_USERNAME, remote_addr=ip)
+            self._login(username=VALID_USERNAME, remote_addr=ip)
 
         # try to login with a different ip
         response = self._login(username=VALID_USERNAME, remote_addr='8.8.8.8')
@@ -457,6 +451,16 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get('PASSWORD'), None)
         self.assertEqual(conf.get('PORT'), 1234)
 
+    @patch('defender.config.DEFENDER_REDIS_NAME', 'default')
+    def test_get_redis_connection_django_conf(self):
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+
+    @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
+    def test_get_redis_connection_django_conf_wrong_key(self):
+        error_msg = 'The cache bad-key was not found on the django cache settings.'
+        self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
+
     def test_get_ip_address_from_request(self):
         req = HttpRequest()
         req.META['REMOTE_ADDR'] = '1.2.3.4'
@@ -589,8 +593,7 @@ class AccessAttemptTest(DefenderTestCase):
         response = self._login()
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-        self.assertEqual(AccessAttempt.objects.count(),
-                          config.FAILURE_LIMIT + 1)
+        self.assertEqual(AccessAttempt.objects.count(), config.FAILURE_LIMIT + 1)
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
     @patch('defender.config.LOCKOUT_BY_IP_USERNAME', True)

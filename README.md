@@ -151,7 +151,7 @@ to improve the login.
 requirements
 ============
 
-- django: 1.6.x, 1.7.x, 1.8.x, 1.9.x, 1.10.x, 1.11.x
+- django: 1.8.x, 1.9.x, 1.10.x, 1.11.x
 - redis
 - python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
 
@@ -332,6 +332,8 @@ locked out.
 * ``DEFENDER_REDIS_URL``: String: the redis url for defender.
 [Default: ``redis://localhost:6379/0``]
 (Example with password: ``redis://:mypassword@localhost:6379/0``)
+* ``DEFENDER_REDIS_NAME``: String: the name of your cache client on the CACHES django setting. If set, ``DEFENDER_REDIS_URL`` will be ignored.
+[Default: ``None``]
 * ``DEFENDER_STORE_ACCESS_ATTEMPTS``: Boolean: If you want to store the login
 attempt to the database, set to True. If False, it is not saved
 [Default: ``True``]
