@@ -377,7 +377,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.PERMANENT_LOCKED_MESSAGE)
 
     def test_login_attempt_model(self):
-        """ test the login model"""
+        """ test the login model """
 
         response = self._login()
         self.assertContains(response, LOGIN_FORM_KEY)
@@ -470,7 +470,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
 
     def test_get_ip_address_from_request(self):
-        """ get ip from request, make sure it is correct""
+        """ get ip from request, make sure it is correct """
         req = HttpRequest()
         req.META['REMOTE_ADDR'] = '1.2.3.4'
         ip = utils.get_ip_address_from_request(req)
@@ -580,7 +580,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_get_view(self):
-        """ Check that the decorator doesn't tamper with GET requests"""
+        """ Check that the decorator doesn't tamper with GET requests """
         for i in range(0, config.FAILURE_LIMIT):
             response = self.client.get(ADMIN_LOGIN_URL)
             # Check if we are in the same login page
@@ -590,7 +590,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch('defender.config.USE_CELERY', True)
     def test_use_celery(self):
-        """ Check that use celery works"""
+        """ Check that use celery works """
 
         self.assertEqual(AccessAttempt.objects.count(), 0)
 
@@ -604,12 +604,14 @@ class AccessAttemptTest(DefenderTestCase):
         response = self._login()
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-        self.assertEqual(AccessAttempt.objects.count(), config.FAILURE_LIMIT + 1)
+        self.assertEqual(AccessAttempt.objects.count(),
+                         config.FAILURE_LIMIT + 1)
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
     @patch('defender.config.LOCKOUT_BY_IP_USERNAME', True)
     def test_lockout_by_ip_and_username(self):
-        """Check that lockout still works when locking out by IP and Username combined"""
+        """ Check that lockout still works when locking out by
+           IP and Username combined """
 
         username = 'testy'
 
@@ -627,11 +629,13 @@ class AccessAttemptTest(DefenderTestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, LOGIN_FORM_KEY)
 
-        # We shouldn't get a lockout message when attempting to use a different username
+        # We shouldn't get a lockout message when attempting to use a
+        # different username
         response = self._login()
         self.assertContains(response, LOGIN_FORM_KEY)
 
-        # We shouldn't get a lockout message when attempting to use a different ip address
+        # We shouldn't get a lockout message when attempting to use a
+        # different ip address
         ip = '74.125.239.60'
         response = self._login(username=VALID_USERNAME, remote_addr=ip)
         # Check if we are in the same login page
@@ -639,7 +643,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch('defender.config.DISABLE_IP_LOCKOUT', True)
     def test_disable_ip_lockout(self):
-        """Check that lockout still works when we disable IP Lock out"""
+        """ Check that lockout still works when we disable IP Lock out """
 
         username = 'testy'
 
@@ -669,11 +673,13 @@ class AccessAttemptTest(DefenderTestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, LOGIN_FORM_KEY)
 
-        # We shouldn't get a lockout message when attempting to use a different username
+        # We shouldn't get a lockout message when attempting to use a
+        # different username
         response = self._login()
         self.assertContains(response, LOGIN_FORM_KEY)
 
-        # We shouldn't get a lockout message when attempting to use a different ip address
+        # We shouldn't get a lockout message when attempting to use a
+        # different ip address
         second_ip = '74.125.239.99'
         response = self._login(username=VALID_USERNAME, remote_addr=second_ip)
         # Check if we are in the same login page
@@ -692,7 +698,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch('defender.config.DISABLE_USERNAME_LOCKOUT', True)
     def test_disable_username_lockout(self):
-        """Check lockouting still works when we disable username lockout"""
+        """ Check lockouting still works when we disable username lockout """
 
         username = 'testy'
 
@@ -720,8 +726,8 @@ class AccessAttemptTest(DefenderTestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, LOGIN_FORM_KEY)
 
-        # We shouldn't get a lockout message when attempting to use a different ip address
-        # to be sure that username is not blocked.
+        # We shouldn't get a lockout message when attempting to use a
+        # different ip address to be sure that username is not blocked.
         second_ip = '74.125.127.2'
         response = self._login(username=username, remote_addr=second_ip)
         # Check if we are in the same login page
@@ -829,7 +835,7 @@ class AccessAttemptTest(DefenderTestCase):
 
 
 class DefenderTestCaseTest(DefenderTestCase):
-    """Make sure that we're cleaning the cache between tests"""
+    """ Make sure that we're cleaning the cache between tests """
     key = 'test_key'
 
     def test_first_incr(self):
@@ -846,7 +852,7 @@ class DefenderTestCaseTest(DefenderTestCase):
 
 
 class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
-    """Make sure that we're cleaning the cache between tests"""
+    """ Make sure that we're cleaning the cache between tests """
     key = 'test_key'
 
     def test_first_incr(self):
