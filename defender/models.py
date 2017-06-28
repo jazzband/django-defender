@@ -6,6 +6,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class AccessAttempt(models.Model):
+    """ Access Attempt log """
     user_agent = models.CharField(
         max_length=255,
     )

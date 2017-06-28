@@ -7,6 +7,7 @@ def get_setting(variable, default=None):
     provided default """
     return getattr(settings, variable, default)
 
+
 # redis server host
 DEFENDER_REDIS_URL = get_setting('DEFENDER_REDIS_URL')
 
@@ -29,7 +30,8 @@ DISABLE_IP_LOCKOUT = get_setting('DEFENDER_DISABLE_IP_LOCKOUT', False)
 
 # If this is True, usernames will not get locked when
 # there are too many login attempts.
-DISABLE_USERNAME_LOCKOUT = get_setting('DEFENDER_DISABLE_USERNAME_LOCKOUT', False)
+DISABLE_USERNAME_LOCKOUT = get_setting(
+    'DEFENDER_DISABLE_USERNAME_LOCKOUT', False)
 
 # use a specific username field to retrieve from login POST data
 USERNAME_FORM_FIELD = get_setting('DEFENDER_USERNAME_FORM_FIELD', 'username')

@@ -3,6 +3,7 @@ from .models import AccessAttempt
 
 
 class AccessAttemptAdmin(admin.ModelAdmin):
+    """ Access attempt admin config """
     list_display = (
         'attempt_time',
         'ip_address',

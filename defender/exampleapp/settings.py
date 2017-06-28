@@ -1,4 +1,6 @@
 import os
+from celery import Celery
+
 PROJECT_DIR = lambda base: os.path.abspath(
     os.path.join(os.path.dirname(__file__), base).replace('\\', '/'))
 
@@ -63,10 +65,6 @@ DEFENDER_MOCK_REDIS = False
 CELERY_ALWAYS_EAGER = True
 BROKER_BACKEND = 'memory'
 BROKER_URL = 'memory://'
-
-import os
-
-from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'defender.exampleapp.settings')

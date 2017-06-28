@@ -6,9 +6,10 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
+    """Initial Migration for Defender"""
 
     def forwards(self, orm):
-        # Adding model 'AccessAttempt'
+        """ Adding model 'AccessAttempt' """
         db.create_table(u'defender_accessattempt', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user_agent', self.gf('django.db.models.fields.CharField')(max_length=255)),
