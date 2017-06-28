@@ -9,6 +9,7 @@ from ... import config
 
 
 class Command(BaseCommand):
+    """ clean up management command """
     help = "Cleans up django-defender AccessAttempt table"
 
     def handle(self, **options):

@@ -5,6 +5,7 @@ from .decorators import watch_login
 
 
 class FailedLoginMiddleware(object):
+    """ Failed login middleware """
     patched = False
 
     def __init__(self, *args, **kwargs):

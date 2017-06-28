@@ -290,7 +290,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_valid_login()
 
     @patch('defender.config.LOCKOUT_URL', 'http://localhost/othe/login/')
-    def test_failed_login_redirect_to_URL(self):
+    def test_failed_login_redirect_to_url(self):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
 
@@ -311,7 +311,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(response['Location'], 'http://localhost/othe/login/')
 
     @patch('defender.config.LOCKOUT_URL', '/o/login/')
-    def test_failed_login_redirect_to_URL_local(self):
+    def test_failed_login_redirect_to_url_local(self):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
 
@@ -361,6 +361,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch('defender.config.COOLOFF_TIME', 0)
     def test_failed_login_no_cooloff(self):
+        """ failed login no cooloff """
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
             # Check if we are in the same login page
@@ -458,15 +459,18 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch('defender.config.DEFENDER_REDIS_NAME', 'default')
     def test_get_redis_connection_django_conf(self):
+        """ get the redis connection """
         redis_client = get_redis_connection()
         self.assertIsInstance(redis_client, Redis)
 
     @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
     def test_get_redis_connection_django_conf_wrong_key(self):
+        """ see if we get the correct error """
         error_msg = 'The cache bad-key was not found on the django cache settings.'
         self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
 
     def test_get_ip_address_from_request(self):
+        """ get ip from request, make sure it is correct""
         req = HttpRequest()
         req.META['REMOTE_ADDR'] = '1.2.3.4'
         ip = utils.get_ip_address_from_request(req)
@@ -494,6 +498,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
     @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_PROXIED')
     def test_get_ip_reverse_proxy_custom_header(self):
+        """ make sure the ip is correct behind reverse proxy """
         req = HttpRequest()
         req.META['HTTP_X_PROXIED'] = '1.2.3.4'
         self.assertEqual(utils.get_ip(req), '1.2.3.4')
@@ -509,6 +514,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
     @patch('defender.config.REVERSE_PROXY_HEADER', 'HTTP_X_REAL_IP')
     def test_get_user_attempts(self):
+        """ Get the user attempts make sure they are correct """
         ip_attempts = random.randint(3, 12)
         username_attempts = random.randint(3, 12)
         for i in range(0, ip_attempts):
@@ -736,13 +742,14 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.FAILURE_LIMIT', 3)
     def test_login_blocked_for_non_standard_login_views_without_msg(self):
         """
-        Check that a view wich returns the expected status code is causing 
+        Check that a view wich returns the expected status code is causing
         the user to be locked out when we do not expect a specific message
         to be returned.
         """
 
         @watch_login(status_code=401)
         def fake_api_401_login_view_without_msg(request):
+            """ Fake the api login with 401 """
             return HttpResponse(status=401)
 
         request_factory = RequestFactory()
@@ -772,6 +779,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         @watch_login(status_code=401, msg='Invalid credentials')
         def fake_api_401_login_view_without_msg(request):
+            """ Fake the api login with 401 """
             return HttpResponse('Sorry, Invalid credentials',
                                 status=401)
 
@@ -802,6 +810,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         @watch_login(status_code=401, msg='Invalid credentials')
         def fake_api_401_login_view_without_msg(request):
+            """ Fake the api login with 401 """
             return HttpResponse('Ups, wrong credentials',
                                 status=401)
 
@@ -824,11 +833,13 @@ class DefenderTestCaseTest(DefenderTestCase):
     key = 'test_key'
 
     def test_first_incr(self):
+        """ first increment """
         utils.REDIS_SERVER.incr(self.key)
         result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
+        """ second increment """
         utils.REDIS_SERVER.incr(self.key)
         result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
@@ -839,19 +850,23 @@ class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
     key = 'test_key'
 
     def test_first_incr(self):
+        """ first increment """
         utils.REDIS_SERVER.incr(self.key)
         result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
+        """ second increment """
         utils.REDIS_SERVER.incr(self.key)
         result = int(utils.REDIS_SERVER.get(self.key))
         self.assertEqual(result, 1)
 
 
 class TestUtils(DefenderTestCase):
+    """ Unit tests for util methods """
 
     def test_username_blocking(self):
+        """ test username blocking """
         username = 'foo'
         self.assertFalse(utils.is_user_already_locked(username))
         utils.block_username(username)
@@ -860,6 +875,7 @@ class TestUtils(DefenderTestCase):
         self.assertFalse(utils.is_user_already_locked(username))
 
     def test_ip_address_blocking(self):
+        """ ip address blocking """
         ip = '1.2.3.4'
         self.assertFalse(utils.is_source_ip_already_locked(ip))
         utils.block_ip(ip)

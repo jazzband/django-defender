@@ -299,7 +299,8 @@ def is_source_ip_already_locked(ip_address):
 
 
 def is_already_locked(request, get_username=get_username_from_request):
-    """Parse the username & IP from the request, and see if it's already locked."""
+    """Parse the username & IP from the request, and see if it's
+    already locked."""
     user_blocked = is_user_already_locked(get_username(request))
     ip_blocked = is_source_ip_already_locked(get_ip(request))
 
@@ -310,7 +311,8 @@ def is_already_locked(request, get_username=get_username_from_request):
     return ip_blocked or user_blocked
 
 
-def check_request(request, login_unsuccessful, get_username=get_username_from_request):
+def check_request(request, login_unsuccessful,
+                  get_username=get_username_from_request):
     """ check the request, and process results"""
     ip_address = get_ip(request)
     username = get_username(request)
@@ -324,7 +326,8 @@ def check_request(request, login_unsuccessful, get_username=get_username_from_re
         return record_failed_attempt(ip_address, username)
 
 
-def add_login_attempt_to_db(request, login_valid, get_username=get_username_from_request):
+def add_login_attempt_to_db(request, login_valid,
+                            get_username=get_username_from_request):
     """ Create a record for the login attempt If using celery call celery
     task, if not, call the method normally """
 
