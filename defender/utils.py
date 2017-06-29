@@ -48,6 +48,16 @@ def get_ip(request):
     return ip_address
 
 
+def lower_username(username):
+    """
+    Single entry point to force the username to lowercase, all the functions
+    that need to deal with username should call this.
+    """
+    if username:
+        return username.lower()
+    return None
+
+
 def get_ip_attempt_cache_key(ip_address):
     """ get the cache key by ip """
     return "{0}:failed:ip:{1}".format(config.CACHE_PREFIX, ip_address)
@@ -55,7 +65,8 @@ def get_ip_attempt_cache_key(ip_address):
 
 def get_username_attempt_cache_key(username):
     """ get the cache key by username """
-    return "{0}:failed:username:{1}".format(config.CACHE_PREFIX, username)
+    return "{0}:failed:username:{1}".format(config.CACHE_PREFIX,
+                                            lower_username(username))
 
 
 def get_ip_blocked_cache_key(ip_address):
@@ -65,7 +76,8 @@ def get_ip_blocked_cache_key(ip_address):
 
 def get_username_blocked_cache_key(username):
     """ get the cache key by username """
-    return "{0}:blocked:username:{1}".format(config.CACHE_PREFIX, username)
+    return "{0}:blocked:username:{1}".format(config.CACHE_PREFIX,
+                                             lower_username(username))
 
 
 def strip_keys(key_list):
@@ -128,7 +140,7 @@ def get_user_attempts(request, get_username=get_username_from_request):
     """
     ip_address = get_ip(request)
 
-    username = get_username(request)
+    username = lower_username(get_username(request))
 
     # get by IP
     ip_count = REDIS_SERVER.get(get_ip_attempt_cache_key(ip_address))
