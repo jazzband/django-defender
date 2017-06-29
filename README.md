@@ -17,11 +17,20 @@ Build status
 
 Sites using Defender:
 =====================
+If you are using defender on your site, submit a PR to add to the list.
+
 - https://hub.docker.com
 
 
 Versions
 ========
+- 0.5.0
+  - Better support for Django 1.11 [@dukebody]
+  - Added support to share redis config with django.core.cache [@Franr]
+  - Allow decoration of functions beyond the admin login [@MattBlack85]
+  - Doc improvements [@dukebody]
+  - Allow usernames with plus signs in unblock view [@dukebody]
+  - Code cleanup [@KenCochrane]
 - 0.4.3 - Better Support for Django 1.10
 - 0.4.2 - Better support for Django 1.9
 - 0.4.1 - minor refactor to make it easier to retrieve username.
@@ -153,7 +162,7 @@ requirements
 
 - django: 1.8.x, 1.9.x, 1.10.x, 1.11.x
 - redis
-- python: 2.6.x, 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
+- python: 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
 
 How it works
 ============
@@ -286,19 +295,8 @@ Database tables:
 You will need to create tables in your database that are necessary
 for operation.
 
-If you're using Django 1.7.x:
 ```bash
 python manage.py migrate defender
-```
-
-On versions of Django prior to 1.7, you might use South (version >= 1.0).
-```bash
-python manage.py migrate defender
-```
-
-If you're not using South, a normal syncdb will work:
-```bash
-python manage.py syncdb
 ```
 
 Customizing Defender
