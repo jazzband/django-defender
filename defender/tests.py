@@ -31,6 +31,7 @@ ADMIN_LOGIN_URL = reverse('admin:login')
 DJANGO_VERSION = StrictVersion(get_version())
 
 VALID_USERNAME = VALID_PASSWORD = 'valid'
+UPPER_USERNAME = 'VALID'
 
 
 class AccessAttemptTest(DefenderTestCase):
@@ -209,6 +210,18 @@ class AccessAttemptTest(DefenderTestCase):
         # try to login with a different ip
         response = self._login(username=VALID_USERNAME, remote_addr='8.8.8.8')
         self.assertContains(response, self.LOCKED_MESSAGE)
+
+    def test_blocked_username_uppercase_saved_lower(self):
+        """
+        Test that a uppercase username is saved in lowercase
+        within the cache.
+        """
+        for i in range(0, config.FAILURE_LIMIT + 2):
+            ip = '74.125.239.{0}.'.format(i)
+            self._login(username=UPPER_USERNAME, remote_addr=ip)
+
+        self.assertNotIn(UPPER_USERNAME, utils.get_blocked_usernames())
+        self.assertIn(UPPER_USERNAME.lower(), utils.get_blocked_usernames())
 
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
