@@ -1,10 +1,14 @@
+try:
+    from django.utils.deprecation import MiddlewareMixin as MIDDLEWARE_BASE_CLASS
+except ImportError:
+    MIDDLEWARE_BASE_CLASS = object
 from django.contrib.auth import views as auth_views
 from django.utils.decorators import method_decorator
 
 from .decorators import watch_login
 
 
-class FailedLoginMiddleware(object):
+class FailedLoginMiddleware(MIDDLEWARE_BASE_CLASS):
     """ Failed login middleware """
     patched = False
 
