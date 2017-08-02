@@ -24,6 +24,10 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+- 0.5.1
+  - Middleware fix for django >= 1.10 #93 [@Temeez]
+  - Force the username to lowercase #90 [@MattBlack85]
+
 - 0.5.0
   - Better support for Django 1.11 [@dukebody]
   - Added support to share redis config with django.core.cache [@Franr]
