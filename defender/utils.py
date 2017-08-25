@@ -122,8 +122,8 @@ def increment_key(key):
     """ given a key increment the value """
     pipe = REDIS_SERVER.pipeline()
     pipe.incr(key, 1)
-    if config.COOLOFF_TIME:
-        pipe.expire(key, config.COOLOFF_TIME)
+    if config.get_cooloff_time():
+        pipe.expire(key, config.get_cooloff_time())
     new_value = pipe.execute()[0]
     return new_value
 
@@ -167,8 +167,8 @@ def block_ip(ip_address):
         # no need to block, we disabled it.
         return
     key = get_ip_blocked_cache_key(ip_address)
-    if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
+    if config.get_cooloff_time():
+        REDIS_SERVER.set(key, 'blocked', config.get_cooloff_time())
     else:
         REDIS_SERVER.set(key, 'blocked')
 
@@ -182,8 +182,8 @@ def block_username(username):
         # no need to block, we disabled it.
         return
     key = get_username_blocked_cache_key(username)
-    if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
+    if config.get_cooloff_time():
+        REDIS_SERVER.set(key, 'blocked', config.get_cooloff_time())
     else:
         REDIS_SERVER.set(key, 'blocked')
 
@@ -197,7 +197,7 @@ def record_failed_attempt(ip_address, username):
         # we only want to increment the IP if this is disabled.
         ip_count = increment_key(get_ip_attempt_cache_key(ip_address))
         # if over the limit, add to block
-        if ip_count > config.FAILURE_LIMIT:
+        if ip_count > config.get_failure_limit():
             block_ip(ip_address)
             ip_block = True
 
@@ -205,7 +205,7 @@ def record_failed_attempt(ip_address, username):
     if not config.DISABLE_USERNAME_LOCKOUT:
         user_count = increment_key(get_username_attempt_cache_key(username))
         # if over the limit, add to block
-        if user_count > config.FAILURE_LIMIT:
+        if user_count > config.get_failure_limit():
             block_username(username)
             user_block = True
 
@@ -275,16 +275,16 @@ def lockout_response(request):
     """ if we are locked out, here is the response """
     if config.LOCKOUT_TEMPLATE:
         context = {
-            'cooloff_time_seconds': config.COOLOFF_TIME,
-            'cooloff_time_minutes': config.COOLOFF_TIME / 60,
-            'failure_limit': config.FAILURE_LIMIT,
+            'cooloff_time_seconds': config.get_cooloff_time(),
+            'cooloff_time_minutes': config.get_cooloff_time() / 60,
+            'failure_limit': config.get_failure_limit(),
         }
         return render(request, config.LOCKOUT_TEMPLATE, context)
 
     if config.LOCKOUT_URL:
         return HttpResponseRedirect(config.LOCKOUT_URL)
 
-    if config.COOLOFF_TIME:
+    if config.get_cooloff_time():
         return HttpResponse("Account locked: too many login attempts.  "
                             "Please try again later.")
     else:
