@@ -116,7 +116,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests the login lock by ip when trying to login
         one more time than failure limit
         """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -134,7 +134,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests the login lock by ip when trying to
         login a lot of times more than failure limit
         """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -154,7 +154,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests the login lock by username when trying to login
         one more time than failure limit
         """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             ip = '74.125.239.{0}.'.format(i)
             response = self._login(username=VALID_USERNAME, remote_addr=ip)
             # Check if we are in the same login page
@@ -179,7 +179,7 @@ class AccessAttemptTest(DefenderTestCase):
     def test_reset_after_valid_login(self):
         """ Tests the counter gets reset after a valid login
         """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             self._login(username=VALID_USERNAME)
 
         # now login with a valid username and password
@@ -192,7 +192,7 @@ class AccessAttemptTest(DefenderTestCase):
     def test_blocked_ip_cannot_login(self):
         """ Test an user with blocked ip cannot login with another username
         """
-        for i in range(0, config.FAILURE_LIMIT + 1):
+        for i in range(0, config.get_failure_limit() + 1):
             self._login(username=VALID_USERNAME)
 
         # try to login with a different user
@@ -203,7 +203,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Test an user with blocked username cannot login using
         another ip
         """
-        for i in range(0, config.FAILURE_LIMIT + 1):
+        for i in range(0, config.get_failure_limit() + 1):
             ip = '74.125.239.{0}.'.format(i)
             self._login(username=VALID_USERNAME, remote_addr=ip)
 
@@ -216,7 +216,7 @@ class AccessAttemptTest(DefenderTestCase):
         Test that a uppercase username is saved in lowercase
         within the cache.
         """
-        for i in range(0, config.FAILURE_LIMIT + 2):
+        for i in range(0, config.get_failure_limit() + 2):
             ip = '74.125.239.{0}.'.format(i)
             self._login(username=UPPER_USERNAME, remote_addr=ip)
 
@@ -228,7 +228,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         self.test_failure_limit_by_ip_once()
         # Wait for the cooling off period
-        time.sleep(config.COOLOFF_TIME)
+        time.sleep(config.get_cooloff_time())
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
@@ -285,7 +285,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests if can handle a long user agent with failure
         """
         long_user_agent = 'ie6' * 1024
-        for i in range(0, config.FAILURE_LIMIT + 1):
+        for i in range(0, config.get_failure_limit() + 1):
             response = self._login(user_agent=long_user_agent)
 
         self.assertContains(response, self.LOCKED_MESSAGE)
@@ -307,7 +307,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
 
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -328,7 +328,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Test to make sure that after lockout we send to the correct
         redirect URL """
 
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -356,7 +356,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ Test to make sure that after lockout we send to the correct
         template """
 
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -375,7 +375,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.COOLOFF_TIME', 0)
     def test_failed_login_no_cooloff(self):
         """ failed login no cooloff """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -570,6 +570,14 @@ class AccessAttemptTest(DefenderTestCase):
         reverse('defender_unblock_username_view',
                 kwargs={'username': 'user+test@test.tld'})
 
+    def test_unblock_view_user_with_special_symbols(self):
+        """
+        There is an available admin view for unblocking a user
+        with a exclamation mark sign in the username.
+        """
+        reverse('defender_unblock_username_view',
+                kwargs={'username': 'user!test@test.tld'})
+
     def test_decorator_middleware(self):
         # because watch_login is called twice in this test (once by the
         # middleware and once by the decorator) we have half as many attempts
@@ -578,7 +586,7 @@ class AccessAttemptTest(DefenderTestCase):
         # to dynamically remove one of the middlewares during a test so we
         # divide the failure limit by 2.
 
-        for i in range(0, int(config.FAILURE_LIMIT)):
+        for i in range(0, int(config.get_failure_limit())):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -594,7 +602,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     def test_get_view(self):
         """ Check that the decorator doesn't tamper with GET requests """
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self.client.get(ADMIN_LOGIN_URL)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -607,7 +615,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         self.assertEqual(AccessAttempt.objects.count(), 0)
 
-        for i in range(0, int(config.FAILURE_LIMIT)):
+        for i in range(0, int(config.get_failure_limit())):
             response = self._login()
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -618,7 +626,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
         self.assertEqual(AccessAttempt.objects.count(),
-                         config.FAILURE_LIMIT + 1)
+                         config.get_failure_limit() + 1)
         self.assertIsNotNone(str(AccessAttempt.objects.all()[0]))
 
     @patch('defender.config.LOCKOUT_BY_IP_USERNAME', True)
@@ -628,7 +636,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         username = 'testy'
 
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login(username=username)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -664,7 +672,7 @@ class AccessAttemptTest(DefenderTestCase):
         # we shouldn't be blocked.
         # same IP different, usernames
         ip = '74.125.239.60'
-        for i in range(0, config.FAILURE_LIMIT + 10):
+        for i in range(0, config.get_failure_limit() + 10):
             login_username = u"{0}{1}".format(username, i)
             response = self._login(username=login_username, remote_addr=ip)
             # Check if we are in the same login page
@@ -672,7 +680,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         # So, we shouldn't have gotten a lock-out yet.
         # same username with same IP
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login(username=username)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -717,7 +725,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         # try logging in with the same username, but different IPs.
         # we shouldn't be locked.
-        for i in range(0, config.FAILURE_LIMIT + 10):
+        for i in range(0, config.get_failure_limit() + 10):
             ip = '74.125.126.{0}'.format(i)
             response = self._login(username=username, remote_addr=ip)
             # Check if we are in the same login page
@@ -725,7 +733,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         # same ip and same username
         ip = '74.125.127.1'
-        for i in range(0, config.FAILURE_LIMIT):
+        for i in range(0, config.get_failure_limit()):
             response = self._login(username=username, remote_addr=ip)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -758,7 +766,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, [])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.get_failure_limit()', 3)
     def test_login_blocked_for_non_standard_login_views_without_msg(self):
         """
         Check that a view wich returns the expected status code is causing
@@ -790,7 +798,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, ['192.168.24.24'])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.get_failure_limit()', 3)
     def test_login_blocked_for_non_standard_login_views_with_msg(self):
         """
         Check that a view wich returns the expected status code and the
@@ -821,7 +829,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, ['192.168.24.24'])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.get_failure_limit()', 3)
     def test_login_non_blocked_for_non_standard_login_views_different_msg(self):
         """
         Check that a view wich returns the expected status code but not the
