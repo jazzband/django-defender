@@ -34,7 +34,7 @@ def get_redis_connection():
             return cache.get_master_client()
         except AttributeError:
             # django_redis.cache.RedisCache case (django-redis package)
-            return cache._client
+            return cache.client.get_client(True)
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
         return redis.StrictRedis(
