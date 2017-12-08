@@ -13,7 +13,7 @@ from django import get_version
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
 from redis.client import Redis
