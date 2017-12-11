@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.contrib.admin.views.decorators import staff_member_required
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from .utils import (
     get_blocked_ips, get_blocked_usernames, unblock_ip, unblock_username)
