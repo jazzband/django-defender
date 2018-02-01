@@ -202,7 +202,7 @@ def record_failed_attempt(ip_address, username):
             ip_block = True
 
     user_block = False
-    if not config.DISABLE_USERNAME_LOCKOUT:
+    if username and not config.DISABLE_USERNAME_LOCKOUT:
         user_count = increment_key(get_username_attempt_cache_key(username))
         # if over the limit, add to block
         if user_count > config.FAILURE_LIMIT:
