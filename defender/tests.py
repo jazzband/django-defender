@@ -912,3 +912,21 @@ class TestUtils(DefenderTestCase):
         self.assertTrue(utils.is_source_ip_already_locked(ip))
         utils.unblock_ip(ip)
         self.assertFalse(utils.is_source_ip_already_locked(ip))
+
+    def test_username_argument_precedence(self):
+        """ test that the optional username argument has highest precedence when provided """
+        request_factory = RequestFactory()
+        request = request_factory.get(ADMIN_LOGIN_URL)
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+        username = 'johndoe'
+
+        utils.block_username(request.user.username)
+
+        self.assertFalse(utils.is_already_locked(request, username=username))
+
+        utils.check_request(request, True, username=username)
+        self.assertEqual(utils.get_user_attempts(request, username=username), 1)
+
+        utils.add_login_attempt_to_db(request, True, username=username)
+        self.assertEqual(AccessAttempt.objects.filter(username=username).count(), 1)
