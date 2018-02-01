@@ -237,6 +237,12 @@ class AccessAttemptTest(DefenderTestCase):
 
             self.assertNotIn(username, utils.get_blocked_usernames())
 
+    def test_lowercase(self):
+        """
+        Test that the lowercase(None) returns None.
+        """
+        self.assertEquals(utils.lower_username(None), None)
+
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
         """
