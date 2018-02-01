@@ -226,6 +226,17 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertNotIn(UPPER_USERNAME, utils.get_blocked_usernames())
         self.assertIn(UPPER_USERNAME.lower(), utils.get_blocked_usernames())
 
+    def test_empty_username_cannot_be_blocked(self):
+        """
+        Test that an empty username, or one that is None, cannot be blocked.
+        """
+        for username in ["", None]:
+            for i in range(0, config.FAILURE_LIMIT + 2):
+                ip = '74.125.239.{0}.'.format(i)
+                self._login(username=username, remote_addr=ip)
+
+            self.assertNotIn(username, utils.get_blocked_usernames())
+
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
         """
