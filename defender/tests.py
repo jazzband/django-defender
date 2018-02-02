@@ -23,6 +23,7 @@ except ImportError:
 
 from . import utils
 from . import config
+from .signals import ip_block as ip_block_signal, username_block as username_block_signal
 from .connection import parse_redis_url, get_redis_connection
 from .decorators import watch_login
 from .models import AccessAttempt
@@ -873,6 +874,31 @@ class AccessAttemptTest(DefenderTestCase):
 
             data_out = utils.get_blocked_ips()
             self.assertEqual(data_out, [])
+
+
+class SignalTest(DefenderTestCase):
+    """ Test that signals are properly sent when blocking usernames and IPs.
+    """
+
+    def test_should_send_signal_when_blocking_ip(self):
+        self.blocked_ip = None
+
+        def handler(sender, ip_address, **kwargs):
+            self.blocked_ip = ip_address
+
+        ip_block_signal.connect(handler)
+        utils.block_ip('8.8.8.8')
+        self.assertEqual(self.blocked_ip, '8.8.8.8')
+
+    def test_should_send_signal_when_blocking_username(self):
+        self.blocked_username = None
+
+        def handler(sender, username, **kwargs):
+            self.blocked_username = username
+
+        username_block_signal.connect(handler)
+        utils.block_username('richard_hendricks')
+        self.assertEqual(self.blocked_username, 'richard_hendricks')
 
 
 class DefenderTestCaseTest(DefenderTestCase):
