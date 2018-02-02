@@ -172,6 +172,47 @@ class AccessAttemptTest(DefenderTestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
+    @patch('defender.config.USERNAME_FAILURE_LIMIT', 3)
+    def test_username_failure_limit(self):
+        """ Tests that the username failure limit setting is
+        respected when trying to login one more time than failure limit
+        """
+        for i in range(0, config.USERNAME_FAILURE_LIMIT):
+            ip = '74.125.239.{0}.'.format(i)
+            response = self._login(username=VALID_USERNAME, remote_addr=ip)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login(username=VALID_USERNAME, remote_addr=ip)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # doing a get should not get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, LOGIN_FORM_KEY)
+
+    @patch('defender.config.IP_FAILURE_LIMIT', 3)
+    def test_ip_failure_limit(self):
+        """ Tests that the IP failure limit setting is
+        respected when trying to login one more time than failure limit
+        """
+        for i in range(0, config.IP_FAILURE_LIMIT):
+            username = 'john-doe__%d' % i
+            response = self._login(username=username)
+            # Check if we are in the same login page
+            self.assertContains(response, LOGIN_FORM_KEY)
+
+        # So, we shouldn't have gotten a lock-out yet.
+        # But we should get one now
+        response = self._login(username=VALID_USERNAME)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+        # doing a get should also get locked out message
+        response = self.client.get(ADMIN_LOGIN_URL)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
+
     def test_valid_login(self):
         """ Tests a valid login for a real username
         """
@@ -786,7 +827,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, [])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.IP_FAILURE_LIMIT', 3)
     def test_login_blocked_for_non_standard_login_views_without_msg(self):
         """
         Check that a view wich returns the expected status code is causing
@@ -818,7 +859,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, ['192.168.24.24'])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.IP_FAILURE_LIMIT', 3)
     def test_login_blocked_for_non_standard_login_views_with_msg(self):
         """
         Check that a view wich returns the expected status code and the
@@ -849,7 +890,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(data_out, ['192.168.24.24'])
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
-    @patch('defender.config.FAILURE_LIMIT', 3)
+    @patch('defender.config.IP_FAILURE_LIMIT', 3)
     def test_login_non_blocked_for_non_standard_login_views_different_msg(self):
         """
         Check that a view wich returns the expected status code but not the
