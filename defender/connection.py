@@ -1,6 +1,5 @@
 from django.core.cache import caches
 from django.core.cache.backends.base import InvalidCacheBackendError
-import mockredis
 import redis
 try:
     import urlparse
@@ -13,7 +12,7 @@ from . import config
 urlparse.uses_netloc.append("redis")
 
 
-MOCKED_REDIS = mockredis.mock_strict_redis_client()
+MOCKED_REDIS = None
 INVALID_CACHE_ERROR_MSG = 'The cache {} was not found on the django cache' \
                           ' settings.'
 
@@ -21,6 +20,10 @@ INVALID_CACHE_ERROR_MSG = 'The cache {} was not found on the django cache' \
 def get_redis_connection():
     """ Get the redis connection if not using mock """
     if config.MOCK_REDIS:  # pragma: no cover
+        global MOCKED_REDIS
+        if MOCKED_REDIS is None:
+            import mockredis
+            MOCKED_REDIS = mockredis.mock_strict_redis_client()
         return MOCKED_REDIS  # pragma: no cover
     elif config.DEFENDER_REDIS_NAME:  # pragma: no cover
         try:
