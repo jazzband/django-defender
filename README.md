@@ -24,7 +24,15 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
--
+- 0.5.2
+  - Fix regex in 'unblock_username_view' to handle special symbols [@ruthus18]
+  - Fix django requires version for 1.11.x [@kencochrane]
+  - remove hiredis dependency [@ericbuckley]
+  - Correctly get raw client when using django_redis cache. [@cburger]
+  - replace django.core.urlresolvers with django.urls For Django 2.0 [@s-wirth]
+  - add username kwarg for providing username directly rather than via callback arg [@williamboman]
+  - Only use the username if it is actually provided  [@cobusc]
+
 - 0.5.1
   - Middleware fix for django >= 1.10 #93 [@Temeez]
   - Force the username to lowercase #90 [@MattBlack85]
