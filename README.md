@@ -313,6 +313,8 @@ These should be defined in your ``settings.py`` file.
 record is created for the failed logins.  [Default: ``3``]
 * ``DEFENDER_BEHIND_REVERSE_PROXY``: Boolean: Is defender behind a reverse proxy?
 [Default: ``False``]
+* ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
+reverse proxy IP address  [Default: ``HTTP_X_FORWARDED_FOR``]
 * ``DEFENDER_LOCK_OUT_BY_IP_AND_USERNAME``: Boolean: Locks a user out based on a combination of IP and Username.  This stops a user denying access to the application for all other users accessing the app from behind the same IP address. [Default: ``False``]
 * ``DEFENDER_DISABLE_IP_LOCKOUT``: Boolean: If this is True, it will not lockout the users IP address, it will only lockout the username. [Default: False]
 * ``DEFENDER_DISABLE_USERNAME_LOCKOUT``: Boolean: If this is True, it will not lockout usernames, it will only lockout IP addresess. [Default: False]
@@ -325,8 +327,6 @@ number of seconds. If ``0``, the locks will not expire. [Default: ``300``]
    - ``failure_limit``: The number of failures before you get blocked.
 * ``DEFENDER_USERNAME_FORM_FIELD``: String: the name of the form field that contains your
 users usernames. [Default: ``username``]
-* ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
-reverse proxy IP address  [Default: ``HTTP_X_FORWARDED_FOR``]
 * ``DEFENDER_CACHE_PREFIX``: String: The cache prefix for your defender keys.
 [Default: ``defender``]
 * ``DEFENDER_LOCKOUT_URL``: String: The URL you want to redirect to if someone is
