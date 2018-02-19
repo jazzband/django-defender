@@ -24,6 +24,7 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+-
 - 0.5.1
   - Middleware fix for django >= 1.10 #93 [@Temeez]
   - Force the username to lowercase #90 [@MattBlack85]
@@ -445,3 +446,8 @@ With Code coverage:
 ```
 PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
 ```
+
+How to release
+==============
+1. python setup.py sdist
+2. twine upload dist/*
