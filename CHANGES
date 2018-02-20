@@ -1,3 +1,7 @@
+0.5.3
+=====
+- Remove mockredis as install requirement, make only test requirement [@blueyed]
+
 0.5.2
 =====
 - Fix regex in 'unblock_username_view' to handle special symbols [@ruthus18]
