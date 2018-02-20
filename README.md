@@ -24,6 +24,9 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+- 0.5.3 [in progress]
+  - Remove mockredis as install requirement, make only test requirement [@blueyed]
+
 - 0.5.2
   - Fix regex in 'unblock_username_view' to handle special symbols [@ruthus18]
   - Fix django requires version for 1.11.x [@kencochrane]
