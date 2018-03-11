@@ -24,7 +24,7 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
-- 0.5.3 [in progress]
+- 0.5.3
   - Remove mockredis as install requirement, make only test requirement [@blueyed]
 
 - 0.5.2
