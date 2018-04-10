@@ -24,6 +24,11 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+- 0.5.4
+  - Added 2 new setting variables for more granular failure limit control [@williamboman]
+  - Added ssl option when instantiating StrictRedis [@mjrimrie]
+  - Send signals when blocking username or ip [@williamboman]
+
 - 0.5.3
   - Remove mockredis as install requirement, make only test requirement [@blueyed]
 
@@ -97,7 +102,8 @@ Features
     - list of blocked usernames and ip's
     - ability to unblock people
     - list of recent login attempts
-- Can be easly adapted to custom authentication method.
+- Can be easily adapted to custom authentication method.
+- Signals are sent when blocking username or IP
 
 Long term goals
 ===============
