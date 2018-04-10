@@ -40,7 +40,9 @@ def get_redis_connection():
             host=redis_config.get('HOST'),
             port=redis_config.get('PORT'),
             db=redis_config.get('DB'),
-            password=redis_config.get('PASSWORD'))
+            password=redis_config.get('PASSWORD'),
+            ssl=redis_config.get('SSL'))
+
 
 
 def parse_redis_url(url):
@@ -52,6 +54,7 @@ def parse_redis_url(url):
         "PASSWORD": None,
         "HOST": "localhost",
         "PORT": 6379,
+        "SSL": False
     }
 
     if not url:
@@ -70,5 +73,7 @@ def parse_redis_url(url):
         redis_config.update({"HOST": url.hostname})
     if url.port:
         redis_config.update({"PORT": int(url.port)})
+    if url.scheme in ['https', 'rediss']:
+        redis_config.update({"SSL": True})
 
     return redis_config
