@@ -442,6 +442,26 @@ class BasicAuthenticationDefender(BasicAuthentication):
 
 To make it works add `BasicAuthenticationDefender` to `DEFAULT_AUTHENTICATION_CLASSES` above all other authentication methods in your `settings.py`.
 
+
+Django Signals
+--------------------
+
+`django-defender` will send signals when blocking a username or an IP address. To set up signal receiver functions:
+
+```python
+from django.dispatch import receiver
+from defender import signals
+
+@receiver(signals.username_block)
+def username_blocked(username, **kwargs):
+    print("%s was blocked!" % username)
+
+@receiver(signals.ip_block)
+def ip_blocked(ip_address, **kwargs):
+    print("%s was blocked!" % ip_address)
+
+```
+
 Running Tests
 =============
 

@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from .connection import get_redis_connection
 from . import config
 from .data import store_login_attempt
+from .signals import send_username_block_signal, send_ip_block_signal
 
 REDIS_SERVER = get_redis_connection()
 
@@ -171,6 +172,7 @@ def block_ip(ip_address):
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
     else:
         REDIS_SERVER.set(key, 'blocked')
+    send_ip_block_signal(ip_address)
 
 
 def block_username(username):
@@ -186,6 +188,7 @@ def block_username(username):
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
     else:
         REDIS_SERVER.set(key, 'blocked')
+    send_username_block_signal(username)
 
 
 def record_failed_attempt(ip_address, username):
