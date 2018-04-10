@@ -200,7 +200,7 @@ def record_failed_attempt(ip_address, username):
         # we only want to increment the IP if this is disabled.
         ip_count = increment_key(get_ip_attempt_cache_key(ip_address))
         # if over the limit, add to block
-        if ip_count > config.FAILURE_LIMIT:
+        if ip_count > config.IP_FAILURE_LIMIT:
             block_ip(ip_address)
             ip_block = True
 
@@ -208,7 +208,7 @@ def record_failed_attempt(ip_address, username):
     if username and not config.DISABLE_USERNAME_LOCKOUT:
         user_count = increment_key(get_username_attempt_cache_key(username))
         # if over the limit, add to block
-        if user_count > config.FAILURE_LIMIT:
+        if user_count > config.USERNAME_FAILURE_LIMIT:
             block_username(username)
             user_block = True
 

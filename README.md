@@ -323,6 +323,10 @@ These should be defined in your ``settings.py`` file.
 
 * ``DEFENDER_LOGIN_FAILURE_LIMIT``: Int: The number of login attempts allowed before a
 record is created for the failed logins.  [Default: ``3``]
+* ``DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME``: Int: The number of login attempts allowed
+on a username before a record is created for the failed logins.  [Default: ``DEFENDER_LOGIN_FAILURE_LIMIT``]
+* ``DEFENDER_LOGIN_FAILURE_LIMIT_IP``: Int: The number of login attempts allowed
+from an IP before a record is created for the failed logins.  [Default: ``DEFENDER_LOGIN_FAILURE_LIMIT``]
 * ``DEFENDER_BEHIND_REVERSE_PROXY``: Boolean: Is defender behind a reverse proxy?
 [Default: ``False``]
 * ``DEFENDER_REVERSE_PROXY_HEADER``: String: the name of the http header with your
