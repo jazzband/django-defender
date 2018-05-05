@@ -76,3 +76,9 @@ except ValueError:  # pragma: no cover
     raise Exception(
         'DEFENDER_ACCESS_ATTEMPT_EXPIRATION'
         ' needs to be an integer')  # pragma: no cover
+
+
+GET_USERNAME_FROM_REQUEST_PATH = get_setting(
+    'DEFENDER_GET_USERNAME_FROM_REQUEST_PATH',
+    'defender.utils.username_from_request'
+)
