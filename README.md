@@ -24,6 +24,10 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+- 0.5.5
+  - Added new setting ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH`` for control how username is accessed from request [@andrewshkovskii]
+  - Added new argument ``get_username`` for ``decorators.watch_login`` to propagate ``get_username`` argument to other utils functions calls done in ``watch_login`` [@andrewshkovskii]
+
 - 0.5.4
   - Added 2 new setting variables for more granular failure limit control [@williamboman]
   - Added ssl option when instantiating StrictRedis [@mjrimrie]
@@ -368,6 +372,9 @@ attempt to the database, set to True. If False, it is saved inline.
 long to keep the access attempt records in the database before the management
 command cleans them up.
 [Default: ``24``]
+* ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH``: String: The import path of the function that access username from request. 
+If you want to use custom function to access and process username from request - you can specify it here.
+[Default: ``defender.utils.username_from_request``]
 
 Adapting to other authentication method
 --------------------

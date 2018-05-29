@@ -1,3 +1,8 @@
+0.5.5
+=====
+- Added new setting ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH` for control how username is accessed from request [@andrewshkovskii]
+- Added new argument ``get_username` for ``decorators.watch_login`` to propagate ``get_username`` argument to other utils functions calls done in ``watch_login`` [@andrewshkovskii]
+
 0.5.4
 =====
 - Added 2 new setting variables for more granular failure limit control [@williamboman]

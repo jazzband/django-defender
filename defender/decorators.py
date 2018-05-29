@@ -3,7 +3,8 @@ from . import utils
 import functools
 
 
-def watch_login(status_code=302, msg=''):
+def watch_login(status_code=302, msg='',
+                get_username=utils.get_username_from_request):
     """
     Used to decorate the django.contrib.admin.site.login method or
     any other function you want to protect by brute forcing.
@@ -15,8 +16,8 @@ def watch_login(status_code=302, msg=''):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
             # if the request is currently under lockout, do not proceed to the
-            # login function, go directly to lockout url, do not pass go, do not
-            # collect messages about this login attempt
+            # login function, go directly to lockout url, do not pass go,
+            # do not collect messages about this login attempt
             if utils.is_already_locked(request):
                 return utils.lockout_response(request)
 
@@ -39,11 +40,13 @@ def watch_login(status_code=302, msg=''):
                         and msg in response.content.decode('utf-8')
                     )
 
-                # ideally make this background task, but to keep simple, keeping
-                # it inline for now.
-                utils.add_login_attempt_to_db(request, not login_unsuccessful)
+                # ideally make this background task, but to keep simple,
+                # keeping it inline for now.
+                utils.add_login_attempt_to_db(request, not login_unsuccessful,
+                                              get_username)
 
-                if utils.check_request(request, login_unsuccessful):
+                if utils.check_request(request, login_unsuccessful,
+                                       get_username):
                     return response
 
                 return utils.lockout_response(request)

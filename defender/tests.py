@@ -23,7 +23,10 @@ except ImportError:
 
 from . import utils
 from . import config
-from .signals import ip_block as ip_block_signal, username_block as username_block_signal
+from .signals import (
+    ip_block as ip_block_signal,
+    username_block as username_block_signal
+)
 from .connection import parse_redis_url, get_redis_connection
 from .decorators import watch_login
 from .models import AccessAttempt
@@ -213,7 +216,6 @@ class AccessAttemptTest(DefenderTestCase):
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
-
     def test_valid_login(self):
         """ Tests a valid login for a real username
         """
@@ -308,8 +310,10 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests if can handle a long user agent
         """
         long_user_agent = 'ie6' * 1024
-        response = self._login(username=VALID_USERNAME, password=VALID_PASSWORD,
-                               user_agent=long_user_agent)
+        response = self._login(
+            username=VALID_USERNAME, password=VALID_PASSWORD,
+            user_agent=long_user_agent
+        )
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
     @patch('defender.config.BEHIND_REVERSE_PROXY', True)
@@ -541,7 +545,8 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
     def test_get_redis_connection_django_conf_wrong_key(self):
         """ see if we get the correct error """
-        error_msg = 'The cache bad-key was not found on the django cache settings.'
+        error_msg = ('The cache bad-key was not found on the django '
+                     'cache settings.')
         self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
 
     def test_get_ip_address_from_request(self):
@@ -998,7 +1003,8 @@ class TestUtils(DefenderTestCase):
         self.assertFalse(utils.is_source_ip_already_locked(ip))
 
     def test_username_argument_precedence(self):
-        """ test that the optional username argument has highest precedence when provided """
+        """ test that the optional username argument has highest precedence
+        when provided """
         request_factory = RequestFactory()
         request = request_factory.get(ADMIN_LOGIN_URL)
         request.user = AnonymousUser()
@@ -1010,7 +1016,11 @@ class TestUtils(DefenderTestCase):
         self.assertFalse(utils.is_already_locked(request, username=username))
 
         utils.check_request(request, True, username=username)
-        self.assertEqual(utils.get_user_attempts(request, username=username), 1)
+        self.assertEqual(
+            utils.get_user_attempts(request, username=username), 1
+        )
 
         utils.add_login_attempt_to_db(request, True, username=username)
-        self.assertEqual(AccessAttempt.objects.filter(username=username).count(), 1)
+        self.assertEqual(
+            AccessAttempt.objects.filter(username=username).count(), 1
+        )
