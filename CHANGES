@@ -1,3 +1,11 @@
+0.6.0
+=====
+- remove Python 3.3 [@fr0mhell]
+- remove Django 1.8-1.10 [@fr0mhell]
+- add Celery v4 [@fr0mhell]
+- update travis config [@fr0mhell]
+- update admin URL [@fr0mhell]
+
 0.5.5
 =====
 - Added new setting ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH` for control how username is accessed from request [@andrewshkovskii]

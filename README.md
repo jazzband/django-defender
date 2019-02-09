@@ -24,6 +24,14 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+
+- 0.6.0
+  - remove Python 3.3 [@fr0mhell]
+  - remove Django 1.8-1.10 [@fr0mhell]
+  - add Celery v4 [@fr0mhell]
+  - update travis config [@fr0mhell]
+  - update admin URL [@fr0mhell]
+
 - 0.5.5
   - Added new setting ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH`` for control how username is accessed from request [@andrewshkovskii]
   - Added new argument ``get_username`` for ``decorators.watch_login`` to propagate ``get_username`` argument to other utils functions calls done in ``watch_login`` [@andrewshkovskii]
@@ -372,7 +380,7 @@ attempt to the database, set to True. If False, it is saved inline.
 long to keep the access attempt records in the database before the management
 command cleans them up.
 [Default: ``24``]
-* ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH``: String: The import path of the function that access username from request. 
+* ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH``: String: The import path of the function that access username from request.
 If you want to use custom function to access and process username from request - you can specify it here.
 [Default: ``defender.utils.username_from_request``]
 
