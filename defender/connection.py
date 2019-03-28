@@ -16,8 +16,8 @@ INVALID_CACHE_ERROR_MSG = 'The cache {} was not found on the django cache' \
                           ' settings.'
 
 
-def get_redis_connection():
-    """ Get the redis connection if not using mock """
+def get_connection():
+    """ Get the cache connection if not using mock """
     if config.MOCK_REDIS:  # pragma: no cover
         import mockredis
         return mockredis.mock_strict_redis_client()  # pragma: no cover
@@ -28,12 +28,14 @@ def get_redis_connection():
             raise KeyError(INVALID_CACHE_ERROR_MSG.format(
                 config.DEFENDER_REDIS_NAME))
         # every redis backend implement it own way to get the low level client
-        try:
-            # redis_cache.RedisCache case (django-redis-cache package)
+        if hasattr(cache, 'get_master_client'):
             return cache.get_master_client()
-        except AttributeError:
-            # django_redis.cache.RedisCache case (django-redis package)
+        
+        if hasattr(cache, 'client') and hasattr(cache.client, 'get_client'):
             return cache.client.get_client(True)
+
+        # otherwise, prolly not a redis cache
+        return cache
     else:  # pragma: no cover
         redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
         return redis.StrictRedis(
@@ -42,7 +44,6 @@ def get_redis_connection():
             db=redis_config.get('DB'),
             password=redis_config.get('PASSWORD'),
             ssl=redis_config.get('SSL'))
-
 
 
 def parse_redis_url(url):

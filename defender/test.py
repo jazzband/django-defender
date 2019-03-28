@@ -1,6 +1,6 @@
 from django.test.testcases import TestCase, TransactionTestCase
 
-from .connection import get_redis_connection
+from .connection import get_connection
 
 
 class DefenderTestCaseMixin(object):
@@ -9,7 +9,7 @@ class DefenderTestCaseMixin(object):
     def tearDown(self):
         """cleanup django-defender cache after each test"""
         super(DefenderTestCaseMixin, self).tearDown()
-        get_redis_connection().flushdb()
+        get_connection().flushdb()
 
 
 class DefenderTransactionTestCase(DefenderTestCaseMixin, TransactionTestCase):

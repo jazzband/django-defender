@@ -27,7 +27,7 @@ from .signals import (
     ip_block as ip_block_signal,
     username_block as username_block_signal
 )
-from .connection import parse_redis_url, get_redis_connection
+from .connection import parse_redis_url, get_connection
 from .decorators import watch_login
 from .models import AccessAttempt
 from .test import DefenderTestCase, DefenderTransactionTestCase
@@ -296,7 +296,7 @@ class AccessAttemptTest(DefenderTestCase):
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
-            get_redis_connection().do_expire()  # pragma: no cover
+            get_connection().do_expire()  # pragma: no cover
         # It should be possible to login again, make sure it is.
         self.test_valid_login()
 
@@ -539,7 +539,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch('defender.config.DEFENDER_REDIS_NAME', 'default')
     def test_get_redis_connection_django_conf(self):
         """ get the redis connection """
-        redis_client = get_redis_connection()
+        redis_client = get_connection()
         self.assertIsInstance(redis_client, Redis)
 
     @patch('defender.config.DEFENDER_REDIS_NAME', 'bad-key')
@@ -547,7 +547,7 @@ class AccessAttemptTest(DefenderTestCase):
         """ see if we get the correct error """
         error_msg = ('The cache bad-key was not found on the django '
                      'cache settings.')
-        self.assertRaisesMessage(KeyError, error_msg, get_redis_connection)
+        self.assertRaisesMessage(KeyError, error_msg, get_connection)
 
     def test_get_ip_address_from_request(self):
         """ get ip from request, make sure it is correct """
@@ -953,14 +953,14 @@ class DefenderTestCaseTest(DefenderTestCase):
 
     def test_first_incr(self):
         """ first increment """
-        utils.REDIS_SERVER.incr(self.key)
-        result = int(utils.REDIS_SERVER.get(self.key))
+        utils.CACHE.incr(self.key)
+        result = int(utils.CACHE.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
         """ second increment """
-        utils.REDIS_SERVER.incr(self.key)
-        result = int(utils.REDIS_SERVER.get(self.key))
+        utils.CACHE.incr(self.key)
+        result = int(utils.CACHE.get(self.key))
         self.assertEqual(result, 1)
 
 
@@ -970,14 +970,14 @@ class DefenderTransactionTestCaseTest(DefenderTransactionTestCase):
 
     def test_first_incr(self):
         """ first increment """
-        utils.REDIS_SERVER.incr(self.key)
-        result = int(utils.REDIS_SERVER.get(self.key))
+        utils.CACHE.incr(self.key)
+        result = int(utils.CACHE.get(self.key))
         self.assertEqual(result, 1)
 
     def test_second_incr(self):
         """ second increment """
-        utils.REDIS_SERVER.incr(self.key)
-        result = int(utils.REDIS_SERVER.get(self.key))
+        utils.CACHE.incr(self.key)
+        result = int(utils.CACHE.get(self.key))
         self.assertEqual(result, 1)
 
 
