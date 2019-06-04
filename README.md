@@ -25,6 +25,10 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+- 0.6.2
+  - Add and test support for Django 2.2 [@chrisledet]
+  - Added support for redis client 3.2.1 [@softinio]
+
 - 0.6.1
   - added redispy 3.2.0 compatibility [@nrth]
 
