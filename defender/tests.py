@@ -25,7 +25,9 @@ from . import utils
 from . import config
 from .signals import (
     ip_block as ip_block_signal,
-    username_block as username_block_signal
+    ip_unblock as ip_unblock_signal,
+    username_block as username_block_signal,
+    username_unblock as username_unblock_signal,
 )
 from .connection import parse_redis_url, get_redis_connection
 from .decorators import watch_login
@@ -936,6 +938,16 @@ class SignalTest(DefenderTestCase):
         utils.block_ip('8.8.8.8')
         self.assertEqual(self.blocked_ip, '8.8.8.8')
 
+    def test_should_send_signal_when_unblocking_ip(self):
+        self.blocked_ip = ('8.8.8.8')
+
+        def handler(sender, ip_address, **kwargs):
+            self.blocked_ip = None
+
+        ip_unblock_signal.connect(handler)
+        utils.unblock_ip('8.8.8.8')
+        self.assertIsNone(self.blocked_ip)
+
     def test_should_send_signal_when_blocking_username(self):
         self.blocked_username = None
 
@@ -945,6 +957,16 @@ class SignalTest(DefenderTestCase):
         username_block_signal.connect(handler)
         utils.block_username('richard_hendricks')
         self.assertEqual(self.blocked_username, 'richard_hendricks')
+
+    def test_should_send_signal_when_unblocking_username(self):
+        self.blocked_username = 'richard_hendricks'
+
+        def handler(sender, username, **kwargs):
+            self.blocked_username = None
+
+        username_unblock_signal.connect(handler)
+        utils.unblock_username('richard_hendricks')
+        self.assertIsNone(self.blocked_username)
 
 
 class DefenderTestCaseTest(DefenderTestCase):

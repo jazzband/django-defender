@@ -10,7 +10,8 @@ from django.utils.module_loading import import_string
 from .connection import get_redis_connection
 from . import config
 from .data import store_login_attempt
-from .signals import send_username_block_signal, send_ip_block_signal
+from .signals import (send_username_block_signal, send_ip_block_signal,
+                      send_username_unblock_signal, send_ip_unblock_signal)
 
 REDIS_SERVER = get_redis_connection()
 
@@ -254,6 +255,7 @@ def unblock_ip(ip_address, pipe=None):
         pipe.delete(get_ip_blocked_cache_key(ip_address))
         if do_commit:
             pipe.execute()
+    send_ip_unblock_signal(ip_address)
 
 
 def unblock_username(username, pipe=None):
@@ -267,6 +269,7 @@ def unblock_username(username, pipe=None):
         pipe.delete(get_username_blocked_cache_key(username))
         if do_commit:
             pipe.execute()
+    send_username_unblock_signal(username)
 
 
 def reset_failed_attempts(ip_address=None, username=None):
