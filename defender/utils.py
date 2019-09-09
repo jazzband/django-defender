@@ -174,12 +174,14 @@ def block_ip(ip_address):
     if config.DISABLE_IP_LOCKOUT:
         # no need to block, we disabled it.
         return
+    already_blocked = is_source_ip_already_locked(ip_address)
     key = get_ip_blocked_cache_key(ip_address)
     if config.COOLOFF_TIME:
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
     else:
         REDIS_SERVER.set(key, 'blocked')
-    send_ip_block_signal(ip_address)
+    if not already_blocked:
+        send_ip_block_signal(ip_address)
 
 
 def block_username(username):
@@ -190,12 +192,14 @@ def block_username(username):
     if config.DISABLE_USERNAME_LOCKOUT:
         # no need to block, we disabled it.
         return
+    already_blocked = is_user_already_locked(username)
     key = get_username_blocked_cache_key(username)
     if config.COOLOFF_TIME:
         REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
     else:
         REDIS_SERVER.set(key, 'blocked')
-    send_username_block_signal(username)
+    if not already_blocked:
+        send_username_block_signal(username)
 
 
 def record_failed_attempt(ip_address, username):

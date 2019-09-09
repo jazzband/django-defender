@@ -948,6 +948,20 @@ class SignalTest(DefenderTestCase):
         utils.unblock_ip('8.8.8.8')
         self.assertIsNone(self.blocked_ip)
 
+    def test_should_not_send_signal_when_ip_already_blocked(self):
+        self.blocked_ip = None
+
+        def handler(sender, ip_address, **kwargs):
+            self.blocked_ip = ip_address
+
+        ip_block_signal.connect(handler)
+
+        key = utils.get_ip_blocked_cache_key('8.8.8.8')
+        utils.REDIS_SERVER.set(key, 'blocked')
+
+        utils.block_ip('8.8.8.8')
+        self.assertIsNone(self.blocked_ip)
+
     def test_should_send_signal_when_blocking_username(self):
         self.blocked_username = None
 
@@ -966,6 +980,20 @@ class SignalTest(DefenderTestCase):
 
         username_unblock_signal.connect(handler)
         utils.unblock_username('richard_hendricks')
+        self.assertIsNone(self.blocked_username)
+
+    def test_should_not_send_signal_when_username_already_blocked(self):
+        self.blocked_username = None
+
+        def handler(sender, username, **kwargs):
+            self.blocked_username = username
+
+        username_block_signal.connect(handler)
+
+        key = utils.get_username_blocked_cache_key('richard hendricks')
+        utils.REDIS_SERVER.set(key, 'blocked')
+
+        utils.block_ip('richard hendricks')
         self.assertIsNone(self.blocked_username)
 
 
