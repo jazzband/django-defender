@@ -13,7 +13,7 @@ backend best fits their needs.
 Build status
 ------------
 
-[![Build Status](https://travis-ci.org/kencochrane/django-defender.svg)](https://travis-ci.org/kencochrane/django-defender)  [![Coverage Status](https://img.shields.io/coveralls/kencochrane/django-defender.svg)](https://coveralls.io/r/kencochrane/django-defender)[![Code Health](https://landscape.io/github/kencochrane/django-defender/master/landscape.svg)](https://landscape.io/github/kencochrane/django-defender/master)
+[![Build Status](https://travis-ci.org/jazzband/django-defender.svg)](https://travis-ci.org/jazzband/django-defender)  [![Coverage Status](https://img.shields.io/coveralls/jazzband/django-defender.svg)](https://coveralls.io/r/jazzband/django-defender)[![Code Health](https://landscape.io/github/jazzband/django-defender/master/landscape.svg)](https://landscape.io/github/jazzband/django-defender/master)
 
 Sites using Defender:
 =====================
