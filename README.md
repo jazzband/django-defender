@@ -306,7 +306,6 @@ following to your ``urls.py``
 
 ```
 urlpatterns = [
-    url(''),
     url(r'^admin/', include(admin.site.urls)), # normal admin
     url(r'^admin/defender/', include('defender.urls')), # defender admin
     # your own patterns follow...
