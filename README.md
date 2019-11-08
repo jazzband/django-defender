@@ -1,6 +1,10 @@
 django-defender
 ===============
 
+[![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
+[![Build Status](https://travis-ci.org/jazzband/django-defender.svg)](https://travis-ci.org/jazzband/django-defender)
+[![Coverage Status](https://img.shields.io/coveralls/jazzband/django-defender.svg)](https://coveralls.io/r/jazzband/django-defender)
+
 A simple Django reusable app that blocks people from brute forcing login
 attempts. The goal is to make this as fast as possible, so that we do not
 slow down the login attempts.
@@ -10,13 +14,10 @@ check the database on each login attempt. The first version will be based on
 Redis, but the goal is to make this configurable so that people can use whatever
 backend best fits their needs.
 
-Build status
-------------
 
-[![Build Status](https://travis-ci.org/jazzband/django-defender.svg)](https://travis-ci.org/jazzband/django-defender)  [![Coverage Status](https://img.shields.io/coveralls/jazzband/django-defender.svg)](https://coveralls.io/r/jazzband/django-defender)[![Code Health](https://landscape.io/github/jazzband/django-defender/master/landscape.svg)](https://landscape.io/github/jazzband/django-defender/master)
+Sites using Defender
+====================
 
-Sites using Defender:
-=====================
 If you are using defender on your site, submit a PR to add to the list.
 
 - https://hub.docker.com
@@ -25,6 +26,7 @@ If you are using defender on your site, submit a PR to add to the list.
 
 Versions
 ========
+
 - 0.6.2
   - Add and test support for Django 2.2 [@chrisledet]
   - Added support for redis client 3.2.1 [@softinio]
@@ -124,6 +126,7 @@ Features
 - Can be easily adapted to custom authentication method.
 - Signals are sent when blocking username or IP
 
+
 Long term goals
 ===============
 
@@ -136,8 +139,10 @@ Long term goals
 (improve the chances that a good IP is blocked)
 - add management command to prune old (configurable) login attempts.
 
-Performance:
-============
+
+Performance
+===========
+
 The goal of defender is to make it as fast as possible so that it doesn't slow
 down the login process. In order to make sure our goals are met we need a way
 to test the application to make sure we are on the right track. The best
@@ -156,6 +161,7 @@ does more checks and does a lot of database queries.
 
 The best way to determine the speed of a login is to do a load test against an
 application with each setup, and compare the login times for each type.
+
 
 Types of Load tests
 -------------------
@@ -179,6 +185,7 @@ We can use a hosted load testing service, or something like jmeter. Either way
 we need to be consistent for all of the tests. If we use jmeter, we should have
 our jmeter configuration for others to run the tests on their own.
 
+
 Results
 -------
 We will post the results here. We will explain each test, and show the results
@@ -198,12 +205,13 @@ as possible, and removing the parts not needed, and speeding up the lookups
 to improve the login.
 
 
-requirements
+Requirements
 ============
 
 - django: 1.8.x, 1.9.x, 1.10.x, 1.11.x
 - redis
 - python: 2.7.x, 3.3.x, 3.4.x, 3.5.x, 3.6.x, PyPy
+
 
 How it works
 ============
@@ -229,19 +237,24 @@ blocked, and give an estimate on when they will be unblocked.
 destination.
 
 
-Cache backend:
-==============
+Cache backend
+=============
 
-cache keys:
------------
+Defender uses the cache to save the failed attempts.
+
+Cache keys
+----------
 
 Counters:
+
 - prefix:failed:ip:[ip] (count, TTL)
 - prefix:failed:username:[username] (count, TTL)
 
 Booleans (if present it is blocked):
+
 - prefix:blocked:ip:[ip] (true, TTL)
 - prefix:blocked:username:[username] (true, TTL)
+
 
 Installing Django-defender
 ==========================
@@ -265,45 +278,46 @@ First of all, you must add this project to your list of ``INSTALLED_APPS`` in
 ``settings.py``::
 
 ```
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    ...
+    # ...
     'defender',
-    ...
-    )
+    # ...
+]
 ```
 
 Next, install the ``FailedLoginMiddleware`` middleware::
 
 ```
-    MIDDLEWARE_CLASSES = (
-        'django.middleware.common.CommonMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'defender.middleware.FailedLoginMiddleware'
-        )
+MIDDLEWARE_CLASSES = [
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'defender.middleware.FailedLoginMiddleware',
+]
 ```
 
 If you want to manage the blocked users via the Django admin, then add the
 following to your ``urls.py``
 
 ```
-urlpatterns = patterns(
-    '',
-    (r'^admin/', include(admin.site.urls)), # normal admin
-    (r'^admin/defender/', include('defender.urls')), # defender admin
-    # your own patterns follow…
-)
+urlpatterns = [
+    url(''),
+    url(r'^admin/', include(admin.site.urls)), # normal admin
+    url(r'^admin/defender/', include('defender.urls')), # defender admin
+    # your own patterns follow...
+]
 ```
 
-Management Commands:
---------------------
 
-``cleanup_django_defender``:
+Management Commands
+-------------------
+
+``cleanup_django_defender``
 
 If you have a website with a lot of traffic, the AccessAttempts table will get
 full pretty quickly. If you don't need to keep the data for auditing purposes
@@ -324,14 +338,16 @@ You can set this up as a daily or weekly cron job to keep the table size down.
 ```
 
 
-Admin Pages:
-------------
+Admin Pages
+-----------
+
 ![alt tag](https://cloud.githubusercontent.com/assets/261601/5950540/8895b570-a729-11e4-9dc3-6b00e46c8043.png)
 
 ![alt tag](https://cloud.githubusercontent.com/assets/261601/5950541/88a35194-a729-11e4-981b-3a55b44ef9d5.png)
 
-Database tables:
-----------------
+
+Database tables
+---------------
 
 You will need to create tables in your database that are necessary
 for operation.
@@ -390,6 +406,7 @@ command cleans them up.
 * ``DEFENDER_GET_USERNAME_FROM_REQUEST_PATH``: String: The import path of the function that access username from request.
 If you want to use custom function to access and process username from request - you can specify it here.
 [Default: ``defender.utils.username_from_request``]
+
 
 Adapting to other authentication method
 --------------------
@@ -476,7 +493,7 @@ To make it works add `BasicAuthenticationDefender` to `DEFAULT_AUTHENTICATION_CL
 
 
 Django Signals
---------------------
+--------------
 
 `django-defender` will send signals when blocking a username or an IP address. To set up signal receiver functions:
 
@@ -494,6 +511,7 @@ def ip_blocked(ip_address, **kwargs):
 
 ```
 
+
 Running Tests
 =============
 
@@ -509,6 +527,7 @@ With Code coverage:
 ```
 PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
 ```
+
 
 How to release
 ==============
