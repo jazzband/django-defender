@@ -17,7 +17,7 @@ env:
 services:
   - redis-server
 install:
-  - pip install coveralls mockredispy django-redis-cache celery<5
+  - pip install coveralls mockredispy django-redis-cache "celery<5"
   - pip install -q django~=$DJANGO
   - python setup.py develop
 script:
