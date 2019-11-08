@@ -1,34 +1,28 @@
 language: python
-
 dist: xenial
-
+cache: pip
 python:
   - "2.7"
   - "3.4"
   - "3.5"
   - "3.6"
-
+  - "3.7"
+  - "3.8"
+  - "pypy3"
 env:
   - DJANGO=1.11
   - DJANGO=2.0
   - DJANGO=2.1
   - DJANGO=2.2
-
 services:
   - redis-server
-
 install:
-  - pip install -q django~=$DJANGO.0
-  - pip install coveralls
-  - pip install mockredispy
-  - pip install django-redis-cache
-  - pip install 'celery<5'
+  - pip install coveralls mockredispy django-redis-cache celery<5
+  - pip install -q django~=$DJANGO
   - python setup.py develop
-
 script:
   - PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.travis_settings
   - coverage report -m
-
 matrix:
   exclude:
     - python: "2.7"
@@ -43,6 +37,5 @@ matrix:
       env: DJANGO=2.1
     - python: "3.4"
       env: DJANGO=2.2
-
 after_success:
   - coveralls --verbose
