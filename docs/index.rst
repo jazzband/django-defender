@@ -6,9 +6,16 @@
 django-defender documentation
 =============================
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :numbered: 1
+
+   1_readme
+   2_contributing
+   3_changelog
 
 
 
