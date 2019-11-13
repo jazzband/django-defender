@@ -3,7 +3,6 @@ dist: xenial
 cache: pip
 python:
   - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7"
@@ -11,7 +10,6 @@ python:
   - "pypy3"
 env:
   - DJANGO=1.11
-  - DJANGO=2.0
   - DJANGO=2.1
   - DJANGO=2.2
 services:
@@ -26,16 +24,8 @@ script:
 matrix:
   exclude:
     - python: "2.7"
-      env: DJANGO=2.0
-    - python: "2.7"
       env: DJANGO=2.1
     - python: "2.7"
-      env: DJANGO=2.2
-    - python: "3.4"
-      env: DJANGO=2.0
-    - python: "3.4"
-      env: DJANGO=2.1
-    - python: "3.4"
       env: DJANGO=2.2
 after_success:
   - coveralls --verbose
