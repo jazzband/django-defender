@@ -10,8 +10,12 @@ from django.utils.module_loading import import_string
 from .connection import get_redis_connection
 from . import config
 from .data import store_login_attempt
-from .signals import (send_username_block_signal, send_ip_block_signal,
-                      send_username_unblock_signal, send_ip_unblock_signal)
+from .signals import (
+    send_username_block_signal,
+    send_ip_block_signal,
+    send_username_unblock_signal,
+    send_ip_unblock_signal,
+)
 
 REDIS_SERVER = get_redis_connection()
 
@@ -33,18 +37,18 @@ def is_valid_ip(ip_address):
 def get_ip_address_from_request(request):
     """ Makes the best attempt to get the client's real IP or return
         the loopback """
-    remote_addr = request.META.get('REMOTE_ADDR', '')
+    remote_addr = request.META.get("REMOTE_ADDR", "")
     if remote_addr and is_valid_ip(remote_addr):
         return remote_addr.strip()
-    return '127.0.0.1'
+    return "127.0.0.1"
 
 
 def get_ip(request):
     """ get the ip address from the request """
     if config.BEHIND_REVERSE_PROXY:
-        ip_address = request.META.get(config.REVERSE_PROXY_HEADER, '')
+        ip_address = request.META.get(config.REVERSE_PROXY_HEADER, "")
         ip_address = ip_address.split(",", 1)[0].strip()
-        if ip_address == '':
+        if ip_address == "":
             ip_address = get_ip_address_from_request(request)
     else:
         ip_address = get_ip_address_from_request(request)
@@ -68,8 +72,9 @@ def get_ip_attempt_cache_key(ip_address):
 
 def get_username_attempt_cache_key(username):
     """ get the cache key by username """
-    return "{0}:failed:username:{1}".format(config.CACHE_PREFIX,
-                                            lower_username(username))
+    return "{0}:failed:username:{1}".format(
+        config.CACHE_PREFIX, lower_username(username)
+    )
 
 
 def get_ip_blocked_cache_key(ip_address):
@@ -79,8 +84,9 @@ def get_ip_blocked_cache_key(ip_address):
 
 def get_username_blocked_cache_key(username):
     """ get the cache key by username """
-    return "{0}:blocked:username:{1}".format(config.CACHE_PREFIX,
-                                             lower_username(username))
+    return "{0}:blocked:username:{1}".format(
+        config.CACHE_PREFIX, lower_username(username)
+    )
 
 
 def strip_keys(key_list):
@@ -105,8 +111,7 @@ def get_blocked_ips():
         # There are no blocked IP's since we disabled them.
         return []
     key = get_ip_blocked_cache_key("*")
-    key_list = [redis_key.decode('utf-8')
-                for redis_key in REDIS_SERVER.keys(key)]
+    key_list = [redis_key.decode("utf-8") for redis_key in REDIS_SERVER.keys(key)]
     return strip_keys(key_list)
 
 
@@ -116,8 +121,7 @@ def get_blocked_usernames():
         # There are no blocked usernames since we disabled them.
         return []
     key = get_username_blocked_cache_key("*")
-    key_list = [redis_key.decode('utf-8')
-                for redis_key in REDIS_SERVER.keys(key)]
+    key_list = [redis_key.decode("utf-8") for redis_key in REDIS_SERVER.keys(key)]
     return strip_keys(key_list)
 
 
@@ -138,9 +142,7 @@ def username_from_request(request):
     return None
 
 
-get_username_from_request = import_string(
-    config.GET_USERNAME_FROM_REQUEST_PATH
-)
+get_username_from_request = import_string(config.GET_USERNAME_FROM_REQUEST_PATH)
 
 
 def get_user_attempts(request, get_username=get_username_from_request, username=None):
@@ -177,9 +179,9 @@ def block_ip(ip_address):
     already_blocked = is_source_ip_already_locked(ip_address)
     key = get_ip_blocked_cache_key(ip_address)
     if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
+        REDIS_SERVER.set(key, "blocked", config.COOLOFF_TIME)
     else:
-        REDIS_SERVER.set(key, 'blocked')
+        REDIS_SERVER.set(key, "blocked")
     if not already_blocked:
         send_ip_block_signal(ip_address)
 
@@ -195,9 +197,9 @@ def block_username(username):
     already_blocked = is_user_already_locked(username)
     key = get_username_blocked_cache_key(username)
     if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, 'blocked', config.COOLOFF_TIME)
+        REDIS_SERVER.set(key, "blocked", config.COOLOFF_TIME)
     else:
-        REDIS_SERVER.set(key, 'blocked')
+        REDIS_SERVER.set(key, "blocked")
     if not already_blocked:
         send_username_block_signal(username)
 
@@ -291,9 +293,9 @@ def lockout_response(request):
     """ if we are locked out, here is the response """
     if config.LOCKOUT_TEMPLATE:
         context = {
-            'cooloff_time_seconds': config.COOLOFF_TIME,
-            'cooloff_time_minutes': config.COOLOFF_TIME / 60,
-            'failure_limit': config.FAILURE_LIMIT,
+            "cooloff_time_seconds": config.COOLOFF_TIME,
+            "cooloff_time_minutes": config.COOLOFF_TIME / 60,
+            "failure_limit": config.FAILURE_LIMIT,
         }
         return render(request, config.LOCKOUT_TEMPLATE, context)
 
@@ -301,11 +303,14 @@ def lockout_response(request):
         return HttpResponseRedirect(config.LOCKOUT_URL)
 
     if config.COOLOFF_TIME:
-        return HttpResponse("Account locked: too many login attempts.  "
-                            "Please try again later.")
+        return HttpResponse(
+            "Account locked: too many login attempts.  " "Please try again later."
+        )
     else:
-        return HttpResponse("Account locked: too many login attempts.  "
-                            "Contact an admin to unlock your account.")
+        return HttpResponse(
+            "Account locked: too many login attempts.  "
+            "Contact an admin to unlock your account."
+        )
 
 
 def is_user_already_locked(username):
@@ -339,9 +344,9 @@ def is_already_locked(request, get_username=get_username_from_request, username=
     return ip_blocked or user_blocked
 
 
-def check_request(request, login_unsuccessful,
-                  get_username=get_username_from_request,
-                  username=None):
+def check_request(
+    request, login_unsuccessful, get_username=get_username_from_request, username=None
+):
     """ check the request, and process results"""
     ip_address = get_ip(request)
     username = username or get_username(request)
@@ -355,9 +360,9 @@ def check_request(request, login_unsuccessful,
         return record_failed_attempt(ip_address, username)
 
 
-def add_login_attempt_to_db(request, login_valid,
-                            get_username=get_username_from_request,
-                            username=None):
+def add_login_attempt_to_db(
+    request, login_valid, get_username=get_username_from_request, username=None
+):
     """ Create a record for the login attempt If using celery call celery
     task, if not, call the method normally """
 
@@ -367,15 +372,18 @@ def add_login_attempt_to_db(request, login_valid,
 
     username = username or get_username(request)
 
-    user_agent = request.META.get('HTTP_USER_AGENT', '<unknown>')[:255]
+    user_agent = request.META.get("HTTP_USER_AGENT", "<unknown>")[:255]
     ip_address = get_ip(request)
-    http_accept = request.META.get('HTTP_ACCEPT', '<unknown>')
-    path_info = request.META.get('PATH_INFO', '<unknown>')
+    http_accept = request.META.get("HTTP_ACCEPT", "<unknown>")
+    path_info = request.META.get("PATH_INFO", "<unknown>")
 
     if config.USE_CELERY:
         from .tasks import add_login_attempt_task
-        add_login_attempt_task.delay(user_agent, ip_address, username,
-                                     http_accept, path_info, login_valid)
+
+        add_login_attempt_task.delay(
+            user_agent, ip_address, username, http_accept, path_info, login_valid
+        )
     else:
-        store_login_attempt(user_agent, ip_address, username,
-                            http_accept, path_info, login_valid)
+        store_login_attempt(
+            user_agent, ip_address, username, http_accept, path_info, login_valid
+        )
