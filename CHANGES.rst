@@ -3,6 +3,14 @@ Changes
 =======
 
 
+WIP
+---
+
+- Remove support from deprecated Python 3.4 and Django 2.0. [@aleksihakli]
+- Add Read the Docs documentation. [@aleksihakli]
+- Add support for Python 3.7, Python 3.8, PyPy3. [@aleksihakli]
+
+
 0.6.2
 -----
 
