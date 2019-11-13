@@ -1,6 +1,6 @@
 
 Contributing
-============
+------------
 
 .. image:: https://jazzband.co/static/img/jazzband.svg
    :target: https://jazzband.co/
