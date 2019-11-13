@@ -96,19 +96,25 @@ Requirements
 Installation
 ------------
 
-Download code, and run setup.
+Download code, and run setup in one of the following ways depending on the method.
 
-.. code-block::
+To install the production ready version from PyPI:
 
-   $ pip install django-defender
+.. code-block:: bash
 
-   or
+   pip install django-defender
 
-   $ python setup.py install
+To install the development version from source code after download:
 
-   or
+.. code-block:: bash
 
-   $ pip install -e git+http://github.com/kencochran django-defender.git#egg=django_defender-dev
+   python setup.py install
+
+To install the master branch development version from the GitHub repository:
+
+.. code-block:: bash
+
+   pip install -e git+http://github.com/kencochran django-defender.git#egg=django_defender-dev
 
 First of all, you must add this project to your list of ``INSTALLED_APPS`` in
 ``settings.py``
@@ -464,13 +470,13 @@ Running tests
 Tests can be run, after you clone the repository and having Django installed,
 like:
 
-.. code-block::
+.. code-block:: bash
 
-   $ PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
+   PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
 
 With Code coverage:
 
-.. code-block::
+.. code-block:: bash
 
    PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
 
