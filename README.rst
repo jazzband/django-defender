@@ -481,8 +481,8 @@ With Code coverage:
    PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
 
 
-How to release
---------------
+Releasing
+---------
 
 #. ``python setup.py sdist``
 #. ``twine upload dist/*``
