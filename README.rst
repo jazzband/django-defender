@@ -34,6 +34,14 @@ If you are using defender on your site, submit a PR to add to the list.
 * https://www.mycosbuilder.com
 
 
+Documentation
+-------------
+
+Documentation is available on Read the Docs:
+
+https://django-defender.readthedocs.io
+
+
 Features
 --------
 
