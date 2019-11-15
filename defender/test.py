@@ -14,9 +14,11 @@ class DefenderTestCaseMixin(object):
 
 class DefenderTransactionTestCase(DefenderTestCaseMixin, TransactionTestCase):
     """Helper TransactionTestCase that cleans the cache after each test"""
+
     pass
 
 
 class DefenderTestCase(DefenderTestCaseMixin, TestCase):
     """Helper TestCase that cleans the cache after each test"""
+
     pass

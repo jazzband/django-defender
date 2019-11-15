@@ -10,6 +10,7 @@ from .decorators import watch_login
 
 class FailedLoginMiddleware(MIDDLEWARE_BASE_CLASS):
     """ Failed login middleware """
+
     patched = False
 
     def __init__(self, *args, **kwargs):
@@ -22,6 +23,7 @@ class FailedLoginMiddleware(MIDDLEWARE_BASE_CLASS):
             # `LoginView` class-based view
             try:
                 from django.contrib.auth.views import LoginView
+
                 our_decorator = watch_login()
                 watch_login_method = method_decorator(our_decorator)
                 LoginView.dispatch = watch_login_method(LoginView.dispatch)

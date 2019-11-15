@@ -7,9 +7,9 @@ from django.conf.urls.static import static
 admin.autodiscover()
 
 urlpatterns = patterns(
-    '',
-    (r'^admin/', include(admin.site.urls)),
-    (r'^admin/defender/', include('defender.urls')),
+    "",
+    (r"^admin/", include(admin.site.urls)),
+    (r"^admin/defender/", include("defender.urls")),
 )
 
 

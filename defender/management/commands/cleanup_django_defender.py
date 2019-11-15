@@ -10,6 +10,7 @@ from ... import config
 
 class Command(BaseCommand):
     """ clean up management command """
+
     help = "Cleans up django-defender AccessAttempt table"
 
     def handle(self, **options):
@@ -31,5 +32,6 @@ class Command(BaseCommand):
 
         print(
             "Finished. Removed {0} AccessAttempt entries.".format(
-                attempts_to_clean_count)
+                attempts_to_clean_count
+            )
         )
