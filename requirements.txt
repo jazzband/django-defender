@@ -1,5 +1,4 @@
 -e .
-coveralls
 mockredispy
 django-redis-cache
 celery<5
