@@ -2,15 +2,27 @@ language: python
 dist: xenial
 cache: pip
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "pypy3"
+- '2.7'
+- '3.5'
+- '3.6'
+- '3.7'
+- '3.8'
+- pypy3
 services:
-  - redis-server
+- redis-server
 install: pip install tox-travis codecov
 script: tox
 after_success:
-  - codecov
+- codecov
+deploy:
+  provider: pypi
+  user: jazzband
+  server: https://jazzband.co/projects/django-defender/upload
+  distributions: sdist bdist_wheel
+  skip_existing: true
+  password:
+    secure: d/PVFgBDMpG6UvBOxXBLH4vc7+tiPsjhq4YLgXfX0iXbdNHUnnCyDLg/XUQ7x0e7kRj+lhmBzytZxu3IpOY+5MuWk4JTqwoBHGuUlmTC9XEVvioqd/nFW7qVe36YKZHKuMDlmwBNQarJZdSBUFAoCfklZKI09sXA1qc8E3BLAb8=
+  on:
+    tags: true
+    repo: jazzband/django-defender
+    python: 3.7
