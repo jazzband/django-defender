@@ -1,0 +1,6 @@
+-e .
+coverage
+mockredispy
+django-redis-cache
+celery<5
+mock; python_version < '3.0'

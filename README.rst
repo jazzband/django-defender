@@ -10,9 +10,9 @@ django-defender
    :target: https://travis-ci.org/jazzband/django-defender
    :alt: Build Status
 
-.. image:: https://img.shields.io/coveralls/jazzband/django-defender.svg
-   :target: https://coveralls.io/r/jazzband/django-defender
-   :alt: Coverage Status
+.. image:: https://codecov.io/gh/jazzband/django-defender/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/jazzband/django-defender
+   :alt: Coverage
 
 
 A simple Django reusable app that blocks people from brute forcing login
