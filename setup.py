@@ -1,26 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import os
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 version = "0.6.2"
-
-
-def get_packages(package):
-    """
-    Return root package and all sub-packages.
-    """
-    return [
-        dirpath
-        for dirpath, dirnames, filenames in os.walk(package)
-        if os.path.exists(os.path.join(dirpath, "__init__.py"))
-    ]
 
 
 def get_package_data(package):
@@ -72,7 +56,7 @@ setup(
     author_email="kencochrane@gmail.com",
     license="Apache 2",
     include_package_data=True,
-    packages=get_packages("defender"),
+    packages=find_packages(),
     package_data=get_package_data("defender"),
     install_requires=["Django>=1.8,<2.3", "redis>=2.10.3,<3.3"],
     tests_require=[
