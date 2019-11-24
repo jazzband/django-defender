@@ -21,9 +21,11 @@ project = "django-defender"
 copyright = "2014, Ken Cochrane"
 author = "Ken Cochrane"
 
-# The full version, including alpha/beta/rc tags
-release = "0.6.2"
+# The full version, including alpha/beta/rc tags.
+release = get_distribution("django-defender").version
 
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 

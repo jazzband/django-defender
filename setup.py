@@ -4,9 +4,6 @@ import os
 from setuptools import setup, find_packages
 
 
-version = "0.6.2"
-
-
 def get_package_data(package):
     """
     Return all files under the root package, that are not in a
@@ -26,7 +23,8 @@ def get_package_data(package):
 
 setup(
     name="django-defender",
-    version=version,
+    use_scm_version=True,
+    setup_requires=["setuptools_scm"],
     description="redis based Django app that locks out users after too "
     "many failed login attempts.",
     long_description="redis based Django app based on speed, that locks out"
