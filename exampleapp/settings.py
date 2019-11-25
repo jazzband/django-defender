@@ -30,7 +30,7 @@ MIDDLEWARE = (
     "defender.middleware.FailedLoginMiddleware",
 )
 
-ROOT_URLCONF = "defender.exampleapp.urls"
+ROOT_URLCONF = "exampleapp.urls"
 
 INSTALLED_APPS = [
     "django.contrib.auth",
@@ -61,7 +61,7 @@ DEFENDER_REDIS_URL = "redis://localhost:6379/1"
 DEFENDER_MOCK_REDIS = False
 # Let's use custom function and strip username string from request.
 DEFENDER_GET_USERNAME_FROM_REQUEST_PATH = (
-    "defender.exampleapp.utils.strip_username_from_request"
+    "exampleapp.utils.strip_username_from_request"
 )
 
 # Celery settings:
@@ -70,7 +70,7 @@ BROKER_BACKEND = "memory"
 BROKER_URL = "memory://"
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "defender.exampleapp.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "exampleapp.settings")
 
 app = Celery("defender")
 

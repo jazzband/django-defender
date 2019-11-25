@@ -22,6 +22,7 @@ var/
 .installed.cfg
 *.egg
 MANIFEST
+.eggs
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -55,5 +56,5 @@ docs/_build/
 target/
 
 # exampleapp
-defender/exampleapp/static/
-defender/exampleapp/media/
+exampleapp/static/
+exampleapp/media/
