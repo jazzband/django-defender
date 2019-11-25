@@ -1,6 +1,12 @@
-include CONTRIBUTING.rst
+include .coveragerc
 include CHANGES.rst
-include README.rst
+include CONTRIBUTING.rst
 include LICENSE
+include README.rst
+include requirements.txt
+include tox.ini
+recursive-include docs *
+recursive-include exampleapp *
 recursive-include defender/templates *.html
 recursive-exclude * *.py[co]
+prune .eggs

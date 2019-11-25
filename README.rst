@@ -14,6 +14,10 @@ django-defender
    :target: https://codecov.io/gh/jazzband/django-defender
    :alt: Coverage
 
+.. image:: https://readthedocs.org/projects/python-dockerflow/badge/?version=latest
+   :alt: Documentation Status
+   :target: https://django-defender.readthedocs.io/en/latest/?badge=latest
+
 
 A simple Django reusable app that blocks people from brute forcing login
 attempts. The goal is to make this as fast as possible, so that we do not
