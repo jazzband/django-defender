@@ -9,3 +9,4 @@ recursive-include docs *
 recursive-include exampleapp *
 recursive-include defender/templates *.html
 recursive-exclude * *.py[co]
+prune .eggs
