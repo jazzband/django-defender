@@ -1,7 +1,13 @@
 from __future__ import unicode_literals
 
+import django
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
+if django.VERSION[0] < 3:
+    from django.utils.encoding import python_2_unicode_compatible
+else:
+    # noop stub
+    def python_2_unicode_compatible(cls):
+        return cls
 
 
 @python_2_unicode_compatible
