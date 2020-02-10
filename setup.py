@@ -56,7 +56,7 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     package_data=get_package_data("defender"),
-    install_requires=["Django>=1.8,<2.3,>=3.0", "redis>=2.10.3,<3.3,>=3.4"],
+    install_requires=["Django<=3.1", "redis<=3.5"],
     tests_require=[
         "mock",
         "mockredispy>=2.9.0.11,<3.0",
