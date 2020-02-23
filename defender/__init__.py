@@ -1,3 +1,3 @@
-from pkg_resources import get_distribution
+VERSION = (0, 7, 0)
 
-__version__ = get_distribution("django-defender").version
+__version__ = ".".join((map(str, VERSION)))
