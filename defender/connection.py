@@ -35,7 +35,8 @@ def get_redis_connection():
             # django_redis.cache.RedisCache case (django-redis package)
             return cache.client.get_client(True)
     else:  # pragma: no cover
-        redis_config = parse_redis_url(config.DEFENDER_REDIS_URL)
+        redis_config = parse_redis_url(
+            config.DEFENDER_REDIS_URL, config.DEFENDER_REDIS_PASSWORD_QUOTE)
         return redis.StrictRedis(
             host=redis_config.get("HOST"),
             port=redis_config.get("PORT"),
@@ -45,7 +46,7 @@ def get_redis_connection():
         )
 
 
-def parse_redis_url(url):
+def parse_redis_url(url, password_quote):
     """Parses a redis URL."""
 
     # create config with some sane defaults
@@ -68,7 +69,10 @@ def parse_redis_url(url):
     if path:
         redis_config.update({"DB": int(path)})
     if url.password:
-        redis_config.update({"PASSWORD": url.password})
+        password = url.password
+        if password_quote:
+            password = urlparse.unquote(password)
+        redis_config.update({"PASSWORD": password})
     if url.hostname:
         redis_config.update({"HOST": url.hostname})
     if url.port:

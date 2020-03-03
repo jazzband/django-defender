@@ -357,6 +357,8 @@ These should be defined in your ``settings.py`` file.
 * ``DEFENDER_REDIS_URL``\ : String: the redis url for defender.
   [Default: ``redis://localhost:6379/0``\ ]
   (Example with password: ``redis://:mypassword@localhost:6379/0``\ )
+* ``DEFENDER_REDIS_PASSWORD_QUOTE``\ : Boolean: if special character in redis password(like '@'), we can quote password(urllib.quote_plus("password!@#")), and set to True.
+  [Default: ``False``\ ]
 * ``DEFENDER_REDIS_NAME``\ : String: the name of your cache client on the CACHES django setting. If set, ``DEFENDER_REDIS_URL`` will be ignored.
   [Default: ``None``\ ]
 * ``DEFENDER_STORE_ACCESS_ATTEMPTS``\ : Boolean: If you want to store the login

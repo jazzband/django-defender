@@ -11,6 +11,9 @@ def get_setting(variable, default=None):
 # redis server host
 DEFENDER_REDIS_URL = get_setting("DEFENDER_REDIS_URL")
 
+# redis password quote for special character
+DEFENDER_REDIS_PASSWORD_QUOTE = get_setting("DEFENDER_REDIS_PASSWORD_QUOTE", False)
+
 # reuse declared cache from django settings
 DEFENDER_REDIS_NAME = get_setting("DEFENDER_REDIS_NAME")
 
