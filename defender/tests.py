@@ -540,6 +540,20 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("PASSWORD"), None)
         self.assertEqual(conf.get("PORT"), 1234)
 
+        # password with special character and set the password_quote = True
+        conf = parse_redis_url("redis://:calmkart%23%40%21@localhost:6379/0", True)
+        self.assertEqual(conf.get("HOST"), "localhost")
+        self.assertEqual(conf.get("DB"), 0)
+        self.assertEqual(conf.get("PASSWORD"), "calmkart#@!")
+        self.assertEqual(conf.get("PORT"), 6379)
+
+        # password without special character and set the password_quote = True
+        conf = parse_redis_url("redis://:password@localhost2:1234", True)
+        self.assertEqual(conf.get("HOST"), "localhost2")
+        self.assertEqual(conf.get("DB"), 0)
+        self.assertEqual(conf.get("PASSWORD"), "password")
+        self.assertEqual(conf.get("PORT"), 1234)
+
     @patch("defender.config.DEFENDER_REDIS_NAME", "default")
     def test_get_redis_connection_django_conf(self):
         """ get the redis connection """
