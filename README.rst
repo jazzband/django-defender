@@ -446,14 +446,14 @@ There's sample ``BasicAuthenticationDefender`` class based on ``djangorestframew
            utils.add_login_attempt_to_db(request,
                                          login_valid=not login_unsuccessful,
                                          get_username=self.get_username_from_request)
+           # add the failed attempt to Redis in case of a failed login or resets the attempt count in case of success
+           utils.check_request(request,
+                               login_unsuccessful=login_unsuccessful,
+                               get_username=self.get_username_from_request)
+           if login_unsuccessful:
+               raise login_exception
 
-           user_not_blocked = utils.check_request(request,
-                                                  login_unsuccessful=login_unsuccessful,
-                                                  get_username=self.get_username_from_request)
-           if user_not_blocked and not login_unsuccessful:
-               return response
-
-           raise login_exception
+           return response
 
 To make it work add ``BasicAuthenticationDefender`` to ``DEFAULT_AUTHENTICATION_CLASSES`` above all other authentication methods in your ``settings.py``.
 
