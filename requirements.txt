@@ -1,6 +1,6 @@
 -e .
 coverage
 mockredispy
-django-redis-cache
+django-redis-cache==2.1.1
 celery<5
 mock; python_version < '3.0'
