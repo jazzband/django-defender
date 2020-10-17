@@ -2,6 +2,13 @@
 Changes
 =======
 
+0.8.0
+-----
+
+- FIX: Change setup.py to allow for Django 3.1.x versions [@s4ke]
+- FIX: dynamic load celery [@balsagoth]
+- FIX: Redis requirement updated [@flaviomartins]
+- FIX: if special character in redis password, we can set DEFENDER_REDIS_PASSWORD_QUOTE to True, and use quote password [@calmkart]
 
 0.7.0
 -----
