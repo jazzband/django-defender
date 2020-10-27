@@ -46,7 +46,7 @@ def get_redis_connection():
         )
 
 
-def parse_redis_url(url, password_quote):
+def parse_redis_url(url, password_quote=None):
     """Parses a redis URL."""
 
     # create config with some sane defaults
