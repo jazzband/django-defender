@@ -6,6 +6,10 @@ django-defender
    :target: https://jazzband.co/
    :alt: Jazzband
 
+.. image:: https://img.shields.io/pypi/pyversions/django-defender.svg
+    :alt: Supported Python versions
+    :target: https://pypi.org/project/django-defender/
+
 .. image:: https://travis-ci.org/jazzband/django-defender.svg
    :target: https://travis-ci.org/jazzband/django-defender
    :alt: Build Status
@@ -100,7 +104,7 @@ Admin pages
 Requirements
 ------------
 
-* Python: 2.7, 3.5, 3.6, 3.7, 3.8, PyPy
+* Python: 3.5, 3.6, 3.7, 3.8, PyPy
 * Django: 1.11, 2.1, 2.2, 3.x
 * Redis
 

@@ -8,7 +8,7 @@ class DefenderTestCaseMixin(object):
 
     def tearDown(self):
         """cleanup django-defender cache after each test"""
-        super(DefenderTestCaseMixin, self).tearDown()
+        super().tearDown()
         get_redis_connection().flushdb()
 
 

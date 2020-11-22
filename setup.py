@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from setuptools import setup, find_packages
 
@@ -36,7 +35,8 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
@@ -56,9 +56,9 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     package_data=get_package_data("defender"),
+    python_requires='~=3.5',
     install_requires=["Django>=1.8,<3.2", "redis<3.6"],
     tests_require=[
-        "mock",
         "mockredispy>=2.9.0.11,<3.0",
         "coverage",
         "celery",
