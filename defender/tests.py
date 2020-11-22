@@ -2,12 +2,7 @@ import random
 import string
 import time
 from distutils.version import StrictVersion
-
-# Python 3 has mock in the stdlib
-try:
-    from mock import patch
-except ImportError:
-    from unittest.mock import patch
+from unittest.mock import patch
 
 from django import get_version
 from django.contrib.auth.models import User

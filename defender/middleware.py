@@ -14,7 +14,7 @@ class FailedLoginMiddleware(MIDDLEWARE_BASE_CLASS):
     patched = False
 
     def __init__(self, *args, **kwargs):
-        super(FailedLoginMiddleware, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Watch the auth login.
         # Monkey-patch only once - otherwise we would be recording
         # failed attempts multiple times!
