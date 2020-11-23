@@ -1,5 +1,8 @@
 import os
+
+import django
 from celery import Celery
+
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:",}}
 
@@ -42,6 +45,8 @@ TEMPLATES = [
         },
     },
 ]
+if django.VERSION > (3, 1):
+    TEMPLATES[0]["OPTIONS"]["context_processors"].append("django.template.context_processors.request")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "too-secret-for-test")
 

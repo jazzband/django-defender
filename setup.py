@@ -44,6 +44,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -60,7 +61,7 @@ setup(
     packages=find_packages(),
     package_data=get_package_data("defender"),
     python_requires='~=3.5',
-    install_requires=["Django>=1.8,<3.2", "redis<3.6"],
+    install_requires=["Django>=2.2,<3.2", "redis<3.6"],
     tests_require=[
         "mockredispy>=2.9.0.11,<3.0",
         "coverage",
