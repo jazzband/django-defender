@@ -10,6 +10,10 @@ django-defender
     :alt: Supported Python versions
     :target: https://pypi.org/project/django-defender/
 
+.. image:: https://img.shields.io/pypi/djversions/django-defender.svg
+   :target: https://pypi.org/project/django-defender/
+   :alt: Supported Django versions
+
 .. image:: https://travis-ci.org/jazzband/django-defender.svg
    :target: https://travis-ci.org/jazzband/django-defender
    :alt: Build Status
@@ -104,8 +108,8 @@ Admin pages
 Requirements
 ------------
 
-* Python: 3.5, 3.6, 3.7, 3.8, PyPy
-* Django: 1.11, 2.1, 2.2, 3.x
+* Python: 3.6, 3.7, 3.8, PyPy
+* Django: 2.2, 3.x
 * Redis
 
 
@@ -165,8 +169,8 @@ following to your ``urls.py``
 .. code-block:: python
 
    urlpatterns = [
-       url(r'^admin/', include(admin.site.urls)), # normal admin
-       url(r'^admin/defender/', include('defender.urls')), # defender admin
+       path('admin/', include(admin.site.urls)), # normal admin
+       path('admin/defender/', include('defender.urls')), # defender admin
        # your own patterns follow...
    ]
 
@@ -674,13 +678,13 @@ like:
 
 .. code-block:: bash
 
-   PYTHONPATH=$PYTHONPATH:$PWD django-admin.py test defender --settings=defender.test_settings
+   PYTHONPATH=$PYTHONPATH:$PWD django-admin test defender --settings=defender.test_settings
 
 With Code coverage:
 
 .. code-block:: bash
 
-   PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin.py) test defender --settings=defender.test_settings
+   PYTHONPATH=$PYTHONPATH:$PWD coverage run --source=defender $(which django-admin) test defender --settings=defender.test_settings
 
 
 Releasing
