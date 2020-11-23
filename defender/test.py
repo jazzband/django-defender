@@ -3,7 +3,7 @@ from django.test.testcases import TestCase, TransactionTestCase
 from .connection import get_redis_connection
 
 
-class DefenderTestCaseMixin(object):
+class DefenderTestCaseMixin:
     """Mixin used to provide a common tearDown method"""
 
     def tearDown(self):
