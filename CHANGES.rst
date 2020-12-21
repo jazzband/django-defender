@@ -2,6 +2,11 @@
 Changes
 =======
 
+Unreleased
+----------
+
+- Move CI to GitHub Actions.
+
 0.8.0
 -----
 
