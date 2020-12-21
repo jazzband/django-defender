@@ -59,7 +59,7 @@ LOGIN_REDIRECT_URL = "/admin"
 DEFENDER_LOGIN_FAILURE_LIMIT = 10
 DEFENDER_COOLOFF_TIME = 2
 DEFENDER_REDIS_URL = "redis://localhost:6379/1"
-# don't use mock redis in unit tests, we will use real redis on travis.
+# don't use mock redis in unit tests, we will use real redis on CI.
 DEFENDER_MOCK_REDIS = False
 
 # Celery settings:
@@ -68,7 +68,7 @@ BROKER_BACKEND = "memory"
 BROKER_URL = "memory://"
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "defender.travis_settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "defender.ci_settings")
 
 app = Celery("defender")
 

@@ -14,15 +14,15 @@ django-defender
    :target: https://pypi.org/project/django-defender/
    :alt: Supported Django versions
 
-.. image:: https://travis-ci.org/jazzband/django-defender.svg
-   :target: https://travis-ci.org/jazzband/django-defender
-   :alt: Build Status
+.. image:: https://github.com/jazzband/django-defender/workflows/Test/badge.svg
+   :target: https://github.com/jazzband/django-defender/actions
+   :alt: GitHub Actions
 
 .. image:: https://codecov.io/gh/jazzband/django-defender/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/jazzband/django-defender
    :alt: Coverage
 
-.. image:: https://readthedocs.org/projects/python-dockerflow/badge/?version=latest
+.. image:: https://readthedocs.org/projects/python-defender/badge/?version=latest
    :alt: Documentation Status
    :target: https://django-defender.readthedocs.io/en/latest/?badge=latest
 
