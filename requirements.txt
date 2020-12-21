@@ -2,4 +2,4 @@
 coverage
 mockredispy
 django-redis-cache
-celery<5
+celery
