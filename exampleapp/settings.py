@@ -57,7 +57,7 @@ LOGIN_REDIRECT_URL = "/admin"
 DEFENDER_LOGIN_FAILURE_LIMIT = 1
 DEFENDER_COOLOFF_TIME = 60
 DEFENDER_REDIS_URL = "redis://localhost:6379/1"
-# don't use mock redis in unit tests, we will use real redis on travis.
+# don't use mock redis in unit tests, we will use real redis on CI.
 DEFENDER_MOCK_REDIS = False
 # Let's use custom function and strip username string from request.
 DEFENDER_GET_USERNAME_FROM_REQUEST_PATH = (

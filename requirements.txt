@@ -1,5 +1,5 @@
 -e .
 coverage
 mockredispy
-django-redis-cache==2.1.1
-celery<5
+django-redis-cache
+celery
