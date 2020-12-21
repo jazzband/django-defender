@@ -22,7 +22,7 @@ django-defender
    :target: https://codecov.io/gh/jazzband/django-defender
    :alt: Coverage
 
-.. image:: https://readthedocs.org/projects/python-defender/badge/?version=latest
+.. image:: https://readthedocs.org/projects/django-defender/badge/?version=latest
    :alt: Documentation Status
    :target: https://django-defender.readthedocs.io/en/latest/?badge=latest
 
