@@ -33,12 +33,22 @@ def watch_login(status_code=302, msg="", get_username=utils.get_username_from_re
                         and response.status_code != status_code
                     )
                 else:
-                    # If msg is not passed the last condition will be evaluated
-                    # always to True so the first 2 will decide the result.
+                    # If msg is passed as None then response object will not be accessed
+                    # and response content will not be checked.
+                    # This is especially useful when overriding non standard login
+                    # views, like some custom Django REST login view.
+                    # If msg is not passed at all then msg condition will always be
+                    # evaluated to True so only first 2 will decide the result.
+                    contains_msg = True  # defaults to True if msg is None
+
+                    if msg is not None:
+                        # Check if response's content contains provided msg
+                        contains_msg = msg in response.content.decode("utf-8")
+
                     login_unsuccessful = (
                         response
                         and response.status_code == status_code
-                        and msg in response.content.decode("utf-8")
+                        and contains_msg
                     )
 
                 # ideally make this background task, but to keep simple,
