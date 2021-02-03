@@ -1,6 +1,7 @@
 import random
 import string
 import time
+from collections import namedtuple
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -32,8 +33,7 @@ UPPER_USERNAME = "VALID"
 
 
 class AccessAttemptTest(DefenderTestCase):
-    """ Test case using custom settings for testing
-    """
+    """Test case using custom settings for testing"""
 
     LOCKED_MESSAGE = "Account locked: too many login attempts."
     PERMANENT_LOCKED_MESSAGE = (
@@ -53,7 +53,7 @@ class AccessAttemptTest(DefenderTestCase):
         user_agent="test-browser",
         remote_addr="127.0.0.1",
     ):
-        """ Login a user. If the username or password is not provided
+        """Login a user. If the username or password is not provided
         it will use a random string instead. Use the VALID_USERNAME and
         VALID_PASSWORD to make a valid login.
         """
@@ -65,7 +65,11 @@ class AccessAttemptTest(DefenderTestCase):
 
         response = self.client.post(
             ADMIN_LOGIN_URL,
-            {"username": username, "password": password, LOGIN_FORM_KEY: 1,},
+            {
+                "username": username,
+                "password": password,
+                LOGIN_FORM_KEY: 1,
+            },
             HTTP_USER_AGENT=user_agent,
             REMOTE_ADDR=remote_addr,
         )
@@ -73,14 +77,15 @@ class AccessAttemptTest(DefenderTestCase):
         return response
 
     def setUp(self):
-        """ Create a valid user for login
-        """
+        """Create a valid user for login"""
         self.user = User.objects.create_superuser(
-            username=VALID_USERNAME, email="test@example.com", password=VALID_PASSWORD,
+            username=VALID_USERNAME,
+            email="test@example.com",
+            password=VALID_PASSWORD,
         )
 
     def test_data_integrity_of_get_blocked_ips(self):
-        """ Test whether data retrieved from redis via
+        """Test whether data retrieved from redis via
         get_blocked_ips() is the same as the data saved
         """
         data_in = ["127.0.0.1", "4.2.2.1"]
@@ -95,7 +100,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(sorted(data_in), sorted(data_out))
 
     def test_data_integrity_of_get_blocked_usernames(self):
-        """ Test whether data retrieved from redis via
+        """Test whether data retrieved from redis via
         get_blocked_usernames() is the same as the data saved
         """
         data_in = ["foo", "bar"]
@@ -115,7 +120,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_failure_limit_by_ip_once(self):
-        """ Tests the login lock by ip when trying to login
+        """Tests the login lock by ip when trying to login
         one more time than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
@@ -133,7 +138,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_failure_limit_by_ip_many(self):
-        """ Tests the login lock by ip when trying to
+        """Tests the login lock by ip when trying to
         login a lot of times more than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
@@ -153,7 +158,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_failure_limit_by_username_once(self):
-        """ Tests the login lock by username when trying to login
+        """Tests the login lock by username when trying to login
         one more time than failure limit
         """
         for i in range(0, config.FAILURE_LIMIT):
@@ -173,7 +178,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.USERNAME_FAILURE_LIMIT", 3)
     def test_username_failure_limit(self):
-        """ Tests that the username failure limit setting is
+        """Tests that the username failure limit setting is
         respected when trying to login one more time than failure limit
         """
         for i in range(0, config.USERNAME_FAILURE_LIMIT):
@@ -193,7 +198,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.IP_FAILURE_LIMIT", 3)
     def test_ip_failure_limit(self):
-        """ Tests that the IP failure limit setting is
+        """Tests that the IP failure limit setting is
         respected when trying to login one more time than failure limit
         """
         for i in range(0, config.IP_FAILURE_LIMIT):
@@ -212,14 +217,12 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_valid_login(self):
-        """ Tests a valid login for a real username
-        """
+        """Tests a valid login for a real username"""
         response = self._login(username=VALID_USERNAME, password=VALID_PASSWORD)
         self.assertNotContains(response, LOGIN_FORM_KEY, status_code=302)
 
     def test_reset_after_valid_login(self):
-        """ Tests the counter gets reset after a valid login
-        """
+        """Tests the counter gets reset after a valid login"""
         for i in range(0, config.FAILURE_LIMIT):
             self._login(username=VALID_USERNAME)
 
@@ -231,8 +234,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertNotContains(response, self.LOCKED_MESSAGE)
 
     def test_blocked_ip_cannot_login(self):
-        """ Test an user with blocked ip cannot login with another username
-        """
+        """Test an user with blocked ip cannot login with another username"""
         for i in range(0, config.FAILURE_LIMIT + 1):
             self._login(username=VALID_USERNAME)
 
@@ -241,7 +243,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_blocked_username_cannot_login(self):
-        """ Test an user with blocked username cannot login using
+        """Test an user with blocked username cannot login using
         another ip
         """
         for i in range(0, config.FAILURE_LIMIT + 1):
@@ -282,8 +284,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEquals(utils.lower_username(None), None)
 
     def test_cooling_off(self):
-        """ Tests if the cooling time allows a user to login
-        """
+        """Tests if the cooling time allows a user to login"""
         self.test_failure_limit_by_ip_once()
         # Wait for the cooling off period
         time.sleep(config.COOLOFF_TIME)
@@ -295,14 +296,12 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_valid_login()
 
     def test_cooling_off_for_trusted_user(self):
-        """ Test the cooling time for a trusted user
-        """
+        """Test the cooling time for a trusted user"""
         # Try the cooling off time
         self.test_cooling_off()
 
     def test_long_user_agent_valid(self):
-        """ Tests if can handle a long user agent
-        """
+        """Tests if can handle a long user agent"""
         long_user_agent = "ie6" * 1024
         response = self._login(
             username=VALID_USERNAME, password=VALID_PASSWORD, user_agent=long_user_agent
@@ -312,8 +311,7 @@ class AccessAttemptTest(DefenderTestCase):
     @patch("defender.config.BEHIND_REVERSE_PROXY", True)
     @patch("defender.config.REVERSE_PROXY_HEADER", "HTTP_X_FORWARDED_FOR")
     def test_get_ip_reverse_proxy(self):
-        """ Tests if can handle a long user agent
-        """
+        """Tests if can handle a long user agent"""
         request_factory = RequestFactory()
         request = request_factory.get(ADMIN_LOGIN_URL)
         request.user = AnonymousUser()
@@ -331,8 +329,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(utils.get_ip(request), "24.24.24.24")
 
     def test_get_ip(self):
-        """ Tests if can handle a long user agent
-        """
+        """Tests if can handle a long user agent"""
         request_factory = RequestFactory()
         request = request_factory.get(ADMIN_LOGIN_URL)
         request.user = AnonymousUser()
@@ -341,8 +338,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(utils.get_ip(request), "127.0.0.1")
 
     def test_long_user_agent_not_valid(self):
-        """ Tests if can handle a long user agent with failure
-        """
+        """Tests if can handle a long user agent with failure"""
         long_user_agent = "ie6" * 1024
         for i in range(0, config.FAILURE_LIMIT + 1):
             response = self._login(user_agent=long_user_agent)
@@ -350,8 +346,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertContains(response, self.LOCKED_MESSAGE)
 
     def test_reset_ip(self):
-        """ Tests if can reset an ip address
-        """
+        """Tests if can reset an ip address"""
         # Make a lockout
         self.test_failure_limit_by_ip_once()
 
@@ -363,8 +358,8 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.LOCKOUT_URL", "http://localhost/othe/login/")
     def test_failed_login_redirect_to_url(self):
-        """ Test to make sure that after lockout we send to the correct
-        redirect URL """
+        """Test to make sure that after lockout we send to the correct
+        redirect URL"""
 
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
@@ -384,8 +379,8 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.LOCKOUT_URL", "/o/login/")
     def test_failed_login_redirect_to_url_local(self):
-        """ Test to make sure that after lockout we send to the correct
-        redirect URL """
+        """Test to make sure that after lockout we send to the correct
+        redirect URL"""
 
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
@@ -407,8 +402,8 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.LOCKOUT_TEMPLATE", "defender/lockout.html")
     def test_failed_login_redirect_to_template(self):
-        """ Test to make sure that after lockout we send to the correct
-        template """
+        """Test to make sure that after lockout we send to the correct
+        template"""
 
         for i in range(0, config.FAILURE_LIMIT):
             response = self._login()
@@ -480,8 +475,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("PORT"), 1234)
 
         # full non local
-        conf = parse_redis_url(
-            "redis://user:pass@www.localhost.com:1234/2", False)
+        conf = parse_redis_url("redis://user:pass@www.localhost.com:1234/2", False)
         self.assertEqual(conf.get("HOST"), "www.localhost.com")
         self.assertEqual(conf.get("DB"), 2)
         self.assertEqual(conf.get("PASSWORD"), "pass")
@@ -695,8 +689,8 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.LOCKOUT_BY_IP_USERNAME", True)
     def test_lockout_by_ip_and_username(self):
-        """ Check that lockout still works when locking out by
-           IP and Username combined """
+        """Check that lockout still works when locking out by
+        IP and Username combined"""
 
         username = "testy"
 
@@ -863,6 +857,42 @@ class AccessAttemptTest(DefenderTestCase):
 
     @patch("defender.config.BEHIND_REVERSE_PROXY", True)
     @patch("defender.config.IP_FAILURE_LIMIT", 3)
+    def test_login_blocked_for_non_standard_login_views_with_msg_as_none(self):
+        """
+        Check that a view wich returns the expected status code is causing
+        the user to be locked out when we skip checking response content
+        by providing msg as None.
+        """
+
+        @watch_login(status_code=401, msg=None)
+        def fake_api_401_login_view_with_msg_as_none(request):
+            """ Fake the api login with 401 """
+            # this fake response does not contains content attribute
+            NonRenderedResponse = namedtuple(
+                "NonRenderedResponse", field_names="status_code"
+            )
+            return NonRenderedResponse(status_code=401)
+
+        request_factory = RequestFactory()
+        request = request_factory.post("api/login")
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META["HTTP_X_FORWARDED_FOR"] = "192.168.24.24"
+
+        for _ in range(3):
+            fake_api_401_login_view_with_msg_as_none(request)
+
+            data_out = utils.get_blocked_ips()
+            self.assertEqual(data_out, [])
+
+        fake_api_401_login_view_with_msg_as_none(request)
+
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, ["192.168.24.24"])
+
+    @patch("defender.config.BEHIND_REVERSE_PROXY", True)
+    @patch("defender.config.IP_FAILURE_LIMIT", 3)
     def test_login_blocked_for_non_standard_login_views_with_msg(self):
         """
         Check that a view wich returns the expected status code and the
@@ -920,8 +950,7 @@ class AccessAttemptTest(DefenderTestCase):
 
 
 class SignalTest(DefenderTestCase):
-    """ Test that signals are properly sent when blocking usernames and IPs.
-    """
+    """Test that signals are properly sent when blocking usernames and IPs."""
 
     def test_should_send_signal_when_blocking_ip(self):
         self.blocked_ip = None
@@ -1050,8 +1079,8 @@ class TestUtils(DefenderTestCase):
         self.assertFalse(utils.is_source_ip_already_locked(ip))
 
     def test_username_argument_precedence(self):
-        """ test that the optional username argument has highest precedence
-        when provided """
+        """test that the optional username argument has highest precedence
+        when provided"""
         request_factory = RequestFactory()
         request = request_factory.get(ADMIN_LOGIN_URL)
         request.user = AnonymousUser()
