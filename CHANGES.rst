@@ -7,6 +7,7 @@ Unreleased
 
 - Move CI to GitHub Actions.
 - Drop support for Django 3.0
+- Add support for Django 3.2
 
 0.8.0
 -----
