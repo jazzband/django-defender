@@ -6,6 +6,7 @@ Unreleased
 ----------
 
 - Move CI to GitHub Actions.
+- Drop support for Django 3.0
 
 0.8.0
 -----
