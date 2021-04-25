@@ -2,8 +2,8 @@
 Changes
 =======
 
-Unreleased
-----------
+0.9.0
+-----
 
 - Move CI to GitHub Actions.
 - Drop support for Django 3.0
