@@ -397,7 +397,7 @@ There's sample ``BasicAuthenticationDefender`` class based on ``djangorestframew
    import base64
    import binascii
 
-   from django.utils.translation import ugettext_lazy as _
+   from django.utils.translation import gettext_lazy as _
 
    from rest_framework import HTTP_HEADER_ENCODING, exceptions
    from rest_framework.authentication import (

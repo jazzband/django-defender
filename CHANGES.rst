@@ -2,6 +2,11 @@
 Changes
 =======
 
+Unreleased
+----------
+
+* Fix failing tests for Django main development branch (Django 4.0)
+
 0.9.0
 -----
 

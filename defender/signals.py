@@ -1,9 +1,9 @@
 from django.dispatch import Signal
 
-username_block = Signal(providing_args=["username"])
-username_unblock = Signal(providing_args=["username"])
-ip_block = Signal(providing_args=["ip_address"])
-ip_unblock = Signal(providing_args=["ip_address"])
+username_block = Signal()  # (providing_args=["username"])
+username_unblock = Signal()  # (providing_args=["username"])
+ip_block = Signal()  # (providing_args=["ip_address"])
+ip_unblock = Signal()  # (providing_args=["ip_address"])
 
 
 class BlockSignal:
