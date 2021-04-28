@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 
 
 def get_setting(variable, default=None):
@@ -61,7 +61,7 @@ except ValueError:  # pragma: no cover
 
 LOCKOUT_TEMPLATE = get_setting("DEFENDER_LOCKOUT_TEMPLATE")
 
-ERROR_MESSAGE = ugettext_lazy(
+ERROR_MESSAGE = gettext_lazy(
     "Please enter a correct username and password. "
     "Note that both fields are case-sensitive."
 )
