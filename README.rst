@@ -109,7 +109,7 @@ Requirements
 ------------
 
 * Python: 3.6, 3.7, 3.8, 3.9, PyPy
-* Django: 2.2, 3.x
+* Django: 2.2, 3.x, 4.x
 * Redis
 
 
@@ -495,12 +495,12 @@ Below is a sample ``BasicAuthenticationDefender`` class based on ``rest_framewor
    from rest_framework.authentication import (
        get_authorization_header,
    )
-   
+
    # Get the UserModel
    UserModel = get_user_model()
-   
+
    class BasicAuthenticationDefender(serializers.Serializer):
-   
+
       username = serializers.CharField(required=False, allow_blank=True)
       email = serializers.EmailField(required=False, allow_blank=True)
       password = serializers.CharField(style={'input_type': 'password'})
@@ -645,7 +645,7 @@ To make it work add ``BasicAuthenticationDefender`` to ``REST_AUTH_SERIALIZERS``
 For example, in your settings.py add the below line,
 
 .. code-block:: python
-   
+
    REST_AUTH_SERIALIZERS = {
        'LOGIN_SERIALIZER': '<path to your basic authentication defender python file>.BasicAuthenticationDefender',
    }
