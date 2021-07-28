@@ -719,6 +719,14 @@ class AccessAttemptTest(DefenderTestCase):
         response = self._login()
         self.assertContains(response, LOGIN_FORM_KEY)
 
+        # Successful login should not clear IP lock
+        self._login(username=VALID_USERNAME, password=VALID_PASSWORD)
+
+        # We should still be locked out for the locked
+        # username using the same IP
+        response = self._login(username=username)
+        self.assertContains(response, self.LOCKED_MESSAGE)
+
         # We shouldn't get a lockout message when attempting to use a
         # different ip address
         ip = "74.125.239.60"
