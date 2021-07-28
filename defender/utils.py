@@ -283,7 +283,10 @@ def reset_failed_attempts(ip_address=None, username=None):
     """
     pipe = REDIS_SERVER.pipeline()
 
-    unblock_ip(ip_address, pipe=pipe)
+    # Because IP is shared, a reset should never clear an IP block
+    # when using IP/username as block
+    if not config.LOCKOUT_BY_IP_USERNAME:
+        unblock_ip(ip_address, pipe=pipe)
     unblock_username(username, pipe=pipe)
 
     pipe.execute()
