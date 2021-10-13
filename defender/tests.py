@@ -279,7 +279,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         Test that the lowercase(None) returns None.
         """
-        self.assertEquals(utils.lower_username(None), None)
+        self.assertEqual(utils.lower_username(None), None)
 
     def test_cooling_off(self):
         """ Tests if the cooling time allows a user to login
