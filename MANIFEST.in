@@ -3,6 +3,7 @@ include CHANGES.rst
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
+include CODE_OF_CONDUCT.md
 include requirements.txt
 include tox.ini
 include .pre-commit-config.yaml
