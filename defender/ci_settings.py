@@ -49,7 +49,7 @@ TEMPLATES = [
         },
     },
 ]
-if django.VERSION > (3, 1):
+if django.VERSION >= (3, 2):
     TEMPLATES[0]["OPTIONS"]["context_processors"].append("django.template.context_processors.request")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "too-secret-for-test")

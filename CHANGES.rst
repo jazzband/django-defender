@@ -2,6 +2,8 @@
 Changes
 =======
 
+- Drop Django 3.1 support.
+
 0.9.1
 -----
 
