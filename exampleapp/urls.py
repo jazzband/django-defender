@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include
+from django.urls import include, re_path
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -6,11 +6,10 @@ from django.conf.urls.static import static
 
 admin.autodiscover()
 
-urlpatterns = patterns(
-    "",
-    (r"^admin/", include(admin.site.urls)),
-    (r"^admin/defender/", include("defender.urls")),
-)
+urlpatterns = [
+    re_path(r"^admin/", admin.site.urls),
+    re_path(r"^admin/defender/", include("defender.urls")),
+]
 
 
 urlpatterns += staticfiles_urlpatterns()
