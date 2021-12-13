@@ -3,6 +3,7 @@ Changes
 =======
 
 - Drop Django 3.1 support.
+- Confirm support for Django 4.0
 
 0.9.1
 -----
