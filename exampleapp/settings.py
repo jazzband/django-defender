@@ -28,6 +28,7 @@ MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "defender.middleware.FailedLoginMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware"
 )
 
 ROOT_URLCONF = "exampleapp.urls"
@@ -80,3 +81,18 @@ app.config_from_object("django.conf:settings")
 app.autodiscover_tasks(lambda: INSTALLED_APPS)
 
 DEBUG = True
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
