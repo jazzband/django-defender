@@ -37,7 +37,7 @@ def watch_login(status_code=302, msg="", get_username=utils.get_username_from_re
                     # always to True so the first 2 will decide the result.
                     login_unsuccessful = (
                         response
-                        and response.status_code == status_code
+                        and response.status_code != status_code
                         and msg in response.content.decode("utf-8")
                     )
 
