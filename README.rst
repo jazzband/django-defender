@@ -353,9 +353,11 @@ These should be defined in your ``settings.py`` file.
   old failed login attempts will be forgotten. An integer, will be interpreted as a
   number of seconds. If ``0``\ , the locks will not expire. [Default: ``300``\ ]
 * ``DEFENDER_LOCKOUT_TEMPLATE``\ : String:   [Default: ``None``\ ] If set, specifies a template to render when a user is locked out. Template receives the following context variables:
+
   * ``cooloff_time_seconds``\ : The cool off time in seconds
   * ``cooloff_time_minutes``\ : The cool off time in minutes
   * ``failure_limit``\ : The number of failures before you get blocked.
+
 * ``DEFENDER_USERNAME_FORM_FIELD``\ : String: the name of the form field that contains your
   users usernames. [Default: ``username``\ ]
 * ``DEFENDER_CACHE_PREFIX``\ : String: The cache prefix for your defender keys.
