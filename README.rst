@@ -169,7 +169,7 @@ following to your ``urls.py``
 .. code-block:: python
 
    urlpatterns = [
-       path('admin/', include(admin.site.urls)), # normal admin
+       path('admin/', admin.site.urls), # normal admin
        path('admin/defender/', include('defender.urls')), # defender admin
        # your own patterns follow...
    ]
