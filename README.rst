@@ -652,6 +652,69 @@ For example, in your settings.py add the below line,
        'LOGIN_SERIALIZER': '<path to your basic authentication defender python file>.BasicAuthenticationDefender',
    }
 
+Adapting for password reset forms
+---------------------------------
+
+``defender`` can be adapted for Django’s ``PasswordResetView`` to prevent too many submissions.
+
+We need to create some new views that subclass Django’s built-in ``LoginView``, ``PasswordResetView`` & ``PasswordResetConfirmView`` — then use these views in our ``urls.py`` as replacements for Django’s built-ins.
+
+The views block based on email address submitted on the password reset view. This is different than the default implementation (which uses username), so we have to be careful to clean up after ourselves on sign-in & completed password reset.
+
+.. code-block:: python
+
+    from defender import utils as def_utils
+    from django.contrib.auth import views as auth_views
+
+    class UserSignIn(auth_views.LoginView):
+        def form_valid(self, form):
+            """Force clear all the cached Defender statues for the authenticated user’s email address."""
+            super_valid = super().form_valid(form)
+            def_utils.check_request(self.request, False, username=form.get_user().email)
+            return super_valid
+
+    class PasswordResetBruteForceProtectedView(auth_views.PasswordResetView):
+        def get(self, request, *args, **kwargs):
+            """Confirm the user isn’t already blocked by IP before showing the password reset view."""
+            if def_utils.is_already_locked(request):
+                return def_utils.lockout_response(request)
+            return super().get(request, *args, **kwargs)
+
+        def post(self, request, *args, **kwargs):
+            """
+            Confirm the user isn’t already blocked by IP before allowing form POST.
+            
+            Also, force log this form POST as a single entry in the Defender cache, against the submitted email address.
+            """
+            if def_utils.is_already_locked(request):
+                return def_utils.lockout_response(request)
+            def_utils.check_request(
+                request, login_unsuccessful=True, username=request.POST.get("email")
+            )
+            return super().post(request, *args, **kwargs)
+
+
+    class PasswordResetConfirmBruceForceProtectedView(auth_views.PasswordResetConfirmView):
+        def get(self, request, *args, **kwargs):
+            """Confirm the user isn’t already blocked by IP before showing the password confirm view."""
+            if def_utils.is_already_locked(request):
+                return def_utils.lockout_response(request)
+            return super().get(request, *args, **kwargs)
+
+        def post(self, request, *args, **kwargs):
+            """Confirm the user isn’t already blocked by IP before allowing form POST for the password change confirmation."""
+            if def_utils.is_already_locked(request):
+                return def_utils.lockout_response(request)
+            return super().post(request, *args, **kwargs)
+
+        def form_valid(self, form):
+            """Force clear all the cached Defender statues for the user’s email address after successfully changing their password."""
+            super_valid = super().form_valid(form)
+            def_utils.check_request(
+                self.request, login_unsuccessful=False, username=self.user.email
+            )
+            return super_valid
+
 Django signals
 --------------
 
