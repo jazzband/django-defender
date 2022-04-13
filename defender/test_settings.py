@@ -41,12 +41,11 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",
             ],
         },
     },
 ]
-if django.VERSION >= (3, 2):
-    TEMPLATES[0]["OPTIONS"]["context_processors"].append("django.template.context_processors.request")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "too-secret-for-test")
 
