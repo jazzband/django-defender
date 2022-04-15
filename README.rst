@@ -108,7 +108,7 @@ Admin pages
 Requirements
 ------------
 
-* Python: 3.6, 3.7, 3.8, 3.9, 3.10, PyPy
+* Python: 3.7, 3.8, 3.9, 3.10, PyPy
 * Django: 3.x, 4.x
 * Redis
 
