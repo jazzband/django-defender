@@ -2,6 +2,9 @@
 Changes
 =======
 
+0.9.2
+-----
+
 - Drop Python 3.6 support.
 - Drop Django 3.1 support.
 - Confirm support for Django 4.0
