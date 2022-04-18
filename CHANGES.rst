@@ -2,6 +2,11 @@
 Changes
 =======
 
+0.9.3
+-----
+
+- Drop Python 3.6 support from package specifiers.
+
 0.9.2
 -----
 
