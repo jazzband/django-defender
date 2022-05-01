@@ -2,6 +2,11 @@
 Changes
 =======
 
+0.9.4
+-----
+
+- Remove port number from IP address string when behind reverse proxy [@ndrsn]
+
 0.9.3
 -----
 
