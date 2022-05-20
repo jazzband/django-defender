@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -43,15 +44,51 @@ def get_ip_address_from_request(request):
     return "127.0.0.1"
 
 
+ipv4_with_port = re.compile(r"^(\d+\.\d+\.\d+\.\d+):\d+")
+ipv6_with_port = re.compile(r"^\[([^\]]+)\]:\d+")
+
+
+def strip_port_number(ip_address_string):
+    """ strips port number from IPv4 or IPv6 address """
+    ip_address = None
+
+    if ipv4_with_port.match(ip_address_string):
+        match = ipv4_with_port.match(ip_address_string)
+        ip_address = match[1]
+    elif ipv6_with_port.match(ip_address_string):
+        match = ipv6_with_port.match(ip_address_string)
+        ip_address = match[1]
+
+    """
+    If it's not a valid IP address, we prefer to return
+    the string as-is instead of returning a potentially 
+    corrupted string:
+    """
+    if is_valid_ip(ip_address):
+        return ip_address
+
+    return ip_address_string
+
+
 def get_ip(request):
     """ get the ip address from the request """
     if config.BEHIND_REVERSE_PROXY:
         ip_address = request.META.get(config.REVERSE_PROXY_HEADER, "")
         ip_address = ip_address.split(",", 1)[0].strip()
+
         if ip_address == "":
             ip_address = get_ip_address_from_request(request)
+        else:
+            """
+            Some reverse proxies will include a port number with the
+            IP address; as this port may change from request to request,
+            and thus make it appear to be different IP addresses, we'll
+            want to remove the port number, if present:
+            """
+            ip_address = strip_port_number(ip_address)
     else:
         ip_address = get_ip_address_from_request(request)
+
     return ip_address
 
 

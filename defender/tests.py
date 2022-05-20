@@ -1075,3 +1075,27 @@ class TestUtils(DefenderTestCase):
 
         utils.add_login_attempt_to_db(request, True, username=username)
         self.assertEqual(AccessAttempt.objects.filter(username=username).count(), 1)
+
+    def test_ip_address_strip_port_number(self):
+        """ Test the strip_port_number() method """
+        # IPv4 with/without port
+        self.assertEqual(utils.strip_port_number("192.168.1.1"), "192.168.1.1")
+        self.assertEqual(utils.strip_port_number(
+            "192.168.1.1:8000"), "192.168.1.1")
+
+        # IPv6 with/without port
+        self.assertEqual(utils.strip_port_number(
+            "2001:db8:85a3:0:0:8a2e:370:7334"), "2001:db8:85a3:0:0:8a2e:370:7334")
+        self.assertEqual(utils.strip_port_number(
+            "[2001:db8:85a3:0:0:8a2e:370:7334]:123456"), "2001:db8:85a3:0:0:8a2e:370:7334")
+
+    @patch("defender.config.BEHIND_REVERSE_PROXY", True)
+    def test_get_ip_strips_port_number(self):
+        """ make sure the IP address is stripped of its port number """
+        req = HttpRequest()
+        req.META["HTTP_X_FORWARDED_FOR"] = "1.2.3.4:123456"
+        self.assertEqual(utils.get_ip(req), "1.2.3.4")
+
+        req = HttpRequest()
+        req.META["HTTP_X_FORWARDED_FOR"] = "[2001:db8::1]:123456"
+        self.assertEqual(utils.get_ip(req), "2001:db8::1")

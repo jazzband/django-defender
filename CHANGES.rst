@@ -2,9 +2,24 @@
 Changes
 =======
 
+0.9.4
+-----
+
+- Remove port number from IP address string when behind reverse proxy [@ndrsn]
+
+0.9.3
+-----
+
+- Drop Python 3.6 support from package specifiers.
+
+0.9.2
+-----
+
+- Drop Python 3.6 support.
 - Drop Django 3.1 support.
 - Confirm support for Django 4.0
 - Confirm support for Python 3.10
+- Drop Django 2.2 support.
 
 0.9.1
 -----
