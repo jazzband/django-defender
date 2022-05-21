@@ -1,6 +1,7 @@
 from ipaddress import ip_address
 import logging
 import re
+import sys
 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -127,20 +128,42 @@ def get_username_blocked_cache_key(username):
     )
 
 
+def remove_prefix(string, prefix):
+
+    # backwards compatibility for str.removeprefix for python < 3.9
+    if sys.version_info < (3, 9):
+        if string.startswith(prefix):
+            return string[len(prefix) :]
+        return string
+
+    return string.removeprefix(prefix)
+
+
 def strip_keys(key_list):
     """ Given a list of keys, remove the prefix and remove just
     the data we care about.
 
     for example:
 
-        ['defender:blocked:ip:ken', 'defender:blocked:ip:joffrey']
+        [
+            'defender:blocked:ip:192.168.24.24',
+            'defender:blocked:ip:::ffff:192.168.24.24',
+            'defender:blocked:username:joffrey'
+        ]
 
     would result in:
 
-        ['ken', 'joffrey']
-
+        [
+            '192.168.24.24',
+            '::ffff:192.168.24.24',
+            'joffrey'
+        ]
     """
-    return [key.split(":")[-1] for key in key_list]
+    return [
+        # key.removeprefix(f"{config.CACHE_PREFIX}:blocked:").partition(":")[2]
+        remove_prefix(key, f"{config.CACHE_PREFIX}:blocked:").partition(":")[2]
+        for key in key_list
+    ]
 
 
 def get_blocked_ips():
