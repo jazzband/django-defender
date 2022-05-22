@@ -1099,3 +1099,10 @@ class TestUtils(DefenderTestCase):
         req = HttpRequest()
         req.META["HTTP_X_FORWARDED_FOR"] = "[2001:db8::1]:123456"
         self.assertEqual(utils.get_ip(req), "2001:db8::1")
+
+    def test_remove_prefix(self):
+        """ test the remove_prefix() method """
+        self.assertEqual(utils.remove_prefix(
+            "defender:blocked:ip:192.168.24.24", "defender:blocked:"), "ip:192.168.24.24")
+        self.assertEqual(utils.remove_prefix(
+            "defender:blocked:username:johndoe", "defender:blocked:"), "username:johndoe")
