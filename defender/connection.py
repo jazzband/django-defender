@@ -38,6 +38,7 @@ def get_redis_connection():
             host=redis_config.get("HOST"),
             port=redis_config.get("PORT"),
             db=redis_config.get("DB"),
+            username=redis_config.get("USERNAME"),
             password=redis_config.get("PASSWORD"),
             ssl=redis_config.get("SSL"),
         )
@@ -49,6 +50,7 @@ def parse_redis_url(url, password_quote=None):
     # create config with some sane defaults
     redis_config = {
         "DB": 0,
+        "USERNAME": "default",
         "PASSWORD": None,
         "HOST": "localhost",
         "PORT": 6379,
@@ -72,6 +74,8 @@ def parse_redis_url(url, password_quote=None):
         redis_config.update({"PASSWORD": password})
     if url.hostname:
         redis_config.update({"HOST": url.hostname})
+    if url.username:
+        redis_config.update({"USERNAME": url.username})
     if url.port:
         redis_config.update({"PORT": int(url.port)})
     if url.scheme in ["https", "rediss"]:
