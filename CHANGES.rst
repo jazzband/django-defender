@@ -2,6 +2,11 @@
 Changes
 =======
 
+0.9.5
+=====
+
+- Add username support to Redis configuration. [@erdos4d]
+
 0.9.4
 -----
 
