@@ -1106,3 +1106,6 @@ class TestUtils(DefenderTestCase):
             "defender:blocked:ip:192.168.24.24", "defender:blocked:"), "ip:192.168.24.24")
         self.assertEqual(utils.remove_prefix(
             "defender:blocked:username:johndoe", "defender:blocked:"), "username:johndoe")
+        self.assertEqual(utils.remove_prefix(
+            "defender:blocked:username:johndoe", "blocked:username:"),
+            "defender:blocked:username:johndoe")
