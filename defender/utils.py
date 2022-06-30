@@ -129,14 +129,10 @@ def get_username_blocked_cache_key(username):
 
 
 def remove_prefix(string, prefix):
+    if string.startswith(prefix):
+        return string[len(prefix):]
+    return string
 
-    # backwards compatibility for str.removeprefix for python < 3.9
-    if sys.version_info < (3, 9):
-        if string.startswith(prefix):
-            return string[len(prefix) :]
-        return string
-
-    return string.removeprefix(prefix)
 
 
 def strip_keys(key_list):
