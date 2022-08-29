@@ -926,6 +926,31 @@ class AccessAttemptTest(DefenderTestCase):
             data_out = utils.get_blocked_ips()
             self.assertEqual(data_out, [])
 
+    @patch("defender.config.BEHIND_REVERSE_PROXY", True)
+    @patch("defender.config.IP_FAILURE_LIMIT", 3)
+    def test_successful_login_does_not_block_user(self):
+        """
+        Check that a successful login with custom status code (200) should not block the user
+        """
+
+        @watch_login(status_code=200)
+        def fake_api_200_login_view_without_msg(request):
+            """ Fake the api login with 200 """
+            return HttpResponse(status=200)
+
+        request_factory = RequestFactory()
+        request = request_factory.post("api/login")
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        request.META["HTTP_X_FORWARDED_FOR"] = "192.168.24.24"
+
+        for _ in range(3):
+            fake_api_200_login_view_without_msg(request)
+        fake_api_200_login_view_without_msg(request)
+        data_out = utils.get_blocked_ips()
+        self.assertEqual(data_out, [])
+
 
 class SignalTest(DefenderTestCase):
     """ Test that signals are properly sent when blocking usernames and IPs.
