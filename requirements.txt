@@ -2,4 +2,5 @@
 coverage
 mockredispy
 django-redis-cache
+importlib-metadata<5.0
 celery
