@@ -350,8 +350,20 @@ These should be defined in your ``settings.py`` file.
 * ``DEFENDER_DISABLE_IP_LOCKOUT``\ : Boolean: If this is True, it will not lockout the users IP address, it will only lockout the username. [Default: False]
 * ``DEFENDER_DISABLE_USERNAME_LOCKOUT``\ : Boolean: If this is True, it will not lockout usernames, it will only lockout IP addresess. [Default: False]
 * ``DEFENDER_COOLOFF_TIME``\ : Int: If set, defines a period of inactivity after which
-  old failed login attempts will be forgotten. An integer, will be interpreted as a
-  number of seconds. If ``0``\ , the locks will not expire. [Default: ``300``\ ]
+  old failed login attempts and username/ip lockouts will be forgotten. An integer,
+  will be interpreted as a number of seconds. If 0, neither the failed login attempts
+  nor the username/ip locks will expire. [Default: ``300``\ ]
+* ``DEFENDER_ATTEMPT_COOLOFF_TIME``\ : Int: If set, overrides the period of inactivity
+  after which old failed login attempts will be forgotten set by DEFENDER_COOLOFF_TIME.
+  An integer, will be interpreted as a number of seconds. If 0, the failed login
+  attempts will not expire. [Default: ``DEFENDER_COOLOFF_TIME``\ ]
+* ``DEFENDER_LOCKOUT_COOLOFF_TIME``\ : Int or List: If set, overrides the period of
+  inactivity after which username/ip lockouts will be forgotten set by
+  DEFENDER_COOLOFF_TIME. An integer, will be interpreted as a number of seconds.
+  A list of integers, will be interpreted as a number of seconds for users with
+  the integer's index being how many previous lockouts (up to some maximum) occurred
+  in the last ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION`` hours. If the property is set to
+  0 or [], the username/ip lockout will not expire. [Default: ``DEFENDER_COOLOFF_TIME``\ ]
 * ``DEFENDER_LOCKOUT_TEMPLATE``\ : String:   [Default: ``None``\ ] If set, specifies a template to render when a user is locked out. Template receives the following context variables:
 
   * ``cooloff_time_seconds``\ : The cool off time in seconds
@@ -434,7 +446,7 @@ There's sample ``BasicAuthenticationDefender`` class based on ``djangorestframew
                         "Your account is locked for {cooloff_time_seconds} seconds" \
                         "".format(
                            failure_limit=config.FAILURE_LIMIT,
-                           cooloff_time_seconds=config.COOLOFF_TIME
+                           cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME
                         )
                raise exceptions.AuthenticationFailed(_(detail))
 
@@ -520,7 +532,7 @@ Below is a sample ``BasicAuthenticationDefender`` class based on ``rest_framewor
             detail = "You have attempted to login {failure_limit} times with no success. "
                      .format(
                          failure_limit=config.FAILURE_LIMIT,
-                         cooloff_time_seconds=config.COOLOFF_TIME
+                         cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME
                      )
             raise exceptions.AuthenticationFailed(_(detail))
 
