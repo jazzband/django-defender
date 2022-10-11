@@ -286,7 +286,7 @@ class AccessAttemptTest(DefenderTestCase):
         """
         self.test_failure_limit_by_ip_once()
         # Wait for the cooling off period
-        time.sleep(config.COOLOFF_TIME)
+        time.sleep(config.ATTEMPT_COOLOFF_TIME)
 
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
@@ -925,6 +925,64 @@ class AccessAttemptTest(DefenderTestCase):
 
             data_out = utils.get_blocked_ips()
             self.assertEqual(data_out, [])
+
+    @patch("defender.config.ATTEMPT_COOLOFF_TIME", "a")
+    def test_bad_attempt_cooloff_configuration(self):
+        self.assertRaises(Exception)
+
+    @patch("defender.config.ATTEMPT_COOLOFF_TIME", ["a"])
+    def test_bad_attempt_cooloff_configuration_with_list(self):
+        self.assertRaises(Exception)
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", "a")
+    def test_bad_lockout_cooloff_configuration(self):
+        self.assertRaises(Exception)
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [300, "a"])
+    def test_bad_list_lockout_cooloff_configuration(self):
+        self.assertRaises(Exception)
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [300, dict(a="a")])
+    def test_bad_list_with_dict_lockout_cooloff_configuration(self):
+        self.assertRaises(Exception)
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
+        self.test_failure_limit_by_ip_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_valid_login()
+        self.test_failure_limit_by_ip_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_blocked_ip_cannot_login()
+        utils.reset_failed_attempts(ip_address="127.0.0.1")
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
+        self.test_failure_limit_by_username_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_valid_login()
+        self.test_failure_limit_by_username_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_blocked_username_cannot_login()
+        utils.reset_failed_attempts(username=VALID_USERNAME)
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    def test_lockout_correctly_releases_after_scaling_with_ip(self):
+        self.test_failure_limit_by_ip_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_valid_login()
+        self.test_failure_limit_by_ip_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
+        self.test_valid_login()
+
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    def test_lockout_correctly_releases_after_scaling_with_username(self):
+        self.test_failure_limit_by_username_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
+        self.test_valid_login()
+        self.test_failure_limit_by_username_once()
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
+        self.test_valid_login()
 
 
 class SignalTest(DefenderTestCase):

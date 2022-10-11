@@ -10,7 +10,7 @@ from django.utils.module_loading import import_string
 
 from .connection import get_redis_connection
 from . import config
-from .data import store_login_attempt
+from .data import get_approx_account_lockouts_from_login_attempts, store_login_attempt
 from .signals import (
     send_username_block_signal,
     send_ip_block_signal,
@@ -166,8 +166,8 @@ def increment_key(key):
     """ given a key increment the value """
     pipe = REDIS_SERVER.pipeline()
     pipe.incr(key, 1)
-    if config.COOLOFF_TIME:
-        pipe.expire(key, config.COOLOFF_TIME)
+    if config.ATTEMPT_COOLOFF_TIME:
+        pipe.expire(key, config.ATTEMPT_COOLOFF_TIME)
     new_value = pipe.execute()[0]
     return new_value
 
@@ -204,6 +204,13 @@ def get_user_attempts(request, get_username=get_username_from_request, username=
     # return the larger of the two.
     return max(ip_count, username_count)
 
+def get_lockout_cooloff_time(ip_address=None, username=None):
+    index = min(
+        len(config.LOCKOUT_COOLOFF_TIMES) - 1,
+        get_approx_account_lockouts_from_login_attempts(ip_address, username)
+    )
+    return config.LOCKOUT_COOLOFF_TIMES[index]
+
 
 def block_ip(ip_address):
     """ given the ip, block it """
@@ -215,8 +222,9 @@ def block_ip(ip_address):
         return
     already_blocked = is_source_ip_already_locked(ip_address)
     key = get_ip_blocked_cache_key(ip_address)
-    if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, "blocked", config.COOLOFF_TIME)
+    cooloff_time = get_lockout_cooloff_time(ip_address=ip_address)
+    if cooloff_time:
+        REDIS_SERVER.set(key, "blocked", cooloff_time)
     else:
         REDIS_SERVER.set(key, "blocked")
     if not already_blocked:
@@ -233,8 +241,9 @@ def block_username(username):
         return
     already_blocked = is_user_already_locked(username)
     key = get_username_blocked_cache_key(username)
-    if config.COOLOFF_TIME:
-        REDIS_SERVER.set(key, "blocked", config.COOLOFF_TIME)
+    cooloff_time = get_lockout_cooloff_time(username=username)
+    if cooloff_time:
+        REDIS_SERVER.set(key, "blocked", cooloff_time)
     else:
         REDIS_SERVER.set(key, "blocked")
     if not already_blocked:
@@ -332,9 +341,10 @@ def reset_failed_attempts(ip_address=None, username=None):
 def lockout_response(request):
     """ if we are locked out, here is the response """
     if config.LOCKOUT_TEMPLATE:
+        cooloff_time = get_lockout_cooloff_time(ip_address=get_ip(request), username=get_username_from_request(request))
         context = {
-            "cooloff_time_seconds": config.COOLOFF_TIME,
-            "cooloff_time_minutes": config.COOLOFF_TIME / 60,
+            "cooloff_time_seconds": cooloff_time,
+            "cooloff_time_minutes": cooloff_time / 60,
             "failure_limit": config.FAILURE_LIMIT,
         }
         return render(request, config.LOCKOUT_TEMPLATE, context)
@@ -342,7 +352,7 @@ def lockout_response(request):
     if config.LOCKOUT_URL:
         return HttpResponseRedirect(config.LOCKOUT_URL)
 
-    if config.COOLOFF_TIME:
+    if get_lockout_cooloff_time():
         return HttpResponse(
             "Account locked: too many login attempts.  " "Please try again later."
         )
