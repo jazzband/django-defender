@@ -1,3 +1,4 @@
+from ipaddress import ip_address
 import logging
 import re
 
@@ -340,8 +341,10 @@ def reset_failed_attempts(ip_address=None, username=None):
 
 def lockout_response(request):
     """ if we are locked out, here is the response """
+    ip_address = get_ip(request)
+    username = get_username_from_request(request)
     if config.LOCKOUT_TEMPLATE:
-        cooloff_time = get_lockout_cooloff_time(ip_address=get_ip(request), username=get_username_from_request(request))
+        cooloff_time = get_lockout_cooloff_time(ip_address=ip_address, username=username)
         context = {
             "cooloff_time_seconds": cooloff_time,
             "cooloff_time_minutes": cooloff_time / 60,
@@ -352,7 +355,7 @@ def lockout_response(request):
     if config.LOCKOUT_URL:
         return HttpResponseRedirect(config.LOCKOUT_URL)
 
-    if get_lockout_cooloff_time():
+    if get_lockout_cooloff_time(ip_address=ip_address, username=username):
         return HttpResponse(
             "Account locked: too many login attempts.  " "Please try again later."
         )

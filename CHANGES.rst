@@ -3,6 +3,8 @@ Changes
 =======
 
 - Confirm support for Django 4.1
+- Add ``DEFENDER_ATTEMPT_COOLOFF_TIME`` config to override ``DEFENDER_COOLOFF_TIME`` specifically for attempt lifespan [@djmore4]
+- Add ``DEFENDER_LOCKOUT_COOLOFF_TIME`` config to override ``DEFENDER_COOLOFF_TIME`` specifically for lockout duration [@djmore4]
 
 0.9.5
 =====
