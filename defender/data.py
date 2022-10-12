@@ -58,4 +58,4 @@ def get_approx_account_lockouts_from_login_attempts(ip_address=None, username=No
         # TODO: Maybe we should throw an exception here instead of returning 0?
         return 0
 
-    return min(AccessAttempt.objects.filter(q).count() // failure_limit, len(config.LOCKOUT_COOLOFF_TIMES) - 1)
+    return AccessAttempt.objects.filter(q).count() // failure_limit
