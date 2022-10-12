@@ -3,15 +3,16 @@ import string
 import time
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AnonymousUser
+from datetime import datetime, timedelta
+
+from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.sessions.backends.db import SessionStore
+from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
 from redis.client import Redis
 from django.urls import reverse
 
-from . import data
 from . import utils
 from . import config
 from .signals import (
@@ -951,6 +952,10 @@ class AccessAttemptTest(DefenderTestCase):
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
         self.test_ip_failure_limit()
+        self.assertTrue(AccessAttempt.objects.filter(
+            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
+            Q(ip_address="127.0.0.1")
+        ).count() > 1)
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 3)
         utils.reset_failed_attempts(ip_address="127.0.0.1")
         self.test_ip_failure_limit()
@@ -964,6 +969,10 @@ class AccessAttemptTest(DefenderTestCase):
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
         self.test_username_failure_limit()
+        self.assertTrue(AccessAttempt.objects.filter(
+            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
+            Q(username=VALID_USERNAME)
+        ).count() > 1)
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 3)
         utils.reset_failed_attempts(username=VALID_USERNAME)
         self.test_username_failure_limit()

@@ -446,7 +446,9 @@ There's sample ``BasicAuthenticationDefender`` class based on ``djangorestframew
                         "Your account is locked for {cooloff_time_seconds} seconds" \
                         "".format(
                            failure_limit=config.FAILURE_LIMIT,
-                           cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME
+                           cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME[
+                              defender_utils.get_lockout_cooloff_time(username=self.get_username_from_request(request))
+                           ]
                         )
                raise exceptions.AuthenticationFailed(_(detail))
 
@@ -532,7 +534,7 @@ Below is a sample ``BasicAuthenticationDefender`` class based on ``rest_framewor
             detail = "You have attempted to login {failure_limit} times with no success. "
                      .format(
                          failure_limit=config.FAILURE_LIMIT,
-                         cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME
+                         cooloff_time_seconds=config.LOCKOUT_COOLOFF_TIME[defender_utils.get_lockout_cooloff_time(username=userid)]
                      )
             raise exceptions.AuthenticationFailed(_(detail))
 
