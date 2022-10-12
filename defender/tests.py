@@ -177,10 +177,8 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests that the username failure limit setting is
         respected when trying to login one more time than failure limit
         """
-        ips = list()
         for i in range(0, config.USERNAME_FAILURE_LIMIT):
             ip = "74.125.239.{0}.".format(i)
-            ips.append(ip)
             response = self._login(username=VALID_USERNAME, remote_addr=ip)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -193,18 +191,14 @@ class AccessAttemptTest(DefenderTestCase):
         # doing a get should not get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, LOGIN_FORM_KEY)
-        for ip in ips:
-            utils.reset_failed_attempts(ip_address=ip)
 
     @patch("defender.config.IP_FAILURE_LIMIT", 3)
     def test_ip_failure_limit(self):
         """ Tests that the IP failure limit setting is
         respected when trying to login one more time than failure limit
         """
-        usernames = list()
         for i in range(0, config.IP_FAILURE_LIMIT):
             username = "john-doe__%d" % i
-            usernames.append(username)
             response = self._login(username=username)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -212,14 +206,11 @@ class AccessAttemptTest(DefenderTestCase):
         # So, we shouldn't have gotten a lock-out yet.
         # But we should get one now
         response = self._login(username=VALID_USERNAME)
-        usernames.append(VALID_USERNAME)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
         # doing a get should also get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
-        for username in usernames:
-            utils.reset_failed_attempts(username=username)
 
     def test_valid_login(self):
         """ Tests a valid login for a real username
@@ -958,35 +949,31 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertRaises(Exception)
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
+    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
-        self.test_ip_failure_limit()
-        self.assertEqual(data.get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1"), 1)
-        if config.MOCK_REDIS:
-            # mock redis require that we expire on our own
-            get_redis_connection().do_expire()  # pragma: no cover
+        self.test_failure_limit_by_ip_once()
+        self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 3)
         utils.reset_failed_attempts(ip_address="127.0.0.1")
-        self.test_ip_failure_limit()
-        self.assertEqual(data.get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1"), 2)
+        self.test_failure_limit_by_ip_once()
+        self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 6)
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
-        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         self.test_valid_login()
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
+    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
-        self.test_username_failure_limit()
-        self.assertEqual(data.get_approx_account_lockouts_from_login_attempts(username=VALID_USERNAME), 1)
-        if config.MOCK_REDIS:
-            # mock redis require that we expire on our own
-            get_redis_connection().do_expire()  # pragma: no cover
+        self.test_failure_limit_by_username_once()
+        self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 3)
         utils.reset_failed_attempts(username=VALID_USERNAME)
-        self.test_username_failure_limit()
-        self.assertEqual(data.get_approx_account_lockouts_from_login_attempts(username=VALID_USERNAME), 2)
+        self.test_failure_limit_by_username_once()
+        self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 6)
+        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
-        time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         self.test_valid_login()
 
 
