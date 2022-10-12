@@ -949,12 +949,11 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertRaises(Exception)
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
-    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
-        self.test_failure_limit_by_ip_once()
+        self.test_ip_failure_limit()
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 3)
         utils.reset_failed_attempts(ip_address="127.0.0.1")
-        self.test_failure_limit_by_ip_once()
+        self.test_ip_failure_limit()
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
@@ -963,12 +962,11 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_valid_login()
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
-    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 3)
         utils.reset_failed_attempts(username=VALID_USERNAME)
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
