@@ -176,8 +176,10 @@ class AccessAttemptTest(DefenderTestCase):
         """ Tests that the username failure limit setting is
         respected when trying to login one more time than failure limit
         """
+        ips = list()
         for i in range(0, config.USERNAME_FAILURE_LIMIT):
             ip = "74.125.239.{0}.".format(i)
+            ips.append(ip)
             response = self._login(username=VALID_USERNAME, remote_addr=ip)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -190,14 +192,18 @@ class AccessAttemptTest(DefenderTestCase):
         # doing a get should not get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, LOGIN_FORM_KEY)
+        for ip in ips:
+            utils.reset_failed_attempts(ip_address=ip)
 
     @patch("defender.config.IP_FAILURE_LIMIT", 3)
     def test_ip_failure_limit(self):
         """ Tests that the IP failure limit setting is
         respected when trying to login one more time than failure limit
         """
+        usernames = list()
         for i in range(0, config.IP_FAILURE_LIMIT):
             username = "john-doe__%d" % i
+            usernames.append(username)
             response = self._login(username=username)
             # Check if we are in the same login page
             self.assertContains(response, LOGIN_FORM_KEY)
@@ -205,11 +211,14 @@ class AccessAttemptTest(DefenderTestCase):
         # So, we shouldn't have gotten a lock-out yet.
         # But we should get one now
         response = self._login(username=VALID_USERNAME)
+        usernames.append(VALID_USERNAME)
         self.assertContains(response, self.LOCKED_MESSAGE)
 
         # doing a get should also get locked out message
         response = self.client.get(ADMIN_LOGIN_URL)
         self.assertContains(response, self.LOCKED_MESSAGE)
+        for username in usernames:
+            utils.reset_failed_attempts(username=username)
 
     def test_valid_login(self):
         """ Tests a valid login for a real username
@@ -427,7 +436,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertTemplateUsed(response, "defender/lockout.html")
 
     @patch("defender.config.COOLOFF_TIME", 0)
-    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [0])
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", 0)
     def test_failed_login_no_cooloff(self):
         """ failed login no cooloff """
         for i in range(0, config.FAILURE_LIMIT):
@@ -947,61 +956,64 @@ class AccessAttemptTest(DefenderTestCase):
     def test_bad_list_with_dict_lockout_cooloff_configuration(self):
         self.assertRaises(Exception)
 
-    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
-        self.test_failure_limit_by_ip_once()
+
+        self.test_ip_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_source_ip_already_locked("127.0.0.1"))
-        self.test_failure_limit_by_ip_once()
+        self.test_ip_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         self.assertTrue(utils.is_source_ip_already_locked("127.0.0.1"))
         utils.reset_failed_attempts(ip_address="127.0.0.1")
 
-    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_user_already_locked(VALID_USERNAME))
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         self.assertTrue(utils.is_user_already_locked(VALID_USERNAME))
         utils.reset_failed_attempts(username=VALID_USERNAME)
 
-    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_correctly_releases_after_scaling_with_ip(self):
-        self.test_failure_limit_by_ip_once()
+        self.test_ip_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_source_ip_already_locked("127.0.0.1"))
-        self.test_failure_limit_by_ip_once()
+        self.test_ip_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_source_ip_already_locked("127.0.0.1"))
+        utils.reset_failed_attempts(ip_address="127.0.0.1")
 
-    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [2, 4])
+    @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
     def test_lockout_correctly_releases_after_scaling_with_username(self):
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[0])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_user_already_locked(VALID_USERNAME))
-        self.test_failure_limit_by_username_once()
+        self.test_username_failure_limit()
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.assertFalse(utils.is_user_already_locked(VALID_USERNAME))
+        utils.reset_failed_attempts(username=VALID_USERNAME)
 
 
 class SignalTest(DefenderTestCase):
