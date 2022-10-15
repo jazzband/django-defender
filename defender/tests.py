@@ -950,15 +950,20 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertRaises(Exception)
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
+    @patch("defender.config.IP_FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
         self.test_ip_failure_limit()
         self.assertTrue(AccessAttempt.objects.filter(
             Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
             Q(ip_address="127.0.0.1")
-        ).count() > 1)
+        ).count() >= 3)
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 3)
         utils.reset_failed_attempts(ip_address="127.0.0.1")
         self.test_ip_failure_limit()
+        self.assertTrue(AccessAttempt.objects.filter(
+            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
+            Q(ip_address="127.0.0.1")
+        ).count() >= 6)
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
@@ -967,15 +972,20 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_valid_login()
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
+    @patch("defender.config.USERNAME_FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
         self.test_username_failure_limit()
         self.assertTrue(AccessAttempt.objects.filter(
             Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
             Q(username=VALID_USERNAME)
-        ).count() > 1)
+        ).count() >= 3)
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 3)
         utils.reset_failed_attempts(username=VALID_USERNAME)
         self.test_username_failure_limit()
+        self.assertTrue(AccessAttempt.objects.filter(
+            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
+            Q(username=VALID_USERNAME)
+        ).count() >= 6)
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:

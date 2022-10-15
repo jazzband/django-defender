@@ -55,7 +55,6 @@ def get_approx_account_lockouts_from_login_attempts(ip_address=None, username=No
     else:
         # If we've made it this far and didn't hit one of the other if or elif
         # conditions, we're in an inappropriate context.
-        # TODO: Maybe we should throw an exception here instead of returning 0?
-        return 0
+        raise Exception("Invalid state requested")
 
     return AccessAttempt.objects.filter(q).count() // failure_limit
