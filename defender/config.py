@@ -72,13 +72,13 @@ try:
                 cooloff_times[index] = int(cooloff_time)
 
             if not len(cooloff_times):
-                raise TypeError()
+                raise TypeError()  # pragma: no cover
 
             LOCKOUT_COOLOFF_TIMES = cooloff_times
         except (TypeError, ValueError):
             raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")
     except ValueError:
-        raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")
+        raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")  # pragma: no cover
 except ValueError:  # pragma: no cover
     raise Exception("DEFENDER_COOLOFF_TIME needs to be an integer")  # pragma: no cover
 

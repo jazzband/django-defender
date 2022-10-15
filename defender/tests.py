@@ -13,6 +13,8 @@ from django.test.client import RequestFactory
 from redis.client import Redis
 from django.urls import reverse
 
+from defender.data import get_approx_account_lockouts_from_login_attempts
+
 from . import utils
 from . import config
 from .signals import (
@@ -950,20 +952,12 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertRaises(Exception)
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
-    @patch("defender.config.IP_FAILURE_LIMIT", 3)
+    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_ip_when_set(self):
         self.test_ip_failure_limit()
-        self.assertTrue(AccessAttempt.objects.filter(
-            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
-            Q(ip_address="127.0.0.1")
-        ).count() >= 3)
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 3)
         utils.reset_failed_attempts(ip_address="127.0.0.1")
         self.test_ip_failure_limit()
-        self.assertTrue(AccessAttempt.objects.filter(
-            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
-            Q(ip_address="127.0.0.1")
-        ).count() >= 6)
         self.assertEqual(utils.get_lockout_cooloff_time(ip_address="127.0.0.1"), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
@@ -972,26 +966,30 @@ class AccessAttemptTest(DefenderTestCase):
         self.test_valid_login()
 
     @patch("defender.config.LOCKOUT_COOLOFF_TIMES", [3, 6])
-    @patch("defender.config.USERNAME_FAILURE_LIMIT", 3)
+    @patch("defender.config.FAILURE_LIMIT", 3)
     def test_lockout_cooloff_correctly_scales_with_username_when_set(self):
         self.test_username_failure_limit()
-        self.assertTrue(AccessAttempt.objects.filter(
-            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
-            Q(username=VALID_USERNAME)
-        ).count() >= 3)
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 3)
         utils.reset_failed_attempts(username=VALID_USERNAME)
         self.test_username_failure_limit()
-        self.assertTrue(AccessAttempt.objects.filter(
-            Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION)) &
-            Q(username=VALID_USERNAME)
-        ).count() >= 6)
         self.assertEqual(utils.get_lockout_cooloff_time(username=VALID_USERNAME), 6)
         time.sleep(config.LOCKOUT_COOLOFF_TIMES[1])
         if config.MOCK_REDIS:
             # mock redis require that we expire on our own
             get_redis_connection().do_expire()  # pragma: no cover
         self.test_valid_login()
+
+    @patch("defender.config.STORE_ACCESS_ATTEMPTS", False)
+    def test_get_approx_account_lockouts_from_login_attempts_auto_return_zero_pt1(self):
+        self.assertEqual(get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1"), 0)
+
+    def test_get_approx_account_lockouts_from_login_attempts_auto_return_zero_pt2(self):
+        self.assertEqual(get_approx_account_lockouts_from_login_attempts(), 0)
+
+    @patch("defender.config.DISABLE_IP_LOCKOUT", True)
+    def test_get_approx_account_lockouts_from_login_attempts_auto_return_zero_pt1(self):
+        with self.assertRaises(Exception):
+            get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1")
 
 
 class SignalTest(DefenderTestCase):
