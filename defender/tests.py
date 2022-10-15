@@ -995,18 +995,6 @@ class AccessAttemptTest(DefenderTestCase):
     def test_approx_account_lockout_count_default_case_invalid_args_pt2(self):
         with self.assertRaises(Exception):
             get_approx_account_lockouts_from_login_attempts(username=VALID_USERNAME)
-    
-    @patch("defender.config.DISABLE_IP_LOCKOUT", True)
-    @patch("defender.config.LOCKOUT_BY_IP_USERNAME", True)
-    def test_approx_account_lockout_count_default_case_invalid_args_pt3(self):
-        with self.assertRaises(Exception):
-            get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1", username=VALID_USERNAME)
-
-    @patch("defender.config.DISABLE_USERNAME_LOCKOUT", True)
-    @patch("defender.config.LOCKOUT_BY_IP_USERNAME", True)
-    def test_approx_account_lockout_count_default_case_invalid_args_pt4(self):
-        with self.assertRaises(Exception):
-            get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1", username=VALID_USERNAME)
 
 
 class SignalTest(DefenderTestCase):
