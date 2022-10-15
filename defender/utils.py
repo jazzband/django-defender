@@ -206,6 +206,8 @@ def get_user_attempts(request, get_username=get_username_from_request, username=
     return max(ip_count, username_count)
 
 def get_lockout_cooloff_time(ip_address=None, username=None):
+    if not config.LOCKOUT_COOLOFF_TIMES:
+        return 0
     index = max(0, min(
         len(config.LOCKOUT_COOLOFF_TIMES) - 1,
         get_approx_account_lockouts_from_login_attempts(ip_address, username) - 1
