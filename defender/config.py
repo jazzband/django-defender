@@ -59,25 +59,25 @@ try:
     try:
         # how long to wait before the bad login attempt gets forgotten, in seconds.
         ATTEMPT_COOLOFF_TIME = int(get_setting("DEFENDER_ATTEMPT_COOLOFF_TIME", COOLOFF_TIME))  # measured in seconds
-    except ValueError:
-        raise Exception("DEFENDER_ATTEMPT_COOLOFF_TIME needs to be an integer")
+    except ValueError:  # pragma: no cover
+        raise Exception("DEFENDER_ATTEMPT_COOLOFF_TIME needs to be an integer")  # pragma: no cover
 
     try:
         # how long to wait before a lockout gets forgotten, in seconds.
         LOCKOUT_COOLOFF_TIMES = [int(get_setting("DEFENDER_LOCKOUT_COOLOFF_TIME", COOLOFF_TIME))]  # measured in seconds
-    except TypeError:
-        try:
+    except TypeError:  # pragma: no cover
+        try:  # pragma: no cover
             cooloff_times = get_setting("DEFENDER_LOCKOUT_COOLOFF_TIME", [COOLOFF_TIME])  # measured in seconds
-            for index, cooloff_time in enumerate(cooloff_times):
-                cooloff_times[index] = int(cooloff_time)
+            for index, cooloff_time in enumerate(cooloff_times):  # pragma: no cover
+                cooloff_times[index] = int(cooloff_time)  # pragma: no cover
 
-            if not len(cooloff_times):
+            if not len(cooloff_times):  # pragma: no cover
                 raise TypeError()  # pragma: no cover
 
             LOCKOUT_COOLOFF_TIMES = cooloff_times
-        except (TypeError, ValueError):
-            raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")
-    except ValueError:
+        except (TypeError, ValueError):  # pragma: no cover
+            raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")  # pragma: no cover
+    except ValueError:  # pragma: no cover
         raise Exception("DEFENDER_LOCKOUT_COOLOFF_TIME needs to be an integer or list of integers having at least one element")  # pragma: no cover
 except ValueError:  # pragma: no cover
     raise Exception("DEFENDER_COOLOFF_TIME needs to be an integer")  # pragma: no cover
