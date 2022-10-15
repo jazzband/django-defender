@@ -41,17 +41,21 @@ def get_approx_account_lockouts_from_login_attempts(ip_address=None, username=No
 
     q = Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION))
     failure_limit = config.FAILURE_LIMIT
-    if (ip_address and username \
-        and config.LOCKOUT_BY_IP_USERNAME \
-        and not (config.DISABLE_IP_LOCKOUT or config.DISABLE_USERNAME_LOCKOUT)
+    if (ip_address and username and config.LOCKOUT_BY_IP_USERNAME \
+        and not config.DISABLE_IP_LOCKOUT and not config.DISABLE_USERNAME_LOCKOUT
     ):
         q = q & Q(ip_address=ip_address) & Q(username=username)
-    elif ip_address and not config.DISABLE_IP_LOCKOUT:
-        failure_limit = config.IP_FAILURE_LIMIT
-        q = q & Q(ip_address=ip_address)
-    elif username and not config.DISABLE_USERNAME_LOCKOUT:
-        failure_limit = config.USERNAME_FAILURE_LIMIT
-        q = q & Q(username=username)
+    elif not config.LOCKOUT_BY_IP_USERNAME:
+        if ip_address and not config.DISABLE_IP_LOCKOUT:
+            failure_limit = config.IP_FAILURE_LIMIT
+            q = q & Q(ip_address=ip_address)
+        elif username and not config.DISABLE_USERNAME_LOCKOUT:
+            failure_limit = config.USERNAME_FAILURE_LIMIT
+            q = q & Q(username=username)
+        else:
+            # If we've made it this far and didn't hit one of the other if or elif
+            # conditions, we're in an inappropriate context.
+            raise Exception("Invalid state requested")
     else:
         # If we've made it this far and didn't hit one of the other if or elif
         # conditions, we're in an inappropriate context.
