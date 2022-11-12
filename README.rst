@@ -398,6 +398,36 @@ These should be defined in your ``settings.py`` file.
   [Default: ``defender.utils.username_from_request``\ ]
 
 
+Rationale for using DEFENDER_ATTEMPT_COOLOFF_TIME and DEFENDER_LOCKOUT_COOLOFF_TIME
+***********************************************************************************
+
+While using ``DEFENDER_COOLOFF_TIME`` alone is sufficent for most use cases, when using ``defender`` in some specific scenarios such as in a high security setting, developers may wish to have finer
+grained control over how long invalid login attempts are "remembered" while under consideration for lockout compared to the time those lockout keys are actually locked out from the system.
+``DEFENDER_ATTEMPT_COOLOFF_TIME`` and ``DEFENDER_LOCKOUT_COOLOFF_TIME`` allow for this exact fine grained configuration.
+
+We can also take a low security and low scale example like a high school's website. Such a website might be run on some of the school's computers and administrated by the school's IT staff and computer
+science teachers (if lucky enough to have any). In this scenario we can imagine that there are significant portions of the website accessible without authentication, but logging in to the website could
+provide access to some relatively privileged information such as the student's name, email, grades, and class schedule. Finally since there is an email linked with the account, we will assume that there
+is password reset functionality which unblocks the account when completed. In such a case, one could imagine that there is no need to remember failed logins for long periods of time since the application
+would simply wish to protect against potential denial of service attacks. This could be accomplished keeping ``DEFENDER_ATTEMPT_COOLOFF_TIME`` low, say 30 seconds, and setting ``DEFENDER_LOCKOUT_COOLOFF_TIME``
+to something much higher like 600 seconds. By keeping ``DEFENDER_ATTEMPT_COOLOFF_TIME`` low and locking out bad actors for significant periods of time by setting ``DEFENDER_LOCKOUT_COOLOFF_TIME`` high,
+rapid brute force login attacks will still be defeated and their small server will have more space in their cache for other data. And by providing password reset functionality as described above, these hypothetical
+administrators could limit their required involvement in unblocking real users while retaining the intended accessibility of their website.
+
+Additionally when ``DEFENDER_STORE_ACCESS_ATTEMPTS`` is True, ``DEFENDER_LOCKOUT_COOLOFF_TIME`` can also be configured as a list of integers. When configured as a list,
+the number of previous failed login attempts for the configured lockout key is divided by ``DEFENDER_LOGIN_FAILURE_LIMIT`` to produce an intentionally overestimated count
+of the number of failed logins for the period defined by ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION``. This ends up being an overestimate because the time between the failed login attempts
+is not considered when doing this calculation. While this may seem harsh, in some specific scenarios the additional protection against slower attacks can be worth the\ potential\ inconvenience
+caused to real users of the system.
+
+One such example of this could be a public web accessible web application that houses sensitive information of it's users (let's say personal financial records).
+The application and data therein should be accessible with minimal interruption, however security is integral so delays can be tolerated up to a point.
+Under these circumstances we may have a desire to simply set ``DEFENDER_COOLOFF_TIME`` to a very large integer or even 0 for maximum protection. But this would mean that
+if a real user\ does\ get locked out of the system, we will need an administrator to manually unblock them which of course is cumbersome and costly.
+By setting ``DEFENDER_ATTEMPT_COOLOFF_TIME`` to a large enough number, let's say 600 and setting ``DEFENDER_LOCKOUT_COOLOFF_TIME`` to a list of increasing integers (ie. [60, 120, 300, 600, 0]) we can
+protect our theoretical application comprably to if we had simply set ``DEFENDER_COOLOFF_TIME`` to 600 while disrupting our users significantly less.
+
+
 Adapting to other authentication methods
 ----------------------------------------
 
