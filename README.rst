@@ -414,7 +414,9 @@ to something much higher like 600 seconds. By keeping ``DEFENDER_ATTEMPT_COOLOFF
 rapid brute force login attacks will still be defeated and their small server will have more space in their cache for other data. And by providing password reset functionality as described above, these hypothetical
 administrators could limit their required involvement in unblocking real users while retaining the intended accessibility of their website.
 
-Additionally when ``DEFENDER_STORE_ACCESS_ATTEMPTS`` is True, ``DEFENDER_LOCKOUT_COOLOFF_TIME`` can also be configured as a list of integers. When configured as a list,
+While the previous example is somewhat contrived, the full power of these configurations is demonstrated with the following explanation and example.
+
+When ``DEFENDER_STORE_ACCESS_ATTEMPTS`` is True, ``DEFENDER_LOCKOUT_COOLOFF_TIME`` can also be configured as a list of integers. When configured as a list,
 the number of previous failed login attempts for the configured lockout key is divided by ``DEFENDER_LOGIN_FAILURE_LIMIT`` to produce an intentionally overestimated count
 of the number of failed logins for the period defined by ``DEFENDER_ACCESS_ATTEMPT_EXPIRATION``. This ends up being an overestimate because the time between the failed login attempts
 is not considered when doing this calculation. While this may seem harsh, in some specific scenarios the additional protection against slower attacks can be worth the\ potential\ inconvenience
