@@ -729,7 +729,7 @@ The views block based on email address submitted on the password reset view. Thi
         def post(self, request, *args, **kwargs):
             """
             Confirm the user isn’t already blocked by IP before allowing form POST.
-            
+
             Also, force log this form POST as a single entry in the Defender cache, against the submitted email address.
             """
             if def_utils.is_already_locked(request):
