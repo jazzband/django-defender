@@ -50,7 +50,6 @@ def parse_redis_url(url, password_quote=None):
     # create config with some sane defaults
     redis_config = {
         "DB": 0,
-        "USERNAME": "default",
         "PASSWORD": None,
         "HOST": "localhost",
         "PORT": 6379,
