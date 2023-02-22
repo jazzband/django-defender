@@ -1215,6 +1215,7 @@ class TestRedisConnection(TestCase):
         result = int(redis_client.get('test2'))
         self.assertEqual(result, 0)
         redis_client.delete('test2')
+        connection.config_set('requirepass', '')
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
     @patch("defender.config.MOCK_REDIS", False)
