@@ -1224,6 +1224,10 @@ class TestRedisConnection(TestCase):
         """ get redis connection with name and password """
 
         connection = redis.Redis()
+        if connection.info().get('redis_version') < '6':
+            # redis versions before 6 don't support name, so skip.
+            return
+
         connection.config_set('requirepass', 'mypass')
 
         redis_client = get_redis_connection()
