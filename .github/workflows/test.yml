@@ -10,7 +10,7 @@ jobs:
       max-parallel: 5
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', 'pypy-3.8']
-        redis-version: [4, 5, 6]
+        redis-version: [5, 6, 7]
 
     steps:
     - uses: actions/checkout@v2

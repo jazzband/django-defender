@@ -110,7 +110,7 @@ Requirements
 
 * Python: 3.7, 3.8, 3.9, 3.10, PyPy
 * Django: 3.x, 4.x
-* Redis
+* Redis: 5.x, 6.x, 7.x
 
 
 Installation
