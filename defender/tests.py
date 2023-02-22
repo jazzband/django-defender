@@ -10,8 +10,11 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
+from django.test.testcases import TestCase
 from redis.client import Redis
 from django.urls import reverse
+
+import redis
 
 from defender.data import get_approx_account_lockouts_from_login_attempts
 
@@ -990,7 +993,7 @@ class AccessAttemptTest(DefenderTestCase):
     def test_approx_account_lockout_count_default_case_invalid_args_pt1(self):
         with self.assertRaises(Exception):
             get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1")
-    
+
     @patch("defender.config.DISABLE_USERNAME_LOCKOUT", True)
     def test_approx_account_lockout_count_default_case_invalid_args_pt2(self):
         with self.assertRaises(Exception):
@@ -1169,3 +1172,56 @@ class TestUtils(DefenderTestCase):
         req = HttpRequest()
         req.META["HTTP_X_FORWARDED_FOR"] = "[2001:db8::1]:123456"
         self.assertEqual(utils.get_ip(req), "2001:db8::1")
+
+
+class TestRedisConnection(TestCase):
+    """ Test the redis connection parsing """
+    REDIS_URL_PLAIN = "redis://localhost:6379/0"
+    REDIS_URL_PASS = "redis://:mypass@localhost:6379/0"
+    REDIS_URL_NAME_PASS = "redis://myname:mypass2@localhost:6379/0"
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PLAIN)
+    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    def test_get_redis_connection(self):
+        """ make sure the IP address is stripped of its port number """
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test', 0)
+        result = int(redis_client.get('test'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
+    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    def test_get_redis_connection_with_password(self):
+        """ make sure the IP address is stripped of its port number """
+
+        connection = redis.Redis()
+        connection.config_set('requirepass', 'mypass')
+
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test2', 0)
+        result = int(redis_client.get('test2'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test2')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
+    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    def test_get_redis_connection_with_name_password(self):
+        """ make sure the IP address is stripped of its port number """
+
+        connection = redis.Redis()
+        connection.acl_setuser(
+            'myname',
+            enabled=True,
+            passwords=["+" + "mypass2", ],
+            keys="*",
+            commands=["+@all", ])
+
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test3', 0)
+        result = int(redis_client.get('test3'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test3')
