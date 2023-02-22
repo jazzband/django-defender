@@ -1256,13 +1256,17 @@ class TestRedisConnection(TestCase):
             passwords=["+" + "mypass2", ],
             keys="*",
             commands=["+@all", ])
+        print(connection.acl_getuser('myname'))
 
-        redis_client = get_redis_connection()
-        self.assertIsInstance(redis_client, Redis)
-        redis_client.set('test3', 0)
-        result = int(redis_client.get('test3'))
-        self.assertEqual(result, 0)
-        redis_client.delete('test3')
+        try:
+            redis_client = get_redis_connection()
+            self.assertIsInstance(redis_client, Redis)
+            redis_client.set('test3', 0)
+            result = int(redis_client.get('test3'))
+            self.assertEqual(result, 0)
+            redis_client.delete('test3')
+        except Exception as e:
+            raise e
 
         # clean up
-        redis_client.acl_deluser('myname')
+        connection.acl_deluser('myname')
