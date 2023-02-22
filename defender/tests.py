@@ -1193,7 +1193,29 @@ class TestRedisConnection(TestCase):
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PLAIN)
     @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection(self):
-        """ get redis connection """
+        """ get redis connection plain """
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test', 0)
+        result = int(redis_client.get('test'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection_2(self):
+        """ get redis connection passing password """
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test', 0)
+        result = int(redis_client.get('test'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection_3(self):
+        """ get redis connection passing name and password """
         redis_client = get_redis_connection()
         self.assertIsInstance(redis_client, Redis)
         redis_client.set('test', 0)
@@ -1216,12 +1238,29 @@ class TestRedisConnection(TestCase):
         self.assertEqual(result, 0)
         redis_client.delete('test2')
         # clean up
-        connection.config_set('requirepass', '')
+        redis_client.config_set('requirepass', '')
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
     @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_name_password(self):
-        """ get redis connection with password and name """
+        """ get redis connection with name and password """
+
+        connection = redis.Redis()
+        connection.config_set('requirepass', 'mypass')
+
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test2', 0)
+        result = int(redis_client.get('test2'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test2')
+        # clean up
+        redis_client.config_set('requirepass', '')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection_with_acl(self):
+        """ get redis connection with password and name ACL """
 
         connection = redis.Redis()
 
@@ -1244,4 +1283,4 @@ class TestRedisConnection(TestCase):
         redis_client.delete('test3')
 
         # clean up
-        connection.acl_deluser('myname')
+        redis_client.acl_deluser('myname')
