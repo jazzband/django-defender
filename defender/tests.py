@@ -1228,7 +1228,7 @@ class TestRedisConnection(TestCase):
             # redis versions before 6 don't support name, so skip.
             return
 
-        connection.config_set('requirepass', 'mypass')
+        connection.config_set('requirepass', 'mypass2')
 
         redis_client = get_redis_connection()
         self.assertIsInstance(redis_client, Redis)
@@ -1243,7 +1243,7 @@ class TestRedisConnection(TestCase):
     @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_acl(self):
         """ get redis connection with password and name ACL """
-
+        print(self.REDIS_URL_NAME_PASS)
         connection = redis.Redis()
 
         if connection.info().get('redis_version') < '6':
