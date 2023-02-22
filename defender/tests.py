@@ -1181,7 +1181,7 @@ class TestRedisConnection(TestCase):
     REDIS_URL_NAME_PASS = "redis://myname:mypass2@localhost:6379/0"
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PLAIN)
-    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection(self):
         """ make sure the IP address is stripped of its port number """
         redis_client = get_redis_connection()
@@ -1192,7 +1192,7 @@ class TestRedisConnection(TestCase):
         redis_client.delete('test')
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
-    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_password(self):
         """ make sure the IP address is stripped of its port number """
 
@@ -1207,7 +1207,7 @@ class TestRedisConnection(TestCase):
         redis_client.delete('test2')
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
-    @patch("defender.config.DEFENDER_MOCK_REDIS", False)
+    @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_name_password(self):
         """ make sure the IP address is stripped of its port number """
 
