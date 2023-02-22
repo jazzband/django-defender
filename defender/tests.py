@@ -1203,28 +1203,6 @@ class TestRedisConnection(TestCase):
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
     @patch("defender.config.MOCK_REDIS", False)
-    def test_get_redis_connection_2(self):
-        """ get redis connection passing password """
-        redis_client = get_redis_connection()
-        self.assertIsInstance(redis_client, Redis)
-        redis_client.set('test', 0)
-        result = int(redis_client.get('test'))
-        self.assertEqual(result, 0)
-        redis_client.delete('test')
-
-    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
-    @patch("defender.config.MOCK_REDIS", False)
-    def test_get_redis_connection_3(self):
-        """ get redis connection passing name and password """
-        redis_client = get_redis_connection()
-        self.assertIsInstance(redis_client, Redis)
-        redis_client.set('test', 0)
-        result = int(redis_client.get('test'))
-        self.assertEqual(result, 0)
-        redis_client.delete('test')
-
-    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
-    @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_password(self):
         """ get redis connection with password """
 
