@@ -10,8 +10,11 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
+from django.test.testcases import TestCase
 from redis.client import Redis
 from django.urls import reverse
+
+import redis
 
 from defender.data import get_approx_account_lockouts_from_login_attempts
 
@@ -483,6 +486,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("DB"), 2)
         self.assertEqual(conf.get("PASSWORD"), "password")
         self.assertEqual(conf.get("PORT"), 1234)
+        self.assertEqual(conf.get("USERNAME"), "user")
 
         # full non local
         conf = parse_redis_url(
@@ -491,6 +495,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("DB"), 2)
         self.assertEqual(conf.get("PASSWORD"), "pass")
         self.assertEqual(conf.get("PORT"), 1234)
+        self.assertEqual(conf.get("USERNAME"), "user")
 
         # no user name
         conf = parse_redis_url("redis://password@localhost2:1234/2", False)
@@ -990,7 +995,7 @@ class AccessAttemptTest(DefenderTestCase):
     def test_approx_account_lockout_count_default_case_invalid_args_pt1(self):
         with self.assertRaises(Exception):
             get_approx_account_lockouts_from_login_attempts(ip_address="127.0.0.1")
-    
+
     @patch("defender.config.DISABLE_USERNAME_LOCKOUT", True)
     def test_approx_account_lockout_count_default_case_invalid_args_pt2(self):
         with self.assertRaises(Exception):
@@ -1179,3 +1184,68 @@ class TestUtils(DefenderTestCase):
         self.assertEqual(utils.remove_prefix(
             "defender:blocked:username:johndoe", "blocked:username:"),
             "defender:blocked:username:johndoe")
+
+
+class TestRedisConnection(TestCase):
+    """ Test the redis connection parsing """
+    REDIS_URL_PLAIN = "redis://localhost:6379/0"
+    REDIS_URL_PASS = "redis://:mypass@localhost:6379/0"
+    REDIS_URL_NAME_PASS = "redis://myname:mypass2@localhost:6379/0"
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PLAIN)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection(self):
+        """ get redis connection plain """
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test', 0)
+        result = int(redis_client.get('test'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_PASS)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection_with_password(self):
+        """ get redis connection with password """
+
+        connection = redis.Redis()
+        connection.config_set('requirepass', 'mypass')
+
+        redis_client = get_redis_connection()
+        self.assertIsInstance(redis_client, Redis)
+        redis_client.set('test2', 0)
+        result = int(redis_client.get('test2'))
+        self.assertEqual(result, 0)
+        redis_client.delete('test2')
+        # clean up
+        redis_client.config_set('requirepass', '')
+
+    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
+    @patch("defender.config.MOCK_REDIS", False)
+    def test_get_redis_connection_with_acl(self):
+        """ get redis connection with password and name ACL """
+        connection = redis.Redis()
+
+        if connection.info().get('redis_version') < '6':
+            # redis versions before 6 don't have acl, so skip.
+            return
+
+        connection.acl_setuser(
+            'myname',
+            enabled=True,
+            passwords=["+" + "mypass2", ],
+            keys="*",
+            commands=["+@all", ])
+
+        try:
+            redis_client = get_redis_connection()
+            self.assertIsInstance(redis_client, Redis)
+            redis_client.set('test3', 0)
+            result = int(redis_client.get('test3'))
+            self.assertEqual(result, 0)
+            redis_client.delete('test3')
+        except Exception as e:
+            raise e
+
+        # clean up
+        connection.acl_deluser('myname')

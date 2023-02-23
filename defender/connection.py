@@ -34,6 +34,7 @@ def get_redis_connection():
     else:  # pragma: no cover
         redis_config = parse_redis_url(
             config.DEFENDER_REDIS_URL, config.DEFENDER_REDIS_PASSWORD_QUOTE)
+
         return redis.StrictRedis(
             host=redis_config.get("HOST"),
             port=redis_config.get("PORT"),
@@ -50,7 +51,6 @@ def parse_redis_url(url, password_quote=None):
     # create config with some sane defaults
     redis_config = {
         "DB": 0,
-        "USERNAME": "default",
         "PASSWORD": None,
         "HOST": "localhost",
         "PORT": 6379,
@@ -60,25 +60,26 @@ def parse_redis_url(url, password_quote=None):
     if not url:
         return redis_config
 
-    url = urlparse.urlparse(url)
+    purl = urlparse.urlparse(url)
+
     # Remove query strings.
-    path = url.path[1:]
+    path = purl.path[1:]
     path = path.split("?", 2)[0]
 
     if path:
         redis_config.update({"DB": int(path)})
-    if url.password:
-        password = url.password
+    if purl.password:
+        password = purl.password
         if password_quote:
             password = urlparse.unquote(password)
         redis_config.update({"PASSWORD": password})
-    if url.hostname:
-        redis_config.update({"HOST": url.hostname})
-    if url.username:
-        redis_config.update({"USERNAME": url.username})
-    if url.port:
-        redis_config.update({"PORT": int(url.port)})
-    if url.scheme in ["https", "rediss"]:
+    if purl.hostname:
+        redis_config.update({"HOST": purl.hostname})
+    if purl.username:
+        redis_config.update({"USERNAME": purl.username})
+    if purl.port:
+        redis_config.update({"PORT": int(purl.port)})
+    if purl.scheme in ["https", "rediss"]:
         redis_config.update({"SSL": True})
 
     return redis_config
