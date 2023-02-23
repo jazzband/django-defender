@@ -486,6 +486,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("DB"), 2)
         self.assertEqual(conf.get("PASSWORD"), "password")
         self.assertEqual(conf.get("PORT"), 1234)
+        self.assertEqual(conf.get("USERNAME"), "user")
 
         # full non local
         conf = parse_redis_url(
@@ -494,6 +495,7 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(conf.get("DB"), 2)
         self.assertEqual(conf.get("PASSWORD"), "pass")
         self.assertEqual(conf.get("PORT"), 1234)
+        self.assertEqual(conf.get("USERNAME"), "user")
 
         # no user name
         conf = parse_redis_url("redis://password@localhost2:1234/2", False)
@@ -1220,30 +1222,8 @@ class TestRedisConnection(TestCase):
 
     @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
     @patch("defender.config.MOCK_REDIS", False)
-    def test_get_redis_connection_with_name_password(self):
-        """ get redis connection with name and password """
-
-        connection = redis.Redis()
-        if connection.info().get('redis_version') < '6':
-            # redis versions before 6 don't support name, so skip.
-            return
-
-        connection.config_set('requirepass', 'mypass2')
-
-        redis_client = get_redis_connection()
-        self.assertIsInstance(redis_client, Redis)
-        redis_client.set('test2', 0)
-        result = int(redis_client.get('test2'))
-        self.assertEqual(result, 0)
-        redis_client.delete('test2')
-        # clean up
-        redis_client.config_set('requirepass', '')
-
-    @patch("defender.config.DEFENDER_REDIS_URL", REDIS_URL_NAME_PASS)
-    @patch("defender.config.MOCK_REDIS", False)
     def test_get_redis_connection_with_acl(self):
         """ get redis connection with password and name ACL """
-        print(self.REDIS_URL_NAME_PASS)
         connection = redis.Redis()
 
         if connection.info().get('redis_version') < '6':
