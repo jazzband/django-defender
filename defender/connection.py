@@ -34,7 +34,7 @@ def get_redis_connection():
     else:  # pragma: no cover
         redis_config = parse_redis_url(
             config.DEFENDER_REDIS_URL, config.DEFENDER_REDIS_PASSWORD_QUOTE)
-        print(redis_config)
+
         return redis.StrictRedis(
             host=redis_config.get("HOST"),
             port=redis_config.get("PORT"),

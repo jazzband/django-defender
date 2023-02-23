@@ -1236,7 +1236,6 @@ class TestRedisConnection(TestCase):
             passwords=["+" + "mypass2", ],
             keys="*",
             commands=["+@all", ])
-        print(connection.acl_getuser('myname'))
 
         try:
             redis_client = get_redis_connection()
