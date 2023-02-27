@@ -2,6 +2,12 @@
 Changes
 =======
 
+0.9.7
+=====
+
+- Fix bug related to using a redis version less than 6 and not having a password. [@kencochrane]
+- Fix bug in remove_prefix method [@dashgin]
+
 0.9.6
 =====
 
