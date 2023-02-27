@@ -13,7 +13,7 @@ jobs:
         redis-version: [5, 6, 7]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.5.0
@@ -21,7 +21,7 @@ jobs:
         redis-version: ${{ matrix.redis-version }}
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -31,7 +31,7 @@ jobs:
         echo "::set-output name=dir::$(pip cache dir)"
 
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
         key:
@@ -49,6 +49,6 @@ jobs:
         tox -v
 
     - name: Upload coverage
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         name: Python ${{ matrix.python-version }}
