@@ -63,7 +63,7 @@ def strip_port_number(ip_address_string):
 
     """
     If it's not a valid IP address, we prefer to return
-    the string as-is instead of returning a potentially 
+    the string as-is instead of returning a potentially
     corrupted string:
     """
     if is_valid_ip(ip_address):
@@ -360,10 +360,9 @@ def reset_failed_attempts(ip_address=None, username=None):
     pipe.execute()
 
 
-def lockout_response(request):
+def lockout_response(request, username):
     """ if we are locked out, here is the response """
     ip_address = get_ip(request)
-    username = get_username_from_request(request)
     if config.LOCKOUT_TEMPLATE:
         cooloff_time = get_lockout_cooloff_time(ip_address=ip_address, username=username)
         context = {

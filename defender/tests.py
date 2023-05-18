@@ -936,6 +936,41 @@ class AccessAttemptTest(DefenderTestCase):
             data_out = utils.get_blocked_ips()
             self.assertEqual(data_out, [])
 
+    @patch("defender.config.USERNAME_FAILURE_LIMIT", 3)
+    @patch("defender.config.DISABLE_IP_LOCKOUT", True)
+    def test_login_blocked_for_non_standard_login_views_different_username(self):
+        """
+        Check that a view with custom username blocked correctly
+        """
+
+        @watch_login(status_code=401, get_username=lambda request: request.POST.get("email"))
+        def fake_api_401_login_different_username(request):
+            """ Fake the api login with 401 """
+            return HttpResponse("Invalid", status=401)
+
+        wrong_email = "email@localhost"
+
+        request_factory = RequestFactory()
+        request = request_factory.post("api/login", data={"email": wrong_email})
+        request.user = AnonymousUser()
+        request.session = SessionStore()
+
+        for _ in range(3):
+            fake_api_401_login_different_username(request)
+
+            data_out = utils.get_blocked_usernames()
+            self.assertEqual(data_out, [])
+
+        fake_api_401_login_different_username(request)
+
+        data_out = utils.get_blocked_usernames()
+        self.assertEqual(data_out, [wrong_email])
+
+        # Ensure that `watch_login` correctly extract username from request
+        # during `is_already_locked` check and don't cause 500 errors
+        status_code = fake_api_401_login_different_username(request)
+        self.assertNotEqual(status_code, 500)
+
     @patch("defender.config.ATTEMPT_COOLOFF_TIME", "a")
     def test_bad_attempt_cooloff_configuration(self):
         self.assertRaises(Exception)
