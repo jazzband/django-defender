@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from defender import config
 from .models import AccessAttempt
 from django.db.models import Q
+from django.utils import timezone
 
 
 def store_login_attempt(
@@ -39,7 +40,7 @@ def get_approx_account_lockouts_from_login_attempts(ip_address=None, username=No
         # None we should return 0.
         return 0
 
-    q = Q(attempt_time__gte=datetime.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION))
+    q = Q(attempt_time__gte=timezone.now() - timedelta(hours=config.ACCESS_ATTEMPT_EXPIRATION))
     failure_limit = config.FAILURE_LIMIT
     if (ip_address and username and config.LOCKOUT_BY_IP_USERNAME \
         and not config.DISABLE_IP_LOCKOUT and not config.DISABLE_USERNAME_LOCKOUT
