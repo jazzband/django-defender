@@ -3,11 +3,8 @@ import string
 import time
 from unittest.mock import patch
 
-from datetime import datetime, timedelta
-
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.sessions.backends.db import SessionStore
-from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
