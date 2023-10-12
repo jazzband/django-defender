@@ -31,55 +31,5 @@ def get_redis_connection():
         except AttributeError:
             # django_redis.cache.RedisCache case (django-redis package)
             return cache.client.get_client(True)
-    else:  # pragma: no cover
-        redis_config = parse_redis_url(
-            config.DEFENDER_REDIS_URL, config.DEFENDER_REDIS_PASSWORD_QUOTE)
-
-        return redis.StrictRedis(
-            host=redis_config.get("HOST"),
-            port=redis_config.get("PORT"),
-            db=redis_config.get("DB"),
-            username=redis_config.get("USERNAME"),
-            password=redis_config.get("PASSWORD"),
-            ssl=redis_config.get("SSL"),
-        )
-
-
-def parse_redis_url(url, password_quote=None):
-    """Parses a redis URL."""
-
-    # create config with some sane defaults
-    redis_config = {
-        "DB": 0,
-        "PASSWORD": None,
-        "HOST": "localhost",
-        "PORT": 6379,
-        "SSL": False,
-    }
-
-    if not url:
-        return redis_config
-
-    purl = urlparse.urlparse(url)
-
-    # Remove query strings.
-    path = purl.path[1:]
-    path = path.split("?", 2)[0]
-
-    if path:
-        redis_config.update({"DB": int(path)})
-    if purl.password:
-        password = purl.password
-        if password_quote:
-            password = urlparse.unquote(password)
-        redis_config.update({"PASSWORD": password})
-    if purl.hostname:
-        redis_config.update({"HOST": purl.hostname})
-    if purl.username:
-        redis_config.update({"USERNAME": purl.username})
-    if purl.port:
-        redis_config.update({"PORT": int(purl.port)})
-    if purl.scheme in ["https", "rediss"]:
-        redis_config.update({"SSL": True})
-
-    return redis_config
+    else:  # pragma: no cover)
+        return redis.StrictRedis.from_url(config.DEFENDER_REDIS_URL)
