@@ -26,7 +26,7 @@ from .signals import (
     username_block as username_block_signal,
     username_unblock as username_unblock_signal,
 )
-from .connection import parse_redis_url, get_redis_connection
+from .connection import get_redis_connection
 from .decorators import watch_login
 from .models import AccessAttempt
 from .test import DefenderTestCase, DefenderTransactionTestCase
@@ -477,74 +477,6 @@ class AccessAttemptTest(DefenderTestCase):
         self.assertEqual(utils.is_valid_ip("2001:db8:85a3::8a2e:370:7334"), True)
         self.assertEqual(utils.is_valid_ip("::ffff:192.0.2.128"), True)
         self.assertEqual(utils.is_valid_ip("::ffff:8.8.8.8"), True)
-
-    def test_parse_redis_url(self):
-        """ test the parse_redis_url method """
-        # full regular
-        conf = parse_redis_url("redis://user:password@localhost2:1234/2", False)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 2)
-        self.assertEqual(conf.get("PASSWORD"), "password")
-        self.assertEqual(conf.get("PORT"), 1234)
-        self.assertEqual(conf.get("USERNAME"), "user")
-
-        # full non local
-        conf = parse_redis_url(
-            "redis://user:pass@www.localhost.com:1234/2", False)
-        self.assertEqual(conf.get("HOST"), "www.localhost.com")
-        self.assertEqual(conf.get("DB"), 2)
-        self.assertEqual(conf.get("PASSWORD"), "pass")
-        self.assertEqual(conf.get("PORT"), 1234)
-        self.assertEqual(conf.get("USERNAME"), "user")
-
-        # no user name
-        conf = parse_redis_url("redis://password@localhost2:1234/2", False)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 2)
-        self.assertEqual(conf.get("PASSWORD"), None)
-        self.assertEqual(conf.get("PORT"), 1234)
-
-        # no user name 2 with colon
-        conf = parse_redis_url("redis://:password@localhost2:1234/2", False)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 2)
-        self.assertEqual(conf.get("PASSWORD"), "password")
-        self.assertEqual(conf.get("PORT"), 1234)
-
-        # Empty
-        conf = parse_redis_url(None, False)
-        self.assertEqual(conf.get("HOST"), "localhost")
-        self.assertEqual(conf.get("DB"), 0)
-        self.assertEqual(conf.get("PASSWORD"), None)
-        self.assertEqual(conf.get("PORT"), 6379)
-
-        # no db
-        conf = parse_redis_url("redis://:password@localhost2:1234", False)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 0)
-        self.assertEqual(conf.get("PASSWORD"), "password")
-        self.assertEqual(conf.get("PORT"), 1234)
-
-        # no password
-        conf = parse_redis_url("redis://localhost2:1234/0", False)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 0)
-        self.assertEqual(conf.get("PASSWORD"), None)
-        self.assertEqual(conf.get("PORT"), 1234)
-
-        # password with special character and set the password_quote = True
-        conf = parse_redis_url("redis://:calmkart%23%40%21@localhost:6379/0", True)
-        self.assertEqual(conf.get("HOST"), "localhost")
-        self.assertEqual(conf.get("DB"), 0)
-        self.assertEqual(conf.get("PASSWORD"), "calmkart#@!")
-        self.assertEqual(conf.get("PORT"), 6379)
-
-        # password without special character and set the password_quote = True
-        conf = parse_redis_url("redis://:password@localhost2:1234", True)
-        self.assertEqual(conf.get("HOST"), "localhost2")
-        self.assertEqual(conf.get("DB"), 0)
-        self.assertEqual(conf.get("PASSWORD"), "password")
-        self.assertEqual(conf.get("PORT"), 1234)
 
     @patch("defender.config.DEFENDER_REDIS_NAME", "default")
     def test_get_redis_connection_django_conf(self):
