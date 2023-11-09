@@ -18,8 +18,10 @@ def watch_login(status_code=302, msg="", get_username=utils.get_username_from_re
             # if the request is currently under lockout, do not proceed to the
             # login function, go directly to lockout url, do not pass go,
             # do not collect messages about this login attempt
-            if utils.is_already_locked(request):
-                return utils.lockout_response(request)
+            username = get_username(request)
+
+            if utils.is_already_locked(request, username=username):
+                return utils.lockout_response(request, username=username)
 
             # call the login function
             response = func(request, *args, **kwargs)
@@ -44,13 +46,13 @@ def watch_login(status_code=302, msg="", get_username=utils.get_username_from_re
                 # ideally make this background task, but to keep simple,
                 # keeping it inline for now.
                 utils.add_login_attempt_to_db(
-                    request, not login_unsuccessful, get_username
+                    request, not login_unsuccessful, username=username
                 )
 
-                if utils.check_request(request, login_unsuccessful, get_username):
+                if utils.check_request(request, login_unsuccessful, username=username):
                     return response
 
-                return utils.lockout_response(request)
+                return utils.lockout_response(request, username=username)
 
             return response
 
