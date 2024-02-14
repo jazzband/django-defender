@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.contrib import admin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse
 
@@ -13,10 +14,12 @@ def block_view(request):
     blocked_ip_list = get_blocked_ips()
     blocked_username_list = get_blocked_usernames()
 
-    context = {
+    context = admin.site.index(request).context_data
+    context.update({
         "blocked_ip_list": blocked_ip_list,
         "blocked_username_list": blocked_username_list,
-    }
+        "title": "Blocked logins",
+    })
     return render(request, "defender/admin/blocks.html", context)
 
 
