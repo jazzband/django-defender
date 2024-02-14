@@ -12,13 +12,13 @@
 <div class="breadcrumbs">
     <a href="{% url "admin:index" %}">Home</a> &rsaquo;
     <a href="{% url "admin:app_list" "defender" %}">Defender</a> &rsaquo;
+    {{ title }}
 </div>
 {% endblock breadcrumbs %}
 
 {% block content %}
 <div id="content-main">
 
-<h1>Blocked Logins</h1>
 <p>Here is a list of IP's and usernames that are blocked</p>
 
 <div class="module">
