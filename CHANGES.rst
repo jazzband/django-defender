@@ -2,6 +2,18 @@
 Changes
 =======
 
+0.9.8
+=====
+
+- Fix watch_login with custom username (#228) [@ron8mcr]
+- Replace datetime.now with timezone.now (#232) [@ericls]
+- Update tox.ini with Django 4.2, Python 3.11 (#233) [@marius-mather]
+- Use redis parse_url method instead of a custom one (#234) [@dkr-sahar]
+- Update DEFENDER_REDIS_NAME documentation (#235) [@bennylope]
+- Prevent the "Reverse for 'defender_blocks_view' not found" error (#237) [@ataylor32]
+- Updated app_index.html (#238) [@ataylor32]
+- Improved the "Blocked Logins" page's admin integration (#239) [@ataylor32]
+
 0.9.7
 =====
 
