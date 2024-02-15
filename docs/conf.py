@@ -18,7 +18,7 @@ from pkg_resources import get_distribution
 # -- Project information -----------------------------------------------------
 
 project = "django-defender"
-copyright = "2014, Ken Cochrane"
+copyright = "2024, Ken Cochrane"
 author = "Ken Cochrane"
 
 # The full version, including alpha/beta/rc tags.
