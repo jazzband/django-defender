@@ -4,3 +4,4 @@ mockredispy
 django-redis-cache
 importlib-metadata<5.0
 celery
+sphinx_rtd_theme==2.0.0
