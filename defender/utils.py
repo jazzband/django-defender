@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.core.validators import validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.utils.module_loading import import_string
+from django.utils.translation import gettext as _
 
 from .connection import get_redis_connection
 from . import config
@@ -377,12 +378,12 @@ def lockout_response(request, username):
 
     if get_lockout_cooloff_time(ip_address=ip_address, username=username):
         return HttpResponse(
-            "Account locked: too many login attempts.  " "Please try again later."
+            _("Account locked: too many login attempts. Please try again later.")
         )
     else:
         return HttpResponse(
-            "Account locked: too many login attempts.  "
-            "Contact an admin to unlock your account."
+            _("Account locked: too many login attempts. "
+              "Contact an admin to unlock your account.")
         )
 
 

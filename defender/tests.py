@@ -41,7 +41,7 @@ class AccessAttemptTest(DefenderTestCase):
 
     LOCKED_MESSAGE = "Account locked: too many login attempts."
     PERMANENT_LOCKED_MESSAGE = (
-        LOCKED_MESSAGE + "  Contact an admin to unlock your account."
+        LOCKED_MESSAGE + " Contact an admin to unlock your account."
     )
 
     def _get_random_str(self):
