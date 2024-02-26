@@ -8,6 +8,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.core.validators import validate_ipv46_address
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
 from django.utils.module_loading import import_string
 
 from .connection import get_redis_connection
@@ -23,6 +26,7 @@ from .signals import (
 REDIS_SERVER = get_redis_connection()
 
 LOG = logging.getLogger(__name__)
+User = get_user_model()
 
 
 def is_valid_ip(ip_address):
@@ -270,6 +274,8 @@ def block_username(username):
         REDIS_SERVER.set(key, "blocked")
     if not already_blocked:
         send_username_block_signal(username)
+        if config.EMAIL_USER_ON_ACCOUNT_LOCKED:
+            send_account_locked_email_to_user(username)
 
 
 def record_failed_attempt(ip_address, username):
@@ -460,3 +466,25 @@ def add_login_attempt_to_db(
         store_login_attempt(
             user_agent, ip_address, username, http_accept, path_info, login_valid
         )
+
+
+def send_account_locked_email_to_user(username:str):
+    """ Send an email to the user to notify them that their account has been locked """
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        # TODO: Handle the case where the user does not exist
+        return
+
+    html_message = render_to_string(config.LOCKOUT_EMAIL_TEMPLATE_PATH, {"user": user})
+    plan_text_message = f"Hi {user.username}, Your account has been locked due to too many failed login attempts.Please contact an admin to unlock your account."
+    send_mail(
+        'Account Locked',
+        plan_text_message,
+        from_email=config.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        html_message=html_message, 
+        fail_silently=False
+    )
+
+
