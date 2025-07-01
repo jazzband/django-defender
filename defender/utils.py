@@ -195,7 +195,7 @@ def increment_key(key):
 def username_from_request(request):
     """ unloads username from default POST request """
     if config.USERNAME_FORM_FIELD in request.POST:
-        return request.POST[config.USERNAME_FORM_FIELD][:255]
+        return request.POST[config.USERNAME_FORM_FIELD][:255].strip()
     return None
 
 
