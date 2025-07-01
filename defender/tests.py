@@ -1149,6 +1149,16 @@ class TestUtils(DefenderTestCase):
             "defender:blocked:username:johndoe", "blocked:username:"),
             "defender:blocked:username:johndoe")
 
+    def test_whitespace_block_circumvention(self):
+        username = "johndoe"
+        req = HttpRequest()
+        req.POST["username"] = f"{username} " # username with appended whitespace
+        req.META["HTTP_X_REAL_IP"] = "1.2.3.4"
+
+        utils.block_username(username)
+
+        self.assertTrue(utils.is_already_locked(req))
+
 
 class TestRedisConnection(TestCase):
     """ Test the redis connection parsing """
