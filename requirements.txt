@@ -1,7 +1,7 @@
 -e .
 coverage
 mockredispy
-django-redis-cache
+django-redis
 importlib-metadata<5.0
 celery
 sphinx_rtd_theme==2.0.0
