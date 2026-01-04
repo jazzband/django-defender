@@ -108,8 +108,8 @@ Admin pages
 Requirements
 ------------
 
-* Python: 3.7, 3.8, 3.9, 3.10, PyPy
-* Django: 3.x, 4.x
+* Python: 3.8, 3.9, 3.10, 3.11, 3.12, PyPy
+* Django: 3.2, 4.2, 5.0, 5.1, 5.2
 * Redis: 5.x, 6.x, 7.x
 
 
@@ -534,8 +534,8 @@ Below is a sample ``BasicAuthenticationDefender`` class based on ``rest_framewor
    from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
    from django.contrib.auth.tokens import default_token_generator
    from django.utils.http import urlsafe_base64_decode as uid_decoder
-   from django.utils.translation import ugettext_lazy as _
-   from django.utils.encoding import force_text
+   from django.utils.translation import gettext_lazy as _
+   from django.utils.encoding import force_str
    from rest_framework import serializers, exceptions, HTTP_HEADER_ENCODING
    from rest_framework.exceptions import ValidationError
    from defender import utils as defender_utils
