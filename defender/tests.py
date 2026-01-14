@@ -13,7 +13,7 @@ from django.urls import reverse
 
 import redis
 
-from defender.data import get_approx_account_lockouts_from_login_attempts
+from defender.data import get_approx_account_lockouts_from_login_attempts, get_approx_lockouts_cache_key
 
 from . import utils
 from . import config
@@ -964,6 +964,19 @@ class AccessAttemptTest(DefenderTestCase):
     def test_approx_account_lockout_count_default_case_invalid_args_pt2(self):
         with self.assertRaises(Exception):
             get_approx_account_lockouts_from_login_attempts(username=VALID_USERNAME)
+    
+    def test_approx_account_lockout_uses_redis_cache(self):
+        get_approx_account_lockouts_from_login_attempts(
+            ip_address="127.0.0.1", username=VALID_USERNAME
+        )
+
+        redis_client = get_redis_connection()
+        cached_value = redis_client.get(
+            get_approx_lockouts_cache_key(
+                ip_address="127.0.0.1", username=VALID_USERNAME
+            )
+        )
+        self.assertIsNone(cached_value)
 
 
 class SignalTest(DefenderTestCase):
