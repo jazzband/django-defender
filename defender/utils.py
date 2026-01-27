@@ -12,7 +12,11 @@ from django.utils.module_loading import import_string
 
 from .connection import get_redis_connection
 from . import config
-from .data import get_approx_account_lockouts_from_login_attempts, store_login_attempt
+from .data import (
+    get_approx_account_lockouts_from_login_attempts, 
+    get_approx_lockouts_cache_key, 
+    store_login_attempt,
+)
 from .signals import (
     send_username_block_signal,
     send_ip_block_signal,
@@ -331,6 +335,12 @@ def unblock_ip(ip_address, pipe=None):
             pipe.execute()
     send_ip_unblock_signal(ip_address)
 
+    redis_cache_key = get_approx_lockouts_cache_key(ip_address, None)
+
+    if redis_cache_key is not None:
+        redis_client = get_redis_connection()
+        redis_client.delete(redis_cache_key)
+
 
 def unblock_username(username, pipe=None):
     """ unblock the given Username """
@@ -345,6 +355,12 @@ def unblock_username(username, pipe=None):
             pipe.execute()
     send_username_unblock_signal(username)
 
+    redis_cache_key = get_approx_lockouts_cache_key(None, username)
+
+    if redis_cache_key is not None:
+        redis_client = get_redis_connection()
+        redis_client.delete(redis_cache_key)
+
 
 def reset_failed_attempts(ip_address=None, username=None):
     """ reset the failed attempts for these ip's and usernames
@@ -356,6 +372,12 @@ def reset_failed_attempts(ip_address=None, username=None):
     if not config.LOCKOUT_BY_IP_USERNAME:
         unblock_ip(ip_address, pipe=pipe)
     unblock_username(username, pipe=pipe)
+
+    redis_cache_key = get_approx_lockouts_cache_key(ip_address, username)
+
+    if redis_cache_key is not None:
+        redis_client = get_redis_connection()
+        redis_client.delete(redis_cache_key)
 
     pipe.execute()
 
