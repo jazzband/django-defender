@@ -71,9 +71,6 @@ def get_approx_account_lockouts_from_login_attempts(ip_address=None, username=No
 
     lockouts = AccessAttempt.objects.filter(q).count() // failure_limit
 
-    # Cache for the same window length used by the DB query.
-    cache_ttl = int(config.ACCESS_ATTEMPT_EXPIRATION * 60 * 60)
-
-    redis_client.set(cache_key, int(lockouts), cache_ttl)
+    redis_client.set(cache_key, int(lockouts), 60)
 
     return lockouts

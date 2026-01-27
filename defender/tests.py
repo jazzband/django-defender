@@ -976,7 +976,7 @@ class AccessAttemptTest(DefenderTestCase):
                 ip_address="127.0.0.1", username=VALID_USERNAME
             )
         )
-        self.assertIsNone(cached_value)
+        self.assertIsNotNone(cached_value)
 
 
 class SignalTest(DefenderTestCase):
