@@ -7,13 +7,7 @@ from celery import Celery
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:",}}
 
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/0",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
+    "default": {"BACKEND": "django_redis.cache.RedisCache", "LOCATION": "redis://localhost:6379",}
 }
 
 SITE_ID = 1
