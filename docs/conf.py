@@ -13,7 +13,11 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath("."))
-from pkg_resources import get_distribution
+try:
+    from importlib import metadata
+except ImportError:
+    # Running on pre-3.8 Python; use importlib-metadata package
+    import importlib_metadata as metadata
 
 # -- Project information -----------------------------------------------------
 
@@ -22,7 +26,11 @@ copyright = "2024, Ken Cochrane"
 author = "Ken Cochrane"
 
 # The full version, including alpha/beta/rc tags.
-release = get_distribution("django-defender").version
+try:
+    release = metadata.version("django-defender")
+except metadata.PackageNotFoundError:
+    # package is not installed
+    release = "0.0.0"
 
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
@@ -38,7 +46,7 @@ master_doc = "index"
 extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = []
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -56,4 +64,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = []
