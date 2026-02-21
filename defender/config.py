@@ -93,6 +93,12 @@ LOCKOUT_URL = get_setting("DEFENDER_LOCKOUT_URL")
 
 USE_CELERY = get_setting("DEFENDER_USE_CELERY", False)
 
+EMAIL_USER_ON_ACCOUNT_LOCKED = get_setting("DEFENDER_EMAIL_USER_ON_ACCOUNT_LOCKED", False)
+# A 'user' instance is passed as context to lockout email template
+LOCKOUT_EMAIL_TEMPLATE_PATH = get_setting("DEFENDER_LOCKOUT_EMAIL_TEMPLATE_PATH", "defender/lockout_email.html")
+
+DEFAULT_FROM_EMAIL = get_setting("DEFENDER_DEFAULT_FROM_EMAIL")
+
 STORE_ACCESS_ATTEMPTS = get_setting("DEFENDER_STORE_ACCESS_ATTEMPTS", True)
 
 # Used by the management command to decide how long to keep access attempt
