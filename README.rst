@@ -2,6 +2,8 @@
 django-defender
 ===============
 
+This project is retired and is no longer maintained. Existing releases and documentation remain available. See `the retirement issue <https://github.com/jazzband/help/issues/450>`_ for the remaining PyPI archival work.
+
 .. image:: https://jazzband.co/static/img/badge.svg
    :target: https://jazzband.co/
    :alt: Jazzband
